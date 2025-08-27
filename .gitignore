@@ -1,0 +1,12 @@
+/.idea
+/vendor/
+composer.lock
+*.cache
+*.log
+.env
+/config
+/mysql
+Dockerfile
+docker-compose.yml
+entrypoint.sh
+redis

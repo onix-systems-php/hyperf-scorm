@@ -1,0 +1,144 @@
+<?xml version="1.0" standalone="no" ?>
+<manifest identifier="LdE29WTAjx5ewKNgBIwZsY1p4Yxxj-UsNhn7Fpa_" version="1.3"
+  xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_v1p3"
+  xmlns:adlseq="http://www.adlnet.org/xsd/adlseq_v1p3"
+  xmlns:imsss="http://www.imsglobal.org/xsd/imsss"
+  xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 imscp_v1p1.xsd
+                      http://www.adlnet.org/xsd/adlcp_v1p3 adlcp_v1p3.xsd
+                      http://www.adlnet.org/xsd/adlseq_v1p3 adlseq_v1p3.xsd
+                      http://www.imsglobal.org/xsd/imsss imsss_v1p0.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>CAM 1.3</schemaversion>
+    <adlcp:location>metadata.xml</adlcp:location>
+  </metadata>
+  <organizations default="B0">
+    <organization identifier="B0" adlseq:objectivesGlobalToSystem="false">
+      <title>Incorporating Trauma-Informed Care Into HIV Practices</title>
+      <item identifier="i1" identifierref="r1" isvisible="true">
+        <title>Incorporating Trauma-Informed Care Into HIV Practices</title>
+        <adlcp:dataFromLMS>eyJjcHYiOiJOaG43RnBhXyIsInJsZCI6ZmFsc2V9</adlcp:dataFromLMS>
+        <imsss:sequencing>
+          <imsss:deliveryControls tracked="true" completionSetByContent="true" objectiveSetByContent="true"/>
+        </imsss:sequencing>
+      </item>
+      <metadata>
+        <adlcp:location>metadata.xml</adlcp:location>
+      </metadata>
+      <imsss:sequencing>
+        <imsss:controlMode choice="true" flow="true"/>
+      </imsss:sequencing>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="r1" type="webcontent" adlcp:scormType="sco" href="scormdriver/indexAPI.html">
+      <!-- SCORMDRIVER STUFF -->
+      <file href="scormdriver/indexAPI.html" />
+      <file href="scormdriver/preloadIntegrity.js" />
+      <file href="scormdriver/driverOptions.js" />
+      <file href="scormdriver/AICCComm.html" />
+      <file href="scormdriver/auto-scripts/AutoBookmark.js" />
+      <file href="scormdriver/auto-scripts/AutoCompleteSCO.js" />
+      <file href="scormdriver/auto-scripts/CourseExit.js" />
+      <file href="scormdriver/blank.html" />
+      <file href="scormdriver/goodbye.html" />
+      <file href="scormdriver/scormdriver.js" />
+      <file href="scormdriver/browsersniff.js" />
+
+      <!-- RUNTIME COMMON STUFF -->
+      <file href="scormcontent/index.html" />
+
+
+        <file href="scormcontent/lib/fonts/icomoon.ttf"/>
+        <file href="scormcontent/lib/fonts/icomoon.woff"/>
+
+        <file href="scormcontent/lib/icomoon.css"/>
+        <file href="scormcontent/lib/player-0.0.11.min.js"/>
+        <file href="scormcontent/lib/lzwcompress.js"/>
+
+
+      <!-- FRONTEND BUNDLE ASSETS -->
+      <file href="scormcontent/lib/rise/f5f8af9b.js" />
+<file href="scormcontent/lib/rise/02ed395c.css" />
+<file href="scormcontent/lib/rise/475afc36.js" />
+<file href="scormcontent/lib/rise/68e5f034.css" />
+<file href="scormcontent/lib/rise/a3d6e070.js" />
+<file href="scormcontent/lib/rise/254e83dc.js" />
+<file href="scormcontent/lib/rise/c82cca6a.js" />
+<file href="scormcontent/lib/rise/40b4cf18.js" />
+<file href="scormcontent/lib/rise/b2cebec4.js" />
+<file href="scormcontent/lib/rise/a607e3d7.js" />
+<file href="scormcontent/lib/mondrian/entry.js" />
+<file href="scormcontent/lib/mondrian/ab103845.js" />
+<file href="scormcontent/lib/mondrian/eb0f689c.js" />
+<file href="scormcontent/lib/mondrian/79f3d047.js" />
+<file href="scormcontent/lib/mondrian/daeabcf0.js" />
+<file href="scormcontent/lib/mondrian/fbeeff99.js" />
+<file href="scormcontent/lib/mondrian/09e37aee.js" />
+<file href="scormcontent/lib/mondrian/196251cf.js" />
+<file href="scormcontent/lib/sandbox/sandbox.html" />
+<file href="scormcontent/lib/sandbox/b8fc6988.js" />
+<file href="scormcontent/lib/sandbox/4adfab46.css" />
+
+
+      <!-- RUNTIME CONTENT STUFF -->
+      <file href="scormcontent/lib/fonts/Lato2-Regular.woff" />
+<file href="scormcontent/lib/fonts/Lato2-Light.woff" />
+<file href="scormcontent/lib/fonts/Lato2-Italic.woff" />
+<file href="scormcontent/lib/fonts/Lato2-Bold.woff" />
+<file href="scormcontent/lib/fonts/Lato2-Black.woff" />
+<file href="scormcontent/lib/fonts/Merriweather-Black.woff" />
+<file href="scormcontent/lib/fonts/Merriweather-Italic.woff" />
+<file href="scormcontent/lib/fonts/Merriweather-Bold.woff" />
+<file href="scormcontent/lib/fonts/Merriweather-Regular.woff" />
+<file href="scormcontent/lib/fonts/Merriweather-Light.woff" />
+<file href="scormcontent/assets/MDy-VK6gA-2IqTL2.jpg" />
+<file href="scormcontent/assets/HIV%20CT%20TIC%20VID01_EDIT%20v4.mp4" />
+<file href="scormcontent/assets/HIV%20CT%20TIC%20VID01_EDIT%20v4.jpg" />
+<file href="scormcontent/assets/1-Stretch.gif" />
+<file href="scormcontent/assets/Picture1.png" />
+<file href="scormcontent/assets/L6lBOL/mountains.jpg" />
+<file href="scormcontent/assets/Picture2.png" />
+<file href="scormcontent/assets/Picture3.png" />
+<file href="scormcontent/assets/sud%20text.png" />
+<file href="scormcontent/assets/Picture5.png" />
+<file href="scormcontent/assets/Picture6.png" />
+<file href="scormcontent/assets/stock-image.jpg" />
+<file href="scormcontent/assets/Picture13.png" />
+<file href="scormcontent/assets/2-JumpJacks.gif" />
+<file href="scormcontent/assets/HgLowQ/stock-image.jpg" />
+<file href="scormcontent/assets/CNFE_8/stock-image.jpg" />
+<file href="scormcontent/assets/3zGXXs/stock-image.jpg" />
+<file href="scormcontent/assets/1iQOV9/stock-image.jpg" />
+<file href="scormcontent/assets/BiD9fK/stock-image.jpg" />
+<file href="scormcontent/assets/PtDGUp/stock-image.jpg" />
+<file href="scormcontent/assets/shutterstock_393603379.jpg" />
+<file href="scormcontent/assets/3-Situps.gif" />
+<file href="scormcontent/assets/Picture14.png" />
+<file href="scormcontent/assets/TQgjcQ/stock-image.jpg" />
+<file href="scormcontent/assets/4-JumpRope.gif" />
+<file href="scormcontent/assets/shutterstock_2268221165.jpg" />
+<file href="scormcontent/assets/7i4oCT/stock-image.jpg" />
+<file href="scormcontent/assets/Picture15.png" />
+<file href="scormcontent/assets/Picture16.png" />
+<file href="scormcontent/assets/Picture17.png" />
+<file href="scormcontent/assets/Picture18.png" />
+<file href="scormcontent/assets/Picture19.png" />
+<file href="scormcontent/assets/Picture20.png" />
+<file href="scormcontent/assets/Picture21.png" />
+<file href="scormcontent/assets/Picture22.png" />
+<file href="scormcontent/assets/HIV%20CT%20TIC%20VID02_EDIT%20v4.mp4" />
+<file href="scormcontent/assets/HIV%20CT%20TIC%20VID02_EDIT%20v4.jpg" />
+<file href="scormcontent/assets/Picture23.png" />
+<file href="scormcontent/assets/PurpLE%20Health%20Foundation%20Logo-Color-01.png" />
+<file href="scormcontent/assets/tic-rc-logo-3.svg" />
+<file href="scormcontent/assets/IOD3hH/stock-image.jpg" />
+<file href="scormcontent/assets/5-Celebrate.gif" />
+
+      <file href="scormcontent/locales/und.js" />
+
+    </resource>
+  </resources>
+</manifest>
