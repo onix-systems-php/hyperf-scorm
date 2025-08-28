@@ -49,11 +49,14 @@ class ScormPlayerController extends AbstractController
 //        $userId = $this->sessionManager->user()?->getId();
         $userId = 1;
 
+        xdebug_break();
+        
         $playerData = $scormPlayerService->getPlayer($packageId, $userId);
 
         return $response->withHeader('Content-Type', 'text/html')
                        ->withBody(new SwooleStream($playerData->playerHtml));
     }
+
 
 //    #[OA\Get(
 //        path: '/v1/scorm/player/{packageId}/data',
@@ -101,7 +104,7 @@ class ScormPlayerController extends AbstractController
 //
 //        return $this->success(['initialized' => $result]);
 //    }
-//
+
 //    #[OA\Post(
 //        path: '/v1/scorm/api/set-value',
 //        operationId: 'setScormValue',

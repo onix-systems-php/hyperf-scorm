@@ -20,7 +20,7 @@ use League\Flysystem\FilesystemException;
 class ScormFileProcessor
 {
 //    private const MANIFEST_FILENAME = 'imsmanifest.xml';
-    private const MANIFEST_FILENAME = 'imsmanifest_1.2.xml';
+    private const MANIFEST_FILENAME = 'imsmanifest.xml';
     private const TEMP_EXTRACT_PREFIX = 'scorm_extract_';
 
     public function __construct(

@@ -35,17 +35,17 @@ Router::addGroup('/v1/scorm/player', function () {
 //});
 //
 // SCORM JavaScript API Routes (for SCORM content communication)
-use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
-
-Router::addGroup('/v1/scorm/api', function () {
-    Router::post('/{attemptId:\d+}/initialize', [ScormApiController::class, 'initialize']);
-    Router::post('/{attemptId:\d+}/terminate', [ScormApiController::class, 'terminate']);
-    Router::post('/{attemptId:\d+}/commit', [ScormApiController::class, 'commit']);
-    Router::get('/{attemptId:\d+}/get-value/{element}', [ScormApiController::class, 'getValue']);
-    Router::post('/{attemptId:\d+}/set-value', [ScormApiController::class, 'setValue']);
-    Router::get('/{attemptId:\d+}/status', [ScormApiController::class, 'getStatus']);
-    Router::post('/{attemptId:\d+}/heartbeat', [ScormApiController::class, 'heartbeat']);
-});
+//use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
+//
+//Router::addGroup('/v1/scorm/api', function () {
+//    Router::post('/{attemptId:\d+}/initialize', [ScormApiController::class, 'initialize']);
+//    Router::post('/{attemptId:\d+}/terminate', [ScormApiController::class, 'terminate']);
+//    Router::post('/{attemptId:\d+}/commit', [ScormApiController::class, 'commit']);
+//    Router::get('/{attemptId:\d+}/get-value/{element}', [ScormApiController::class, 'getValue']);
+//    Router::post('/{attemptId:\d+}/set-value', [ScormApiController::class, 'setValue']);
+//    Router::get('/{attemptId:\d+}/status', [ScormApiController::class, 'getStatus']);
+//    Router::post('/{attemptId:\d+}/heartbeat', [ScormApiController::class, 'heartbeat']);
+//});
 //// Alternative SCORM API Routes (from ScormPlayerController)
 //Router::addGroup('/v1/scorm/api', function () {
 //    Router::post('/initialize', [\OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController::class, 'initializeApi']);

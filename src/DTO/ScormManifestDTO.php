@@ -55,8 +55,8 @@ class ScormManifestDTO extends AbstractDTO
     {
         return [
             'title' => $this->title,
-            'version' => $this->version->value,
-            'version_label' => $this->version->getLabel(),
+            'version' => $this->version,
+            'version_label' => $this->version,
             'description' => $this->description,
             'scos' => array_map(fn($sco) => $sco->toArray(), $this->scos),
             'primary_launch_url' => $this->getPrimaryLaunchUrl(),
