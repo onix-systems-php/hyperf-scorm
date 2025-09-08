@@ -72,7 +72,7 @@ class RequestScormCompactCommit extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => ['required', 'string', 'max:255'],
+            'student_id' => ['required', 'integer'],
             'student_name' => ['required', 'string', 'max:255'],
 
             'session' => ['array'],
@@ -92,7 +92,7 @@ class RequestScormCompactCommit extends FormRequest
             'score' => ['nullable', 'integer', 'min:0'],
             'scorePercentage' => ['nullable', 'integer', 'min:0', 'max:100'],
 //            'sessionTime' => ['nullable', 'integer', 'min:0'],
-            'interactions' => ['required', 'array', 'min:1'],
+            'interactions' => ['array'],
             'interactions.*.id' => ['required', 'string', 'max:255'],
             'interactions.*.type' => ['required', 'string', 'max:50'],
             'interactions.*.description' => ['nullable', 'string', 'max:1000'],

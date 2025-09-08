@@ -336,8 +336,8 @@ class ScormNormalizer {
    */
   extractSessionInfo(data) {
     return {
-      totalTime: data['cmi.core.total_time'] || '0000:00:00',
-      sessionTime: data['cmi.core.session_time'] || 'PT0S',
+      totalTime: this.parseISO8601Duration(data['cmi.core.total_time']) || 0,
+      sessionTime: this.parseISO8601Duration(data['cmi.core.session_time']),
       sessionTimeSeconds: this.parseISO8601Duration(data['cmi.core.session_time']),
       suspendData: data['cmi.suspend_data'] || null,
       launchData: data['cmi.launch_data'] || null,
@@ -482,8 +482,6 @@ class ScormNormalizer {
    */
   denormalize(normalizedData) {
     const scormData = {};
-
-    debugger
     if (normalizedData.student) {
       scormData['cmi.core.student_id'] = normalizedData.student.id || '';
       scormData['cmi.core.student_name'] = normalizedData.student.name || '';
@@ -506,8 +504,8 @@ class ScormNormalizer {
     }
 
     if (normalizedData.session) {
-      scormData['cmi.core.total_time'] = normalizedData.session.total_time || '0000:00:00';
-      scormData['cmi.core.session_time'] = normalizedData.session.session_time || 'PT0S';
+      scormData['cmi.core.total_time'] = this.formatTotalTime(normalizedData.session.total_time) || '0000:00:00';
+      scormData['cmi.core.session_time'] = this.encodeISO8601Duration(normalizedData.session.session_time) || 'PT0S';
       scormData['cmi.suspend_data'] = normalizedData.session.suspend_data || '';
       scormData['cmi.launch_data'] = normalizedData.session.launch_data || '';
       scormData['cmi.comments'] = normalizedData.session.comments || '';
@@ -598,6 +596,25 @@ class ScormNormalizer {
     }
 
     return duration === 'PT' ? 'PT0S' : duration;
+  }
+
+  /**
+   * Converts seconds to SCORM total time format HHHH:MM:SS
+   */
+  formatTotalTime(seconds) {
+    if (!seconds || seconds === 0) return '0000:00:00';
+
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    // Format as HHHH:MM:SS
+    const hoursStr = hours.toString().padStart(4, '0');
+    const minutesStr = minutes.toString().padStart(2, '0');
+    const secsStr = secs.toString().padStart(2, '0');
+
+    return `${hoursStr}:${minutesStr}:${secsStr}`;
   }
 
   /**

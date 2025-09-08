@@ -18,19 +18,19 @@ Integrates with Hyperf backend API endpoints
     var apiEndpoint = config.apiEndpoint || '/v1/scorm/api';
     var sessionId = window.sessionId || null;
     // var debug = config.debug || false; //notice for test
-    var debug = true;
+    var debug = false;
 
-    // SCORM data storage - initialize from session
+    // SCORM data storage - initialize with proper defaults
     var data = {
-        "cmi.core.student_id": "",
-        "cmi.core.student_name": "",
+        "cmi.core.student_id": window.learnerId || sessionId || "guest",
+        "cmi.core.student_name": window.learnerName || "Guest User",
         "cmi.core.lesson_location": "",
         "cmi.core.credit": "credit",
         "cmi.core.lesson_status": "not attempted",
         "cmi.core.entry": "",
         "cmi.core.score.raw": "",
-        "cmi.core.score.max": "",
-        "cmi.core.score.min": "",
+        "cmi.core.score.max": "100",
+        "cmi.core.score.min": "0",
         "cmi.core.total_time": "0000:00:00",
         "cmi.core.lesson_mode": "normal",
         "cmi.core.exit": "",
@@ -55,7 +55,6 @@ Integrates with Hyperf backend API endpoints
 
 
     function saveDataToServer() {
-      debugger
         if (!sessionId) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
@@ -71,9 +70,7 @@ Integrates with Hyperf backend API endpoints
             },
 
             body: JSON.stringify({
-                action: 'commit',
-                data: compactVersion,
-                parameter: ''
+              ...compactVersion
             })
         }).then(function(response) {
             if (!response.ok) {
@@ -92,56 +89,35 @@ Integrates with Hyperf backend API endpoints
         });
     }
 
-    // Load initial data from server (optional)
-    async function loadDataFromServer(parameter) {
+    // Load initial data from server synchronously
+    function loadDataFromServerSync(parameter) {
         if (!sessionId) return;
-
         try {
-         let response =  await fetch(apiEndpoint + '/' + sessionId + '/initialize', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({
-              action: 'initialize',
-              parameter: parameter
-            })
-          })
-          debugger
-          let data = await response.json()
-          let denormalizeData = window.scormNormalizer.denormalize(data)
-          Object.assign(data, denormalizeData)
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', apiEndpoint + '/' + sessionId + '/initialize', false); // async: false
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send(JSON.stringify({
+                action: 'initialize',
+                parameter: parameter
+            }));
 
-          // fetch(apiEndpoint + '/' + sessionId + '/initialize', {
-          //   method: 'POST',
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //     'X-Requested-With': 'XMLHttpRequest'
-          //   },
-          //   body: JSON.stringify({
-          //     action: 'initialize',
-          //     parameter: parameter
-          //   })
-          // }).then(function(response) {
-          //   return response.json();
-          // }).then(function(result) {
-          //   debugger
-          //   let denormalizeData = window.scormNormalizer.denormalize(result.data)
-          //   Object.assign(data,denormalizeData)
-          //   debugLog('Session initialized on server');
-          // }).catch(function(error) {
-          //   console.error('Failed to initialize session:', error);
-          // });
-          //   debugLog('Data loading from server not implemented');
+            if (xhr.status === 200) {
+                var result = JSON.parse(xhr.responseText);
+                var denormalizedData = window.scormNormalizer.denormalize(result.data);
+                Object.assign(data, denormalizedData);
+                debugLog('Session data loaded from server synchronously');
+            }
         } catch (e) {
-            debugLog('Failed to load data from server: ' + e.message);
+            debugLog('Failed to load data from server synchronously: ' + e.message);
         }
     }
 
+    // Load data from server asynchronously in background
+
     // SCORM 1.2 API
     window.API = {
-        LMSInitialize: async function(parameter) {
+        LMSInitialize: function(parameter) {
             apiCalls++;
             debugLog('LMSInitialize called with parameter: ' + parameter);
 
@@ -155,10 +131,14 @@ Integrates with Hyperf backend API endpoints
                 return "false";
             }
 
-            // Initialize session with server
-            await loadDataFromServer(parameter)
+            // Ensure basic student data is set
+            data["cmi.core.student_id"] = window.learnerId || sessionId || "guest";
+            data["cmi.core.student_name"] = window.learnerName || "Guest User";
+            data["cmi.core.lesson_mode"] = "normal";
 
-            debugger
+            // Load data from server synchronously
+            loadDataFromServerSync(parameter);
+
             initialized = true;
             terminated = false;
             sessionStartTime = new Date();
@@ -166,6 +146,12 @@ Integrates with Hyperf backend API endpoints
 
             debugLog('SCORM session initialized');
             updateDebugPanel();
+
+            // Start background async sync after successful initialization
+            // setTimeout(function() {
+            //     loadDataFromServerAsync(parameter);
+            // }, 100);
+
             return "true";
         },
 
@@ -287,6 +273,7 @@ Integrates with Hyperf backend API endpoints
                         data["cmi.interactions._count"] = (index + 1).toString();
                     }
                 }
+              saveDataToServer()
             } else if (element.indexOf("cmi.objectives.") === 0) {
                 objectives[element] = value;
 
@@ -314,7 +301,6 @@ Integrates with Hyperf backend API endpoints
         LMSCommit: function(parameter) {
             apiCalls++;
             debugLog('LMSCommit called with parameter: ' + parameter);
-          debugger
             if (parameter !== "") {
                 lastError = "201";
                 return "false";
@@ -359,12 +345,13 @@ Integrates with Hyperf backend API endpoints
         },
 
         Terminate: function(parameter) {
+          debugger
             return window.API.LMSFinish(parameter);
         },
 
         GetValue: function(element) {
             // Map SCORM 2004 elements to SCORM 1.2
-            var mappings = {
+            let mappings = {
                 "cmi.learner_id": "cmi.core.student_id",
                 "cmi.learner_name": "cmi.core.student_name",
                 "cmi.location": "cmi.core.lesson_location",
@@ -377,7 +364,7 @@ Integrates with Hyperf backend API endpoints
                 "cmi.session_time": "cmi.core.session_time"
             };
 
-            var mappedElement = mappings[element] || element;
+            let mappedElement = mappings[element] || element;
             return window.API.LMSGetValue(mappedElement);
         },
 

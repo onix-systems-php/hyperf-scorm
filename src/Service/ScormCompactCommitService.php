@@ -136,7 +136,7 @@ class ScormCompactCommitService
 
         $existingIds = $session->interactions->pluck('interaction_id')->toArray();
         $data = collect((array)$interactions)
-            ->filter(fn(ScormSessionInteractionCommitDTO $interaction) => !in_array($interaction->id, $existingIds))
+//            ->filter(fn(ScormSessionInteractionCommitDTO $interaction) => !in_array($interaction->id, $existingIds))//todo scorm cam be restart
             ->map(function (ScormSessionInteractionCommitDTO $interaction) use ($session) {
 
                 return [
