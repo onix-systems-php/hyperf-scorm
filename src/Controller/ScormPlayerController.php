@@ -48,9 +48,7 @@ class ScormPlayerController extends AbstractController
     ): PsrResponseInterface {
 //        $userId = $this->sessionManager->user()?->getId();
         $userId = 1;
-
         xdebug_break();
-        
         $playerData = $scormPlayerService->getPlayer($packageId, $userId);
 
         return $response->withHeader('Content-Type', 'text/html')

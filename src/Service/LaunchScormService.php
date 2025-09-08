@@ -22,9 +22,6 @@ class LaunchScormService
     public function run(int $packageId, int $userId): string
     {
         $scormPlayerDto = $this->scormPlayerService->getPlayer($packageId, $userId);
-//        $package = $this->scormPackageRepository->findById($packageId);
-//        $session = $this->scormUserSessionRepository->findUserSessionForPackage($userId, $packageId);
-
         return $scormPlayerDto->playerHtml;
     }
 }

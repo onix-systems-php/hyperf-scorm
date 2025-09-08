@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
-use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepositoryInterface;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormTrackingRepositoryInterface;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepositoryInterface;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormTrackingRepository;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
 use OnixSystemsPHP\HyperfScorm\Factory\ScormApiStrategyFactory;
 use OnixSystemsPHP\HyperfScorm\Entity\ScormUserSession;
 
@@ -18,9 +18,9 @@ class ScormTrackingService implements ScormTrackingServiceInterface
     private array $sessionCache = [];
 
     public function __construct(
-        private ScormUserSessionRepositoryInterface $sessionRepository,
-        private ScormTrackingRepositoryInterface $trackingRepository,
-        private ScormPackageRepositoryInterface $packageRepository,
+        private ScormUserSessionRepository $sessionRepository,
+        private ScormTrackingRepository $trackingRepository,
+        private ScormPackageRepository $packageRepository,
         private ScormApiStrategyFactory $strategyFactory
     ) {}
 

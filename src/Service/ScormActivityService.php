@@ -6,10 +6,10 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use OnixSystemsPHP\HyperfScorm\Repository\ScormActivityRepository;
 use OnixSystemsPHP\HyperfScorm\Application\Service\ScormActivityServiceInterface;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepositoryInterface;
 use OnixSystemsPHP\HyperfScorm\Model\ScormActivity;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use Carbon\Carbon;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
 
 /**
  * SCORM Activity Service implementation
@@ -19,7 +19,7 @@ class ScormActivityService implements ScormActivityServiceInterface
 {
     public function __construct(
         private readonly ScormActivityRepository $scormActivityRepository,
-        private readonly ScormUserSessionRepositoryInterface $sessionRepository
+        private readonly ScormUserSessionRepository $sessionRepository
     ) {}
 
     public function recordQuestionAnswer(

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
 use Carbon\Carbon;
+use Hyperf\Database\Model\Collection;
 use Hyperf\Database\Model\Relations\BelongsTo;
 use Hyperf\Database\Model\Relations\HasMany;
 use Hyperf\Database\Model\SoftDeletes;
@@ -24,11 +25,14 @@ use OnixSystemsPHP\HyperfSocialite\One\User;
  * @property string $status
  * @property string $suspend_data
  * @property string $current_location
-
  * @property Carbon|null $started_at
  * @property Carbon|null $completed_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property ?Collection $interactions
+ * @property ?ScormPackage $package
+ * @property ?User $user
  */
 class ScormUserSession extends AbstractModel
 {
@@ -40,12 +44,36 @@ class ScormUserSession extends AbstractModel
         'package_id',
         'user_id',
         'status',
-        'suspend_data',
-        'current_location',
         'started_at',
+        'last_accessed',
+        'completed_at',
         'completed_at',
         'created_at',
         'updated_at',
+        'session_token',
+        'last_activity_at',
+        'lesson_status',
+        'lesson_location',
+        'score_raw',
+        'score_scaled',
+        'completion_status',
+        'success_status',
+        'session_time',
+        'total_time',
+        'exit_mode',
+        'scorm_version',
+        'interactions_count',
+        'best_score',
+        'restart_count',
+        'suspend_data',
+        'student_name',
+        'session_time_seconds',
+        'total_time_seconds',
+        'launch_data',
+        'comments',
+        'comments_from_lms',
+        'interactions_processed',
+        'last_interaction_at',
     ];
 
     protected array $casts = [
@@ -73,6 +101,11 @@ class ScormUserSession extends AbstractModel
     public function trackingRecords(): HasMany
     {
         return $this->hasMany(ScormTracking::class, 'attempt_id');
+    }
+
+    public function interactions(): HasMany
+    {
+        return $this->hasMany(ScormInteraction::class, 'session_id');
     }
 
     public function isCompleted(): bool

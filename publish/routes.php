@@ -4,6 +4,8 @@ declare(strict_types=1);
 use Hyperf\HttpServer\Router\Router;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController;
+use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
+
 Router::addGroup('/v1/scorm/packages', function () {
     Router::post('/upload', [ScormController::class, 'upload']);
     Router::post('', [ScormController::class, 'create']);
@@ -14,6 +16,8 @@ Router::addGroup('/v1/scorm/packages', function () {
 //// SCORM Player Routes
 Router::addGroup('/v1/scorm/player', function () {
     Router::get('/{packageId:\d+}', [ScormPlayerController::class, 'launch']);
+    Router::post('/{sessionId:\d+}/commit', [ScormApiController::class, 'commitCompact']);
+    Router::post('/{sessionId:\d+}/initialize', [ScormApiController::class, 'initialize']);
 //    Router::get('/{packageId:\d+}/data', [\OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController::class, 'getPlayerData']);
 });
 //

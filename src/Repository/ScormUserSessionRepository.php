@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Repository;
 
 use Carbon\Carbon;
+use Hyperf\Database\Model\Model;
 use Hyperf\DbConnection\Db;
 use OnixSystemsPHP\HyperfCore\Model\Builder;
 use OnixSystemsPHP\HyperfCore\Repository\AbstractRepository;
@@ -86,70 +87,76 @@ class ScormUserSessionRepository extends AbstractRepository
 
         return $results->map(fn($data) => $this->hydrate($data))->toArray();
     }
-    public function updateStatus(string $sessionId, string $status): bool
+
+    public function createMany(ScormUserSession $session, array $data, string $relation): ScormUserSession
     {
-        $updateData = [
-            'status' => $status,
-            'last_accessed' => now()->format('Y-m-d H:i:s'),
-            'updated_at' => now()->format('Y-m-d H:i:s'),
-        ];
-
-//        if ($status === ScormUserSession::STATUS_COMPLETED) {
-//            $updateData['completed_at'] = now()->format('Y-m-d H:i:s');
-//        }
-
-        return Db::table($this->table)
-            ->where('id', $sessionId)
-            ->update($updateData) > 0;
+        $session->$relation()->createMany($data);
+        return $session;
     }
+//    public function updateStatus(string $sessionId, string $status): bool
+//    {
+//        $updateData = [
+//            'status' => $status,
+//            'last_accessed' => now()->format('Y-m-d H:i:s'),
+//            'updated_at' => now()->format('Y-m-d H:i:s'),
+//        ];
+//
+////        if ($status === ScormUserSession::STATUS_COMPLETED) {
+////            $updateData['completed_at'] = now()->format('Y-m-d H:i:s');
+////        }
+//
+//        return Db::table($this->table)
+//            ->where('id', $sessionId)
+//            ->update($updateData) > 0;
+//    }
 
-    public function getSessionStatistics(int $packageId): array
-    {
-        $stats = Db::table($this->table)
-            ->select([
-                Db::raw('COUNT(*) as total_sessions'),
-                Db::raw('COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_sessions'),
-                Db::raw('COUNT(CASE WHEN status = "active" THEN 1 END) as active_sessions'),
-                Db::raw('COUNT(CASE WHEN status = "suspended" THEN 1 END) as suspended_sessions'),
-                Db::raw('AVG(session_time) as avg_session_time'),
-                Db::raw('AVG(score) as avg_score'),
-            ])
-            ->where('package_id', $packageId)
-            ->first();
-
-        return [
-            'total_sessions' => (int)$stats->total_sessions,
-            'completed_sessions' => (int)$stats->completed_sessions,
-            'active_sessions' => (int)$stats->active_sessions,
-            'suspended_sessions' => (int)$stats->suspended_sessions,
-            'completion_rate' => $stats->total_sessions > 0 ?
-                round($stats->completed_sessions / $stats->total_sessions * 100, 2) : 0,
-            'avg_session_time' => (int)$stats->avg_session_time,
-            'avg_score' => round((float)$stats->avg_score, 2),
-        ];
-    }
+//    public function getSessionStatistics(int $packageId): array
+//    {
+//        $stats = Db::table($this->table)
+//            ->select([
+//                Db::raw('COUNT(*) as total_sessions'),
+//                Db::raw('COUNT(CASE WHEN status = "completed" THEN 1 END) as completed_sessions'),
+//                Db::raw('COUNT(CASE WHEN status = "active" THEN 1 END) as active_sessions'),
+//                Db::raw('COUNT(CASE WHEN status = "suspended" THEN 1 END) as suspended_sessions'),
+//                Db::raw('AVG(session_time) as avg_session_time'),
+//                Db::raw('AVG(score) as avg_score'),
+//            ])
+//            ->where('package_id', $packageId)
+//            ->first();
+//
+//        return [
+//            'total_sessions' => (int)$stats->total_sessions,
+//            'completed_sessions' => (int)$stats->completed_sessions,
+//            'active_sessions' => (int)$stats->active_sessions,
+//            'suspended_sessions' => (int)$stats->suspended_sessions,
+//            'completion_rate' => $stats->total_sessions > 0 ?
+//                round($stats->completed_sessions / $stats->total_sessions * 100, 2) : 0,
+//            'avg_session_time' => (int)$stats->avg_session_time,
+//            'avg_score' => round((float)$stats->avg_score, 2),
+//        ];
+//    }
 
     /**
      * Hydrate database row into ScormUserSession model
      */
-    private function hydrate($data): ScormUserSession
-    {
-        $session = new ScormUserSession();
-        $session->id = $data->id;
-        $session->package_id = $data->package_id;
-        $session->user_id = $data->user_id;
-        $session->status = $data->status;
-        $session->suspend_data = json_decode($data->suspend_data ?? '[]', true);
-        $session->lesson_location = $data->lesson_location;
-        $session->lesson_status = $data->lesson_status;
-        $session->score = $data->score;
-        $session->session_time = $data->session_time;
-        $session->started_at = $data->started_at ? Carbon::parse($data->started_at) : null;
-        $session->last_accessed = $data->last_accessed ? Carbon::parse($data->last_accessed) : null;
-        $session->completed_at = $data->completed_at ? Carbon::parse($data->completed_at) : null;
-        $session->created_at = $data->created_at ? Carbon::parse($data->created_at) : null;
-        $session->updated_at = $data->updated_at ? Carbon::parse($data->updated_at) : null;
-
-        return $session;
-    }
+//    private function hydrate($data): ScormUserSession
+//    {
+//        $session = new ScormUserSession();
+//        $session->id = $data->id;
+//        $session->package_id = $data->package_id;
+//        $session->user_id = $data->user_id;
+//        $session->status = $data->status;
+//        $session->suspend_data = json_decode($data->suspend_data ?? '[]', true);
+//        $session->lesson_location = $data->lesson_location;
+//        $session->lesson_status = $data->lesson_status;
+//        $session->score = $data->score;
+//        $session->session_time = $data->session_time;
+//        $session->started_at = $data->started_at ? Carbon::parse($data->started_at) : null;
+//        $session->last_accessed = $data->last_accessed ? Carbon::parse($data->last_accessed) : null;
+//        $session->completed_at = $data->completed_at ? Carbon::parse($data->completed_at) : null;
+//        $session->created_at = $data->created_at ? Carbon::parse($data->created_at) : null;
+//        $session->updated_at = $data->updated_at ? Carbon::parse($data->updated_at) : null;
+//
+//        return $session;
+//    }
 }

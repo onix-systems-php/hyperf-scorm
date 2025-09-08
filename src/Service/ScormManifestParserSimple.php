@@ -27,7 +27,7 @@ class ScormManifestParserSimple
         $xml = $this->loadXmlSafely($manifestPath);
         $version = $this->detectScormVersion($xml);
 
-        // Создаем scos из resources (resource = SCO в SCORM)
+        // Create SCOs from resources (resource = SCO in SCORM)
         $scos = $this->createScosFromResources($xml);
 
 
@@ -263,7 +263,7 @@ class ScormManifestParserSimple
     }
 
     /**
-     * Создать SCOs из resources (совместимо с SCORM 1.2 и 2004)
+     * Create SCOs from resources (compatible with SCORM 1.2 and 2004)
      */
     private function createScosFromResources(\SimpleXMLElement $xml): array
     {
@@ -275,10 +275,10 @@ class ScormManifestParserSimple
                 $href = (string)($resource['href'] ?? '');
                 $type = (string)($resource['type'] ?? 'webcontent');
 
-                // Совместимость с обеими версиями SCORM (case-insensitive)
+                // Compatibility with both SCORM versions (case-insensitive)
                 $scormType = $this->getScormType($resource);
 
-                // Получаем данные из соответствующего item в organizations
+                // Get data from the corresponding item in organizations
                 $itemData = $this->getItemDataFromOrganizations($xml, $identifier);
 
                 $scos[] = ScoDTO::make([
@@ -294,7 +294,7 @@ class ScormManifestParserSimple
     }
 
     /**
-     * Получить scormType с совместимостью для SCORM 1.2 и 2004
+     * Get scormType with compatibility for SCORM 1.2 and 2004
      */
     private function getScormType(\SimpleXMLElement $resource): string
     {
@@ -304,18 +304,18 @@ class ScormManifestParserSimple
             return $scormType;
         }
 
-        // SCORM 1.2: adlcp:scormtype (маленькими буквами)
+        // SCORM 1.2: adlcp:scormtype (lowercase)
         $scormType = (string)($resource['adlcp:scormtype'] ?? '');
         if (!empty($scormType)) {
             return $scormType;
         }
 
-        // Если не указан, считаем что это SCO
+        // If not specified, consider it as SCO
         return 'sco';
     }
 
     /**
-     * Получить данные из organizations по identifierref (совместимо с SCORM 1.2 и 2004)
+     * Get data from organizations by identifierref (compatible with SCORM 1.2 and 2004)
      */
     private function getItemDataFromOrganizations(\SimpleXMLElement $xml, string $resourceId): array
     {
@@ -340,7 +340,7 @@ class ScormManifestParserSimple
             }
         }
 
-        // Fallback если item не найден
+        // Fallback if item is not found
         return [
             'title' => $resourceId ?: 'Untitled SCO',
             'parameters' => '',
@@ -361,7 +361,7 @@ class ScormManifestParserSimple
         return null;
     }
     /**
-     * Построить полный launch URL с параметрами
+     * Build full launch URL with parameters
      */
     private function buildLaunchUrl(string $href, string $parameters): string
     {

@@ -1,17 +1,23 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
+use Hyperf\HttpServer\Contract\RequestInterface;
+use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
-use OnixSystemsPHP\HyperfScorm\Service\ScormTrackingService;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormAttemptRepositoryInterface;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCompactCommitDTO;
 use OnixSystemsPHP\HyperfScorm\Factory\ScormApiStrategyFactory;
-use Hyperf\HttpServer\Contract\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormAttemptRepositoryInterface;
+use OnixSystemsPHP\HyperfScorm\Request\RequestScormCompactCommit;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormCompactCommitResult;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormInitialize;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\InitializeScormService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormCompactCommitService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormTrackingService;
 use OpenApi\Attributes as OA;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * SCORM API Controller - handles SCORM Runtime API calls from JavaScript
@@ -21,8 +27,10 @@ class ScormApiController extends AbstractController
     public function __construct(
         private readonly ScormTrackingService $trackingService,
         private readonly ScormAttemptRepositoryInterface $attemptRepository,
-        private readonly ScormApiStrategyFactory $apiStrategyFactory
-    ) {}
+        private readonly ScormApiStrategyFactory $apiStrategyFactory,
+        private readonly SessionManager $sessionManager
+    ) {
+    }
 
     #[OA\Post(
         path: '/v1/scorm/api/{attemptId}/initialize',
@@ -38,30 +46,21 @@ class ScormApiController extends AbstractController
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
     )]
-    public function initialize(RequestInterface $request, int $attemptId): ResponseInterface
+    public function initialize(
+        InitializeScormService $initializeScormService,
+        int $sessionId
+    ): ResourceScormInitialize {
+        $data = $initializeScormService->run($sessionId);
+        return ResourceScormInitialize::make($data);
+    }
+
+    public function initializeSession(RequestInterface $request): PsrResponseInterface
     {
-        try {
-            $attempt = $this->attemptRepository->findById($attemptId);
-            if (!$attempt) {
-                return $this->errorResponse('Attempt not found', 404);
-            }
+        $sessionId = $request->input('sessionId');
 
-            // Update attempt status if not already started
-            if ($attempt->status === 'not_attempted') {
-                $attempt->status = 'incomplete';
-                $attempt->started_at = now();
-                $this->attemptRepository->save($attempt);
-            }
+        $result = $this->trackingService->initializeSession($sessionId);
 
-            return $this->successResponse([
-                'message' => 'SCORM session initialized',
-                'attemptId' => $attemptId,
-                'status' => $attempt->status
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->errorResponse('Failed to initialize session: ' . $e->getMessage(), 500);
-        }
+        return $this->success(['initialized' => $result]);
     }
 
     #[OA\Post(
@@ -87,7 +86,6 @@ class ScormApiController extends AbstractController
             $this->trackingService->commitData($attempt);
 
             return ResourceSuccess::make([]);
-
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to terminate session: ' . $e->getMessage(), 500);
         }
@@ -117,44 +115,84 @@ class ScormApiController extends AbstractController
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
     )]
-    public function commit(RequestInterface $request, int $attemptId): ResponseInterface
-    {
-        //make formRequest and make validation
-        try {
-            $attempt = $this->attemptRepository->findById($attemptId);
-            if (!$attempt) {
-                return $this->errorResponse('Attempt not found', 404);
-            }
+//    public function commit(RequestInterface $request, int $attemptId): ResponseInterface
+//    {
+//        //make formRequest and make validation
+//        try {
+//            $attempt = $this->attemptRepository->findById($attemptId);
+//            if (!$attempt) {
+//                return $this->errorResponse('Attempt not found', 404);
+//            }
+//
+//            // Get data from request
+//            $data = $request->input('data', []);
+//
+//            // Process and validate the data using strategy pattern
+//            $package = $attempt->package;
+//            $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
+//
+//            $validatedData = [];
+//            foreach ($data as $element => $value) {
+//                if ($apiStrategy->validateElement($element, $value)) {
+//                    $validatedData[$element] = $value;
+//                } else {
+//                    // Log invalid element but don't fail the entire commit
+//                    error_log("Invalid SCORM element: {$element} = {$value}");
+//                }
+//            }
+//
+//            // Update the attempt with validated data
+//            $this->trackingService->updateCmiData($attempt, $validatedData);
+//
+//            return $this->successResponse([
+//                'message' => 'Data committed successfully',
+//                'attemptId' => $attemptId,
+//                'elementsProcessed' => count($validatedData),
+//            ]);
+//        } catch (\Exception $e) {
+//            return $this->errorResponse('Failed to commit data: ' . $e->getMessage(), 500);
+//        }
+//    }
 
-            // Get data from request
-            $data = $request->input('data', []);
+    #[OA\Post(
+        path: '/v1/scorm/api/{sessionId}/commit-compact',
+        operationId: 'scormApiCommitCompact',
+        summary: 'Commit SCORM data in compact format',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(ref: '#/components/schemas/RequestScormCompactCommit')
+        ),
+        tags: ['scorm-api'],
+        parameters: [
+            new OA\Parameter(name: 'sessionId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Compact data committed successfully',
+                content: new OA\JsonContent(ref: '#/components/schemas/ResourceScormCompactCommitResult')
+            ),
+            new OA\Response(ref: '#/components/responses/400', response: 400),
+            new OA\Response(ref: '#/components/responses/404', response: 404),
+            new OA\Response(ref: '#/components/responses/500', response: 500),
+        ],
+    )]
+    public function commitCompact(
+        RequestScormCompactCommit $request,
+        ScormCompactCommitService $service,
+        int $sessionId,
+    ): ResourceScormCompactCommitResult {
+            // Convert request to DTO
+        xdebug_break();
 
-            // Process and validate the data using strategy pattern
-            $package = $attempt->package;
-            $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
+        $compactData = ScormCompactCommitDTO::make($request->validated());
 
-            $validatedData = [];
-            foreach ($data as $element => $value) {
-                if ($apiStrategy->validateElement($element, $value)) {
-                    $validatedData[$element] = $value;
-                } else {
-                    // Log invalid element but don't fail the entire commit
-                    error_log("Invalid SCORM element: {$element} = {$value}");
-                }
-            }
 
-            // Update the attempt with validated data
-            $this->trackingService->updateCmiData($attempt, $validatedData);
+        // Process the compact commit
+        $result = $service->commit($sessionId, $compactData);
 
-            return $this->successResponse([
-                'message' => 'Data committed successfully',
-                'attemptId' => $attemptId,
-                'elementsProcessed' => count($validatedData)
-            ]);
-
-        } catch (\Exception $e) {
-            return $this->errorResponse('Failed to commit data: ' . $e->getMessage(), 500);
-        }
+        // Return formatted response
+        return ResourceScormCompactCommitResult::make($result);
     }
 
     #[OA\Get(
@@ -185,9 +223,8 @@ class ScormApiController extends AbstractController
             return $this->successResponse([
                 'element' => $element,
                 'value' => $value,
-                'attemptId' => $attemptId
+                'attemptId' => $attemptId,
             ]);
-
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to get value: ' . $e->getMessage(), 500);
         }
@@ -246,9 +283,8 @@ class ScormApiController extends AbstractController
                 'message' => 'Value set successfully',
                 'element' => $element,
                 'value' => $value,
-                'attemptId' => $attemptId
+                'attemptId' => $attemptId,
             ]);
-
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to set value: ' . $e->getMessage(), 500);
         }
@@ -285,9 +321,8 @@ class ScormApiController extends AbstractController
                 'timeSpent' => $attempt->time_spent,
                 'startedAt' => $attempt->started_at?->toISOString(),
                 'completedAt' => $attempt->completed_at?->toISOString(),
-                'progress' => $this->calculateProgress($attempt)
+                'progress' => $this->calculateProgress($attempt),
             ]);
-
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to get status: ' . $e->getMessage(), 500);
         }
@@ -321,9 +356,8 @@ class ScormApiController extends AbstractController
             return $this->successResponse([
                 'message' => 'Heartbeat received',
                 'attemptId' => $attemptId,
-                'timestamp' => now()->toISOString()
+                'timestamp' => now()->toISOString(),
             ]);
-
         } catch (\Exception $e) {
             return $this->errorResponse('Heartbeat failed: ' . $e->getMessage(), 500);
         }
@@ -337,7 +371,7 @@ class ScormApiController extends AbstractController
         $progress = [
             'percentage' => 0,
             'completed' => false,
-            'passed' => false
+            'passed' => false,
         ];
 
         // Basic progress based on status
@@ -369,7 +403,7 @@ class ScormApiController extends AbstractController
         if ($attempt->cmi_data) {
             $cmiData = $attempt->cmi_data->toArray();
             if (isset($cmiData['cmi.progress_measure'])) {
-                $progressMeasure = (float) $cmiData['cmi.progress_measure'];
+                $progressMeasure = (float)$cmiData['cmi.progress_measure'];
                 if ($progressMeasure >= 0 && $progressMeasure <= 1) {
                     $progress['percentage'] = $progressMeasure * 100;
                 }
@@ -386,7 +420,7 @@ class ScormApiController extends AbstractController
     {
         return $this->response->json([
             'success' => true,
-            ...$data
+            ...$data,
         ]);
     }
 
@@ -398,7 +432,7 @@ class ScormApiController extends AbstractController
         return $this->response->json([
             'success' => false,
             'message' => $message,
-            'error_code' => $code
+            'error_code' => $code,
         ], $code);
     }
 }
