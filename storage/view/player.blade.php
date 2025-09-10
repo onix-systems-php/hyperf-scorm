@@ -13,12 +13,16 @@
             autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }} * 1000
         };
 
-        window.sessionToken = '{{ $session_token }}';
+        window.user = {
+            id: {{ $user->id }},
+            name: '{{ $user->name }}',
+            sessionToken: '{{ $session_token }}'
+        };
+
         window.packageId = '{{ $package->id }}';
 
         console.log('[SCORM] Initializing player...');
         console.log('[SCORM] API Endpoint:', window.SCORM_CONFIG.apiEndpoint);
-        // console.log('[SCORM] Session Data:', window.scormSessionData);
     </script>
 
     <!-- Load SCORM API - MUST be before iframe -->

@@ -5,6 +5,7 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 
 class ScormCommitDTO extends AbstractDTO
 {
@@ -20,7 +21,7 @@ class ScormCommitDTO extends AbstractDTO
 
     public ?int $score_percentage = null;
 
-    #[ConvertArray(ScormSessionInteractionCommitDTO::class)]
+    #[ConvertArray(ScormCommitInteractionDTO::class)]
     public array $interactions = [];
 
     public ?string $completed_at = null;

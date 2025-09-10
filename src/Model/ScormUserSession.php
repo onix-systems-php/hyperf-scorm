@@ -13,10 +13,9 @@ use Carbon\Carbon;
 use Hyperf\Database\Model\Collection;
 use Hyperf\Database\Model\Relations\BelongsTo;
 use Hyperf\Database\Model\Relations\HasMany;
-use Hyperf\Database\Model\SoftDeletes;
 use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
 use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
-use OnixSystemsPHP\HyperfSocialite\One\User;
+use App\User\Model\User;
 
 /**
  * @property int $id
@@ -59,7 +58,7 @@ use OnixSystemsPHP\HyperfSocialite\One\User;
  *
  * @property ?Collection $interactions
  * @property ?ScormPackage $package
- * @property ?User $user
+ * @property User $user
  */
 class ScormUserSession extends AbstractModel
 {
@@ -125,7 +124,7 @@ class ScormUserSession extends AbstractModel
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class);
     }
 
     public function trackingRecords(): HasMany

@@ -107,10 +107,11 @@ class ScormPlayerService
         $render = make(RenderInterface::class);
         $template = $render->getContents('OnixSystemsPHP\\HyperfScorm::player', [
             'package' => $package,
+            'user' => $scormUserSession->user,
+            'session_token' => $scormUserSession->session_token,
             'launchUrl' => $launchUrl,
             'apiEndpoint' => $apiEndpoint,
             'apiConfig' => $apiConfig,
-            'session_token' => $scormUserSession->session_token,
             'scormVersion' => $package->scorm_version,
         ]);
 
