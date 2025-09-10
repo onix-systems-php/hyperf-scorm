@@ -28,12 +28,14 @@ class ScormUserSessionRepository extends AbstractRepository
         return $this->finder('id', $id)->fetchOne($lock, $force);
     }
 
-    public function findByToken(
+    public function findByIdentifier(
+        int $packageId,
         string $sessionToken,
         bool $lock = false,
         bool $force = false
     ): ?ScormUserSession {
         return $this
+            ->finder('packageId', $packageId)
             ->finder('sessionToken', $sessionToken)
             ->fetchOne($lock, $force);
     }

@@ -32,17 +32,15 @@ class ScormPlayerService
     ) {
     }
 
-    public function getPlayer(int $packageId, $userId, ?string $sessionToken): ScormPlayerDTO
+    public function run(int $packageId, $userId, ?string $sessionToken): ScormPlayerDTO
     {
         xdebug_break();
 
         $package = $this->scormPackageRepository->findById($packageId, true, true);
 
-        $exceptionSession = $sessionToken
-            ? $this->scormUserSessionRepository->findByToken($sessionToken)
-            : null;
-
-        $session = $exceptionSession ?: $this->createSession($package, $userId);
+        $session = $sessionToken
+            ? $this->scormUserSessionRepository->findByIdentifier($package->id, $sessionToken, true, true)
+            : $this->createSession($package, $userId);
 
         $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
 

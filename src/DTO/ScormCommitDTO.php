@@ -13,6 +13,8 @@ class ScormCommitDTO extends AbstractDTO
 
     public string $student_name;
 
+    public string $session_token;
+
     public ScormCommitSessionDTO $session;
 
     public ScormCommitLessonDTO $lesson;

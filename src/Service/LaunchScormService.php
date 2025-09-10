@@ -22,7 +22,7 @@ class LaunchScormService
 
     public function run(int $packageId, int $userId, ?string $sessionToken): string
     {
-        $scormPlayerDto = $this->scormPlayerService->getPlayer($packageId, $userId, $sessionToken);
+        $scormPlayerDto = $this->scormPlayerService->run($packageId, $userId, $sessionToken);
         return $scormPlayerDto->playerHtml;
     }
 }

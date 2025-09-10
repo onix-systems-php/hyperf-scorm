@@ -42,7 +42,7 @@ class GetScormPlayerAction
         }
 
         // Get player data
-        return $this->playerService->getPlayer($packageId, $userId);
+        return $this->playerService->run($packageId, $userId);
     }
 
     /**

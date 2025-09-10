@@ -22,18 +22,18 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'message', type: 'string', example: 'Compact commit processed successfully'),
         new OA\Property(
             property: 'summary',
-            type: 'object',
             properties: [
                 new OA\Property(property: 'total_interactions', type: 'integer', example: 3),
                 new OA\Property(property: 'correct_interactions', type: 'integer', example: 1),
                 new OA\Property(property: 'incorrect_interactions', type: 'integer', example: 2),
                 new OA\Property(property: 'session_duration_formatted', type: 'string', example: '5m 0s'),
                 new OA\Property(property: 'completion_percentage', type: 'integer', example: 75),
-            ]
+            ],
+            type: 'object'
         ),
     ]
 )]
-class ResourceScormCommitResult extends AbstractResource
+class ResourceScormCommit extends AbstractResource
 {
     /**
      * @method __construct(array $resource)

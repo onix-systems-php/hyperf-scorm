@@ -20,12 +20,12 @@ class InitializeScormService
     ) {
     }
 
-    public function run(string $sessionToken): ScormUserSession
+    public function run(int $packageId, string $sessionToken): ScormUserSession
     {
         //todo create session_id hash uuid, but if int you cant hack others sessions
         xdebug_break();
 
-        $session = $this->scormUserSessionRepository->findByToken($sessionToken);
+        $session = $this->scormUserSessionRepository->findByIdentifier($packageId, $sessionToken);
         $session->load(['interactions']);
 
         return $session;
