@@ -8,11 +8,7 @@ use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormInteractionRepository;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormTrackingRepository;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormTrackingRepositoryInterface;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use function Hyperf\Collection\collect;
 use function Hyperf\Support\now;
 

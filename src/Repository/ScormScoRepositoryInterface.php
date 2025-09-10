@@ -7,30 +7,14 @@ namespace OnixSystemsPHP\HyperfScorm\Repository;
 use Hyperf\Database\Model\Model;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
 
-/**
- * Repository interface for SCORM SCOs
- */
 interface ScormScoRepositoryInterface
 {
-    /**
-     * Find SCO by ID
-     */
     public function findById(int $id): ?ScormSco;
 
-    /**
-     * Find SCO by identifier and package ID
-     */
     public function findByIdentifier(string $identifier, int $packageId): ?ScormSco;
 
-    /**
-     * Find SCOs by package ID
-     */
     public function findByPackageId(int $packageId): array;
 
-    /**
-     * Save model (from AbstractRepository)
-     * @deprecated Use saveSco() instead
-     */
     public function save(Model $model): bool;
 
     /**

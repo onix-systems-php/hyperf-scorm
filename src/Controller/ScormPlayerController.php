@@ -18,23 +18,42 @@ class ScormPlayerController extends AbstractController
     ) {
     }
 
-    #[OA\Get(
-        path: '/v1/scorm/player/{packageId}/{sessionToken?}',
+    #[OA\Get(//@SONAR_STOP@
+        path: '/v1/api/scorm/player/{packageId}/launch/{sessionToken?}',
         operationId: 'launchScormPlayer',
-        summary: 'Launch SCORM player with session restoration',
-        tags: ['scorm-player'],
+        summary: 'Launch SCORM player',
+        security: [['bearerAuth' => []]],
+        tags: ['scorm'],
         parameters: [
-            new OA\Parameter(name: 'packageId', in: 'path', required: true, schema: new OA\Schema(type: 'integer')),
-            new OA\Parameter(name: 'userId', in: 'query', required: true, schema: new OA\Schema(type: 'integer')),
+            new OA\Parameter(
+                name: 'packageId',
+                description: 'SCORM Package ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'sessionToken',
+                description: 'Session token to resume existing session',
+                in: 'path',
+                required: false,
+                schema: new OA\Schema(type: 'string', nullable: true)
+            ),
         ],
         responses: [
-            new OA\Response(response: 200, description: 'SCORM player HTML', content: new OA\MediaType(mediaType: 'text/html')),
+            new OA\Response(
+                response: 200,
+                description: 'SCORM player HTML page',
+                content: new OA\MediaType(
+                    mediaType: 'text/html',
+                    schema: new OA\Schema(type: 'string')
+                )
+            ),
+            new OA\Response(ref: '#/components/responses/403', response: 403),
             new OA\Response(ref: '#/components/responses/404', response: 404),
-            new OA\Response(ref: '#/components/responses/401', response: 401),
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
-    )]
-//    #[Acl(roles: [UserRoles::GROUP_ALL])]//@SONAR_START@
+    )]//@SONAR_START@
     public function launch(
         ScormPlayerService $scormPlayerService,
         ResponseInterface $response,

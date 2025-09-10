@@ -7,7 +7,7 @@ use OnixSystemsPHP\HyperfCore\Resource\AbstractResource;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
-    schema: 'ResourceScormCompactCommitResult',
+    schema: 'ResourceScormCommit',
     properties: [
         new OA\Property(property: 'session_id', type: 'integer', example: 123),
         new OA\Property(property: 'student_id', type: 'string', example: 'Guest'),

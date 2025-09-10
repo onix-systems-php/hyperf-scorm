@@ -3,13 +3,9 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Repository;
 
-use Carbon\Carbon;
-use Hyperf\Database\Model\Model;
-use Hyperf\DbConnection\Db;
 use OnixSystemsPHP\HyperfCore\Model\Builder;
 use OnixSystemsPHP\HyperfCore\Repository\AbstractRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
-use function Hyperf\Support\now;
 
 /**
  * @method ScormUserSession create(array $data)
