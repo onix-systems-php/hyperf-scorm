@@ -33,7 +33,7 @@ use OpenApi\Attributes as OA;
         ),
     ]
 )]
-class ResourceScormCompactCommitResult extends AbstractResource
+class ResourceScormCommitResult extends AbstractResource
 {
     /**
      * @method __construct(array $resource)
@@ -64,7 +64,7 @@ class ResourceScormCompactCommitResult extends AbstractResource
     private function getMessage(): string
     {
         $status = $this->resource['lesson_status'];
-        
+
         return match($status) {
             'completed' => 'Lesson completed successfully',
             'passed' => 'Lesson completed and passed',
@@ -122,15 +122,15 @@ class ResourceScormCompactCommitResult extends AbstractResource
         $secs = $seconds % 60;
 
         $parts = [];
-        
+
         if ($hours > 0) {
             $parts[] = "{$hours}h";
         }
-        
+
         if ($minutes > 0) {
             $parts[] = "{$minutes}m";
         }
-        
+
         if ($secs > 0 || empty($parts)) {
             $parts[] = "{$secs}s";
         }

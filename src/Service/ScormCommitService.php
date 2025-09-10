@@ -5,8 +5,8 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\DbConnection\Annotation\Transactional;
 use OnixSystemsPHP\HyperfCore\Service\Service;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormCompactCommitDTO;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormSessionInteractionCommitDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormInteractionRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormTrackingRepository;
@@ -20,7 +20,7 @@ use function Hyperf\Support\now;
  * SCORM Compact Commit Service - handles compact format commit operations
  */
 #[Service]
-class ScormCompactCommitService
+class ScormCommitService
 {
     public const ACTION = 'compact_commit_scorm_data';
 
@@ -35,15 +35,15 @@ class ScormCompactCommitService
      * Process compact commit data
      */
     #[Transactional(attempts: 1)]
-    public function commit(int $sessionId, ScormCompactCommitDTO $compactData): array
+    public function run(string $sessionToken, ScormCommitDTO $compactData): array
     {
         // Find the session
-        $session = $this->sessionRepository->findById($sessionId, true, true);
+        $session = $this->sessionRepository->findByToken($sessionToken, true, true);
         $session->load('interactions');
 
         xdebug_break();
         if (!$this->canCommitToSession($session)) {
-            throw new \RuntimeException("Session cannot accept commits: {$sessionId}");
+            throw new \RuntimeException("Session cannot accept commits: {$sessionToken}");
         }
 
         // Convert compact format to CMI structure
@@ -57,8 +57,9 @@ class ScormCompactCommitService
 
 
         return [
-            'session_id' => $sessionId,
+            'session_id' => $session->id,
             'student_id' => $compactData->student_id,
+            'session_token' => $session->session_token,
             'lesson_status' => $compactData->lesson->status,
             'current_location' => $compactData->lesson->location,
             'exit_mode' => $compactData->lesson->exit,
@@ -87,7 +88,7 @@ class ScormCompactCommitService
         return true;
     }
 
-    private function updateSessionSummary($session, ScormCompactCommitDTO $compactData): void
+    private function updateSessionSummary($session, ScormCommitDTO $compactData): void
     {
         xdebug_break();
 
@@ -97,7 +98,12 @@ class ScormCompactCommitService
             'student_id' => $compactData->student_id,
 
             'lesson_status' => $compactData->lesson->status,
-            'current_location' => $compactData->lesson->location,
+            'lesson_location' => $compactData->lesson->location,
+            'lesson_entry' => $compactData->lesson->entry,
+            'lesson_credit' => $compactData->lesson->credit,
+            'lesson_mode' => $compactData->lesson->mode,
+            'lesson_exit' => $compactData->lesson->exit,
+
             'exit_mode' => $compactData->lesson->exit,
 
             'score_raw' => $compactData->score,
@@ -113,6 +119,7 @@ class ScormCompactCommitService
             'processed_at' => now()->toISOString(),
 //            'updated_at' => now(),
         ];
+
 
         if ($compactData->isCompleted() && !$session->completed_at) {
             $updateData['completed_at'] = $compactData->getCompletedTimestamp()
@@ -136,8 +143,8 @@ class ScormCompactCommitService
 
         $existingIds = $session->interactions->pluck('interaction_id')->toArray();
         $data = collect((array)$interactions)
-//            ->filter(fn(ScormSessionInteractionCommitDTO $interaction) => !in_array($interaction->id, $existingIds))//todo scorm cam be restart
-            ->map(function (ScormSessionInteractionCommitDTO $interaction) use ($session) {
+            ->filter(fn(ScormCommitInteractionDTO $interaction) => !in_array($interaction->id, $existingIds))//todo scorm cam be restart
+            ->map(function (ScormCommitInteractionDTO $interaction) use ($session) {
 
                 return [
                     'interaction_id' => $interaction->id,
@@ -153,6 +160,7 @@ class ScormCompactCommitService
                     'created_at' => now(),
                 ];
             })->toArray();
+
 
         $this->sessionRepository->createMany($session, $data, 'interactions');
     }

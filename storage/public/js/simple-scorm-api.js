@@ -231,6 +231,7 @@ Works with any SCORM course - no complications
         },
 
         LMSCommit: function(parameter) {
+          debugger
             if (parameter !== "") {
                 lastError = "201";
                 return "false";
@@ -241,6 +242,11 @@ Works with any SCORM course - no complications
                 return "false";
             }
 
+          // const result = normalizer.normalize(originalScormData);
+          //
+          // const compact = normalizer.createCompactVersion(result);
+
+          // const backToScorm = normalizer.convertCompactBackToScorm(compact);
             saveData();
             lastError = "0";
             return "true";

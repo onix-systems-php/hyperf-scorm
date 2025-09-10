@@ -14,10 +14,11 @@ Router::addGroup('/v1/scorm/packages', function () {
     Router::delete('/{id:\d+}', [ScormController::class, 'delete']);
 });
 //// SCORM Player Routes
-Router::addGroup('/v1/scorm/player', function () {
-    Router::get('/{packageId:\d+}', [ScormPlayerController::class, 'launch']);
-    Router::post('/{sessionId:\d+}/commit', [ScormApiController::class, 'commitCompact']);
-    Router::post('/{sessionId:\d+}/initialize', [ScormApiController::class, 'initialize']);
+Router::addGroup('/v1/scorm-player', function () {
+    Router::get('/package/{packageId:\d+}/session/{sessionToken}/launch', [ScormPlayerController::class, 'launch']);
+    Router::get('/package/{packageId:\d+}/launch', [ScormPlayerController::class, 'launch']);
+    Router::post('/session/{sessionToken}/commit', [ScormApiController::class, 'commitCompact']);
+    Router::post('/session/{sessionToken}/initialize', [ScormApiController::class, 'initialize']);
 //    Router::get('/{packageId:\d+}/data', [\OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController::class, 'getPlayerData']);
 });
 //

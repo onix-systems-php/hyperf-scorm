@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Action;
 
-use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\PlayerManifestDTO;
-use OnixSystemsPHP\HyperfScorm\Service\ScormPlayerService;
-use OnixSystemsPHP\HyperfScorm\Service\PlayerManifestParser;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use OnixSystemsPHP\HyperfScorm\Service\PlayerManifestParser;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 
 /**
  * Action for getting SCORM player with optimized data
@@ -36,7 +36,7 @@ class GetScormPlayerAction
 
         // Parse manifest for player-optimized data
         $playerManifest = $this->manifestParser->parse($package->manifest_data);
-        
+
         if (!$playerManifest->hasScos()) {
             throw new \RuntimeException("No SCOs found in package: {$packageId}");
         }

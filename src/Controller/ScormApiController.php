@@ -7,14 +7,14 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormCompactCommitDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\Factory\ScormApiStrategyFactory;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormAttemptRepositoryInterface;
-use OnixSystemsPHP\HyperfScorm\Request\RequestScormCompactCommit;
-use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormCompactCommitResult;
+use OnixSystemsPHP\HyperfScorm\Request\RequestScormCommit;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormCommitResult;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormInitialize;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\InitializeScormService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormCompactCommitService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormCommitService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormTrackingService;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface;
@@ -33,7 +33,7 @@ class ScormApiController extends AbstractController
     }
 
     #[OA\Post(
-        path: '/v1/scorm/api/{attemptId}/initialize',
+        path: '/v1/scorm-player/session/{sessionToken}/initialize',
         operationId: 'scormApiInitialize',
         summary: 'Initialize SCORM session',
         tags: ['scorm-api'],
@@ -48,19 +48,12 @@ class ScormApiController extends AbstractController
     )]
     public function initialize(
         InitializeScormService $initializeScormService,
-        int $sessionId
+        string $sessionToken
     ): ResourceScormInitialize {
-        $data = $initializeScormService->run($sessionId);
+        xdebug_break();
+
+        $data = $initializeScormService->run($sessionToken);
         return ResourceScormInitialize::make($data);
-    }
-
-    public function initializeSession(RequestInterface $request): PsrResponseInterface
-    {
-        $sessionId = $request->input('sessionId');
-
-        $result = $this->trackingService->initializeSession($sessionId);
-
-        return $this->success(['initialized' => $result]);
     }
 
     #[OA\Post(
@@ -178,21 +171,21 @@ class ScormApiController extends AbstractController
         ],
     )]
     public function commitCompact(
-        RequestScormCompactCommit $request,
-        ScormCompactCommitService $service,
-        int $sessionId,
-    ): ResourceScormCompactCommitResult {
+        RequestScormCommit $request,
+        ScormCommitService $service,
+        string $sessionToken,
+    ): ResourceScormCommitResult {
             // Convert request to DTO
         xdebug_break();
 
-        $compactData = ScormCompactCommitDTO::make($request->validated());
+        $compactData = ScormCommitDTO::make($request->validated());
 
 
         // Process the compact commit
-        $result = $service->commit($sessionId, $compactData);
+        $result = $service->run($sessionToken, $compactData);
 
         // Return formatted response
-        return ResourceScormCompactCommitResult::make($result);
+        return ResourceScormCommitResult::make($result);
     }
 
     #[OA\Get(

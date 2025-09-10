@@ -5,7 +5,7 @@ namespace OnixSystemsPHP\HyperfScorm\Cast;
 
 use Hyperf\Contract\CastsAttributes;
 use OnixSystemsPHP\HyperfScorm\DTO\CmiDataDTO;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormSessionCommitDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitSessionDTO;
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 
 /**
@@ -15,7 +15,7 @@ class ScormSessionCommitDTOCast extends DtoCast
 {
     protected function dtoClass(): string
     {
-        return ScormSessionCommitDTO::class;
+        return ScormCommitSessionDTO::class;
     }
 }
 

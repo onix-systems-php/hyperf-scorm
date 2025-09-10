@@ -5,7 +5,7 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-class ScormSessionCommitDTO extends AbstractDTO
+class ScormCommitSessionDTO extends AbstractDTO
 {
     public int $total_time = 0;
 

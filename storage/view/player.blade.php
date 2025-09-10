@@ -13,7 +13,7 @@
             autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }} * 1000
         };
 
-        window.sessionId = '{{ $sessionId }}';
+        window.sessionToken = '{{ $session_token }}';
         window.packageId = '{{ $package->id }}';
 
         console.log('[SCORM] Initializing player...');

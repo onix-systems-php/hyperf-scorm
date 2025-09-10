@@ -35,8 +35,8 @@ class ConfigProvider
                 \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class =>
                     \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class,
 
-                \OnixSystemsPHP\HyperfScorm\Service\ScormPlayerService::class =>
-                    \OnixSystemsPHP\HyperfScorm\Service\ScormPlayerService::class,
+                Service\ScormApi\ScormPlayerService::class =>
+                    Service\ScormApi\ScormPlayerService::class,
 
                 // Legacy interfaces (for backward compatibility)
                 \OnixSystemsPHP\HyperfScorm\Service\ScormTrackingServiceInterface::class =>

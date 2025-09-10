@@ -446,7 +446,7 @@ class ScormNormalizer {
   createCompactVersion(normalizedData) {
     return {
       student_id: normalizedData.student.id,
-      student_name: normalizedData.student.name,
+      student_name: normalizedData.student.name || 'Guest',
       score: normalizedData.score.raw,
       score_percentage: normalizedData.score.percentage,
       session: {
@@ -458,7 +458,14 @@ class ScormNormalizer {
         comments_from_lms: normalizedData.session.commentsFromLms,
         launch_data: normalizedData.session.launchData
       },
-      lesson: normalizedData.lesson,
+      lesson: {
+        status: normalizedData.lesson.status,
+        location: normalizedData.lesson.location,
+        mode: normalizedData.lesson.mode,
+        entry: normalizedData.lesson.entry,
+        exit: normalizedData.lesson.exit,
+        credit: normalizedData.lesson.credit
+      },
       interactions: normalizedData.interactions.map(i => ({
         id: i.id,
         type: i.type,
@@ -683,7 +690,7 @@ class ScormNormalizer {
     scormResult['cmi.core.student_id'] = compactData.studentId || '';
     scormResult['cmi.core.student_name'] = compactData.studentName || '';
     scormResult['cmi.core.lesson_status'] = compactData.lessonStatus || 'incomplete';
-    scormResult['cmi.core.lesson_location'] = '';
+    scormResult['cmi.core.lesson_location'] = compactData.lesson.lesson_location || '';
     scormResult['cmi.core.lesson_mode'] = 'normal';
     scormResult['cmi.core.entry'] = '';
     scormResult['cmi.core.exit'] = compactData.lessonStatus === 'completed' ? 'normal' : 'suspend';

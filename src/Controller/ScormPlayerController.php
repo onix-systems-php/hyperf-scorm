@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
-use App\Common\Constants\UserRoles;
+use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\ResponseInterface;
 use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
-use OnixSystemsPHP\HyperfPolicy\Annotation\Acl;
-use OnixSystemsPHP\HyperfScorm\Service\ScormPlayerService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormTrackingServiceInterface;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
-use Hyperf\HttpMessage\Stream\SwooleStream;
 
 /**
  * Thin controller for SCORM Player functionality
@@ -25,7 +22,7 @@ class ScormPlayerController extends AbstractController
     ) {}
 
     #[OA\Get(
-        path: '/v1/scorm/player/{packageId}',
+        path: '/v1/scorm/player/{packageId}/{sessionToken?}',
         operationId: 'launchScormPlayer',
         summary: 'Launch SCORM player with session restoration',
         tags: ['scorm-player'],
@@ -44,12 +41,12 @@ class ScormPlayerController extends AbstractController
     public function launch(
         ScormPlayerService $scormPlayerService,
         ResponseInterface $response,
-        int $packageId
+        int $packageId,
+        ?string $sessionToken = null
     ): PsrResponseInterface {
 //        $userId = $this->sessionManager->user()?->getId();
         $userId = 1;
-        xdebug_break();
-        $playerData = $scormPlayerService->getPlayer($packageId, $userId);
+        $playerData = $scormPlayerService->getPlayer($packageId, $userId, $sessionToken);
 
         return $response->withHeader('Content-Type', 'text/html')
                        ->withBody(new SwooleStream($playerData->playerHtml));

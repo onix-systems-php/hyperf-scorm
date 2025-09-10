@@ -56,7 +56,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'completedAt', type: 'string', format: 'date-time', example: '2025-08-29T18:26:40.006Z'),
     ]
 )]
-class RequestScormCompactCommit extends FormRequest
+class RequestScormCommit extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -83,11 +83,15 @@ class RequestScormCompactCommit extends FormRequest
             'session.comments' => ['nullable', 'string'],
             'session.comments_from_lms' => ['nullable', 'string'],
 
+
             'lesson' => ['array'],
-            'lesson.status' => ['required', 'string', 'in:incomplete,completed,passed,failed,browsed,not_attempted'],
-            'lesson.mode' => ['nullable', 'string', 'in:normal,browse,review'],
-            'lesson.exit' => ['nullable', 'string', 'in:time-out,suspend,logout,close'],
+            'lesson.status' => ['required', 'string', 'in:incomplete,completed,passed,failed,browsed,not_attempted'],//todo create enum for statuses
+            'lesson.mode' => ['nullable', 'string', 'in:normal,browse,review'],//todo create enum for modes
+            'lesson.exit' => ['nullable', 'string'],//todo create enum for exit modes
             'lesson.location' => ['nullable', 'string', 'max:255'],
+            'lesson.entry' => ['nullable', 'string', 'in:ab-initio,resume'],
+            'lesson.credit' => ['nullable', 'string', 'in:credit,no-credit'],
+
 
             'score' => ['nullable', 'integer', 'min:0'],
             'scorePercentage' => ['nullable', 'integer', 'min:0', 'max:100'],

@@ -6,6 +6,7 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 
 #[Service]
 class LaunchScormService
@@ -19,9 +20,9 @@ class LaunchScormService
     ) {
     }
 
-    public function run(int $packageId, int $userId): string
+    public function run(int $packageId, int $userId, ?string $sessionToken): string
     {
-        $scormPlayerDto = $this->scormPlayerService->getPlayer($packageId, $userId);
+        $scormPlayerDto = $this->scormPlayerService->getPlayer($packageId, $userId, $sessionToken);
         return $scormPlayerDto->playerHtml;
     }
 }

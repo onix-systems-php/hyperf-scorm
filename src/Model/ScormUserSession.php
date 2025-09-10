@@ -23,12 +23,39 @@ use OnixSystemsPHP\HyperfSocialite\One\User;
  * @property int $package_id
  * @property int $user_id
  * @property string $status
- * @property string $suspend_data
- * @property string $current_location
- * @property Carbon|null $started_at
- * @property Carbon|null $completed_at
+ * @property string $session_token
+ * @property string $lesson_status
+ * @property string $lesson_mode
+ * @property string $lesson_entry
+ * @property string $lesson_credit
+ * @property string $lesson_location
+ * @property float $score_raw
+ * @property float $score_scaled
+ * @property string $completion_status
+ * @property string $success_status
+ * @property string $session_time
+ * @property int $session_time_seconds
+ * @property string $total_time
+ * @property int $total_time_seconds
+ * @property string $exit_mode
+ * @property string $scorm_version
+ * @property int $interactions_count
+ * @property float $best_score
+ * @property int $restart_count
+ * @property array $suspend_data
+ * @property string $student_name
+ * @property string $launch_data
+ * @property string $comments
+ * @property string $comments_from_lms
+ * @property bool $interactions_processed
+ * @property Carbon $started_at
+ * @property Carbon $last_accessed
+ * @property Carbon $last_activity_at
+ * @property Carbon $last_interaction_at
+ * @property Carbon $completed_at
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property Carbon $deleted_at
  *
  * @property ?Collection $interactions
  * @property ?ScormPackage $package
@@ -53,6 +80,9 @@ class ScormUserSession extends AbstractModel
         'session_token',
         'last_activity_at',
         'lesson_status',
+        'lesson_mode',
+        'lesson_entry',
+        'lesson_credit',
         'lesson_location',
         'score_raw',
         'score_scaled',

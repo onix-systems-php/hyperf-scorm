@@ -34,8 +34,11 @@ class ResourceScormInitialize extends AbstractResource
             ],
             'lesson' => [
                'status' =>  $this->resource->lesson_status,
-               'location' =>  $this->resource->current_location,
+               'location' =>  $this->resource->lesson_location,
                'exit' =>  $this->resource->exit_mode,
+                'mode' =>  $this->resource->lesson_mode,
+                'entry' =>  $this->resource->lesson_entry,
+                'credit' =>  $this->resource->lesson_credit,
             ],
             //            'interactions' =>  $this->resource->interactions ?? [],//todo need this data or not? check can you go back in scorm
             'interactions' => [],

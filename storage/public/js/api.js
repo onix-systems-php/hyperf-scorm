@@ -15,14 +15,14 @@ Integrates with Hyperf backend API endpoints
     var pendingData = {};
 
     var config = window.SCORM_CONFIG || {};
-    var apiEndpoint = config.apiEndpoint || '/v1/scorm/api';
-    var sessionId = window.sessionId || null;
+    var apiEndpoint = config.apiEndpoint || '/v1/scorm-player/';
+    var sessionToken = window.sessionToken || null;
     // var debug = config.debug || false; //notice for test
-    var debug = false;
+    var debug = true;
 
     // SCORM data storage - initialize with proper defaults
     var data = {
-        "cmi.core.student_id": window.learnerId || sessionId || "guest",
+        "cmi.core.student_id": window.learnerId || sessionToken || "guest",
         "cmi.core.student_name": window.learnerName || "Guest User",
         "cmi.core.lesson_location": "",
         "cmi.core.credit": "credit",
@@ -55,14 +55,15 @@ Integrates with Hyperf backend API endpoints
 
 
     function saveDataToServer() {
-        if (!sessionId) {
+      debugger
+        if (!sessionToken) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
         }
         var cmiData = Object.assign({}, data, interactions, objectives, pendingData);
         var result = window.scormNormalizer.normalize(cmiData);
         var compactVersion = window.scormNormalizer.createCompactVersion(result)
-        return fetch(apiEndpoint + '/' + sessionId + '/commit', {
+        return fetch(apiEndpoint + '/session/' + sessionToken + '/commit', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,10 +92,11 @@ Integrates with Hyperf backend API endpoints
 
     // Load initial data from server synchronously
     function loadDataFromServerSync(parameter) {
-        if (!sessionId) return;
+      debugger
+        if (!sessionToken) return;
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', apiEndpoint + '/' + sessionId + '/initialize', false); // async: false
+            xhr.open('POST', apiEndpoint + '/session/' + sessionToken + '/initialize', false); // async: false
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
             xhr.send(JSON.stringify({
@@ -118,6 +120,7 @@ Integrates with Hyperf backend API endpoints
     // SCORM 1.2 API
     window.API = {
         LMSInitialize: function(parameter) {
+          debugger
             apiCalls++;
             debugLog('LMSInitialize called with parameter: ' + parameter);
 
@@ -131,12 +134,12 @@ Integrates with Hyperf backend API endpoints
                 return "false";
             }
 
-            // Ensure basic student data is set
-            data["cmi.core.student_id"] = window.learnerId || sessionId || "guest";
+            //notice maybe duplicate
+            data["cmi.core.student_id"] = window.learnerId || sessionToken || "guest";
             data["cmi.core.student_name"] = window.learnerName || "Guest User";
             data["cmi.core.lesson_mode"] = "normal";
 
-            // Load data from server synchronously
+            debugger
             loadDataFromServerSync(parameter);
 
             initialized = true;
@@ -146,11 +149,6 @@ Integrates with Hyperf backend API endpoints
 
             debugLog('SCORM session initialized');
             updateDebugPanel();
-
-            // Start background async sync after successful initialization
-            // setTimeout(function() {
-            //     loadDataFromServerAsync(parameter);
-            // }, 100);
 
             return "true";
         },
@@ -185,8 +183,8 @@ Integrates with Hyperf backend API endpoints
             saveDataToServer();
 
             // Terminate session on server
-            if (sessionId) {
-                fetch(apiEndpoint + '/' + sessionId + '/terminate', {
+            if (sessionToken) {
+                fetch(apiEndpoint + '/session/' + sessionToken + '/terminate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -299,6 +297,7 @@ Integrates with Hyperf backend API endpoints
         },
 
         LMSCommit: function(parameter) {
+          debugger
             apiCalls++;
             debugLog('LMSCommit called with parameter: ' + parameter);
             if (parameter !== "") {
@@ -385,7 +384,6 @@ Integrates with Hyperf backend API endpoints
         },
 
         Commit: function(parameter) {
-          debugger
             return window.API.LMSCommit(parameter);
         },
 
@@ -434,7 +432,7 @@ Integrates with Hyperf backend API endpoints
             lastError: lastError,
             apiCalls: apiCalls,
             pendingDataCount: Object.keys(pendingData).length,
-            sessionId: sessionId
+            sessionToken: sessionToken
         };
     };
 

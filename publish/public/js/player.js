@@ -216,9 +216,9 @@ class ScormNormalizer {
   }
 
   /**
-   * Main SCORM data normalization method
-   * @param {Object} scormData - raw SCORM data
-   * @returns {Object} - normalized data
+   * Основной метод нормализации данных SCORM
+   * @param {Object} scormData - сырые данные SCORM
+   * @returns {Object} - нормализованные данные
    */
   normalize(scormData) {
     return {
@@ -235,7 +235,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts student information
+   * Извлекает информацию о студенте
    */
   extractStudentInfo(data) {
     return {
@@ -245,7 +245,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts lesson information
+   * Извлекает информацию о уроке
    */
   extractLessonInfo(data) {
     return {
@@ -259,7 +259,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts score information
+   * Извлекает информацию о результатах
    */
   extractScoreInfo(data) {
     const scoreData = {
@@ -269,7 +269,7 @@ class ScormNormalizer {
       scaled: this.parseNumber(data['cmi.core.score.scaled'])
     };
 
-    // Calculate percentage if possible
+    // Вычисляем процент, если возможно
     if (scoreData.raw !== null && scoreData.max !== null && scoreData.max > 0) {
       scoreData.percentage = Math.round((scoreData.raw / scoreData.max) * 100);
     }
@@ -278,7 +278,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts interactions
+   * Извлекает взаимодействия (interactions)
    */
   extractInteractions(data) {
     const interactions = [];
@@ -310,7 +310,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts objectives
+   * Извлекает цели (objectives)
    */
   extractObjectives(data) {
     const objectives = [];
@@ -332,7 +332,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts session information
+   * Извлекает информацию о сессии
    */
   extractSessionInfo(data) {
     return {
@@ -347,19 +347,19 @@ class ScormNormalizer {
   }
 
   /**
-   * Extracts metadata
+   * Извлекает метаданные
    */
   extractMetadata(data) {
     return {
       processedAt: new Date().toISOString(),
-      scormVersion: '1.2', // can be determined automatically
+      scormVersion: '1.2', // можно определить автоматически
       totalInteractions: parseInt(data['cmi.interactions._count']) || 0,
       totalObjectives: parseInt(data['cmi.objectives._count']) || 0
     };
   }
 
   /**
-   * Parses numeric values
+   * Парсит числовые значения
    */
   parseNumber(value) {
     if (value === '' || value === null || value === undefined) return null;
@@ -368,7 +368,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Parses learner responses
+   * Парсит ответы учащегося
    */
   parseResponse(response) {
     if (!response) return [];
@@ -376,7 +376,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Parses correct responses
+   * Парсит правильные ответы
    */
   parseCorrectResponse(response) {
     if (!response) return [];
@@ -384,7 +384,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Parses ISO 8601 duration to seconds
+   * Парсит ISO 8601 duration в секунды
    */
   parseISO8601Duration(duration) {
     if (!duration || !duration.startsWith('PT')) return 0;
@@ -402,7 +402,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Cleans text from extra characters
+   * Очищает текст от лишних символов
    */
   cleanText(text) {
     if (!text) return null;
@@ -413,7 +413,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Removes empty fields from object
+   * Удаляет пустые поля из объекта
    */
   cleanEmptyFields(obj) {
     if (Array.isArray(obj)) {
@@ -441,12 +441,12 @@ class ScormNormalizer {
   }
 
   /**
-   * Creates compact version for server transmission
+   * Создает компактную версию для отправки на сервер
    */
   createCompactVersion(normalizedData) {
     return {
       student_id: normalizedData.student.id,
-      student_name: normalizedData.student.name,
+      student_name: normalizedData.student.name || 'Guest',
       score: normalizedData.score.raw,
       score_percentage: normalizedData.score.percentage,
       session: {
@@ -458,7 +458,14 @@ class ScormNormalizer {
         comments_from_lms: normalizedData.session.commentsFromLms,
         launch_data: normalizedData.session.launchData
       },
-      lesson: normalizedData.lesson,
+      lesson: {
+        status: normalizedData.lesson.status,
+        location: normalizedData.lesson.location,
+        mode: normalizedData.lesson.mode,
+        entry: normalizedData.lesson.entry,
+        exit: normalizedData.lesson.exit,
+        credit: normalizedData.lesson.credit
+      },
       interactions: normalizedData.interactions.map(i => ({
         id: i.id,
         type: i.type,
@@ -476,9 +483,9 @@ class ScormNormalizer {
   }
 
   /**
-   * Converts normalized data back to SCORM format
-   * @param {Object} normalizedData - normalized data
-   * @returns {Object} - data in SCORM format
+   * Преобразует нормализированные данные обратно в формат SCORM
+   * @param {Object} normalizedData - нормализованные данные
+   * @returns {Object} - данные в формате SCORM
    */
   denormalize(normalizedData) {
     const scormData = {};
@@ -526,7 +533,7 @@ class ScormNormalizer {
         scormData[`cmi.interactions.${index}.latency`] = this.encodeISO8601Duration(interaction.latency);
         scormData[`cmi.interactions.${index}.timestamp`] = interaction.timestamp || '';
 
-        // Objectives for interaction
+        // Objectives для interaction
         if (interaction.objectives && interaction.objectives.length > 0) {
           scormData[`cmi.interactions.${index}.objectives.0.id`] = interaction.objectives[0].id || '';
         }
@@ -556,7 +563,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Encodes text back to SCORM character format
+   * Кодирует текст обратно в формат с SCORM символами
    */
   encodeText(text) {
     if (!text) return '';
@@ -566,7 +573,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Encodes response array to SCORM format string
+   * Кодирует массив ответов в строку SCORM формата
    */
   encodeResponse(responseArray) {
     if (!responseArray || !Array.isArray(responseArray)) return '';
@@ -574,7 +581,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Converts seconds to ISO 8601 duration
+   * Преобразует секунды в ISO 8601 duration
    */
   encodeISO8601Duration(seconds) {
     if (!seconds || seconds === 0) return 'PT0S';
@@ -587,7 +594,7 @@ class ScormNormalizer {
     if (hours > 0) duration += `${hours}H`;
     if (minutes > 0) duration += `${minutes}M`;
     if (secs > 0) {
-      // If there's a fractional part, preserve it
+      // Если есть дробная часть, сохраняем её
       if (secs % 1 !== 0) {
         duration += `${secs.toFixed(2)}S`;
       } else {
@@ -618,7 +625,7 @@ class ScormNormalizer {
   }
 
   /**
-   * Creates SCORM format data from compact version
+   * Создает данные в формате SCORM из компактной версии
    */
   createScormFromCompact(compactData) {
     const normalizedData = {
@@ -672,10 +679,10 @@ class ScormNormalizer {
   }
 
   /**
-   * NEW METHOD: Converts compact version directly back to SCORM format
-   * This is what you need for: const compact = normalizer.createCompactVersion(result);
-   * @param {Object} compactData - result of createCompactVersion()
-   * @returns {Object} - data in SCORM format
+   * НОВЫЙ МЕТОД: Преобразует компактную версию напрямую обратно в SCORM формат
+   * Это то, что вам нужно для: const compact = normalizer.createCompactVersion(result);
+   * @param {Object} compactData - результат createCompactVersion()
+   * @returns {Object} - данные в формате SCORM
    */
   convertCompactBackToScorm(compactData) {
     const scormResult = {};
@@ -683,7 +690,7 @@ class ScormNormalizer {
     scormResult['cmi.core.student_id'] = compactData.studentId || '';
     scormResult['cmi.core.student_name'] = compactData.studentName || '';
     scormResult['cmi.core.lesson_status'] = compactData.lessonStatus || 'incomplete';
-    scormResult['cmi.core.lesson_location'] = '';
+    scormResult['cmi.core.lesson_location'] = compactData.lesson.lesson_location || '';
     scormResult['cmi.core.lesson_mode'] = 'normal';
     scormResult['cmi.core.entry'] = '';
     scormResult['cmi.core.exit'] = compactData.lessonStatus === 'completed' ? 'normal' : 'suspend';
@@ -726,7 +733,7 @@ class ScormNormalizer {
       scormResult['cmi.interactions._count'] = '0';
     }
 
-    // Objectives
+    // Цели
     scormResult['cmi.objectives._count'] = '0';
 
     return scormResult;

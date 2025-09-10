@@ -12,10 +12,10 @@ use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 class ScoDTO extends AbstractDTO
 {
 
-    public string $identifier;     // resource.identifier
-    public string $title;          // item.title
-    public string $launch_url;       // resource.href + parameters
-    public ?float $mastery_score;     // item['adlcp:masteryscore']
+    public string $identifier;
+    public string $title;
+    public string $launch_url;
+    public ?float $mastery_score;
     public ?int $max_time_seconds = 0;
 
 

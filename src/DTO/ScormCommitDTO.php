@@ -6,17 +6,17 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-class ScormCompactCommitDTO extends AbstractDTO
+class ScormCommitDTO extends AbstractDTO
 {
     public string $student_id;
 
     public string $student_name;
 
-    public ScormSessionCommitDTO $session;
+    public ScormCommitSessionDTO $session;
 
-    public ScormSessionLessonCommitDTO $lesson;
+    public ScormCommitLessonDTO $lesson;
 
-    public int $score = 0;
+    public ?int $score = 0;
 
     public ?int $score_percentage = null;
 

@@ -5,7 +5,7 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-class ScormSessionInteractionCommitDTO extends AbstractDTO
+class ScormCommitInteractionDTO extends AbstractDTO
 {
     public string $id;
     public string $type = 'choice';
@@ -18,7 +18,4 @@ class ScormSessionInteractionCommitDTO extends AbstractDTO
     public string $interaction_timestamp;
     public ?array $objectives = [];
     public string $created_at;
-
-
-//cmi_commit_id	bigint NULL // notice ???
 }
