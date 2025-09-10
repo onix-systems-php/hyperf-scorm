@@ -55,7 +55,6 @@ Integrates with Hyperf backend API endpoints
 
 
     function saveDataToServer() {
-      debugger
         if (!sessionToken) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
@@ -92,7 +91,6 @@ Integrates with Hyperf backend API endpoints
 
     // Load initial data from server synchronously
     function loadDataFromServerSync(parameter) {
-      debugger
         if (!sessionToken) return;
         try {
             var xhr = new XMLHttpRequest();
@@ -120,7 +118,6 @@ Integrates with Hyperf backend API endpoints
     // SCORM 1.2 API
     window.API = {
         LMSInitialize: function(parameter) {
-          debugger
             apiCalls++;
             debugLog('LMSInitialize called with parameter: ' + parameter);
 
@@ -139,7 +136,6 @@ Integrates with Hyperf backend API endpoints
             data["cmi.core.student_name"] = window.learnerName || "Guest User";
             data["cmi.core.lesson_mode"] = "normal";
 
-            debugger
             loadDataFromServerSync(parameter);
 
             initialized = true;
@@ -297,7 +293,6 @@ Integrates with Hyperf backend API endpoints
         },
 
         LMSCommit: function(parameter) {
-          debugger
             apiCalls++;
             debugLog('LMSCommit called with parameter: ' + parameter);
             if (parameter !== "") {
@@ -344,7 +339,6 @@ Integrates with Hyperf backend API endpoints
         },
 
         Terminate: function(parameter) {
-          debugger
             return window.API.LMSFinish(parameter);
         },
 

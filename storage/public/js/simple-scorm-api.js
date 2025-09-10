@@ -231,7 +231,6 @@ Works with any SCORM course - no complications
         },
 
         LMSCommit: function(parameter) {
-          debugger
             if (parameter !== "") {
                 lastError = "201";
                 return "false";

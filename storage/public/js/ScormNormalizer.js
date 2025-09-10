@@ -254,7 +254,6 @@ class ScormNormalizer {
    * Создает компактную версию для отправки на сервер
    */
   createCompactVersion(normalizedData) {
-   debugger
     return {
       studentId: normalizedData.student.id,
       studentName: normalizedData.student.name,
