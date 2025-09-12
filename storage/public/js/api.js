@@ -55,7 +55,6 @@ Integrates with Hyperf backend API endpoints
 
 
     function saveDataToServer() {
-      debugger
         if (!user.sessionToken) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
@@ -338,7 +337,6 @@ Integrates with Hyperf backend API endpoints
         },
 
         Terminate: function(parameter) {
-          debugger
             return window.API.LMSFinish(parameter);
         },
 

@@ -5,7 +5,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 
 class ScormCommitDTO extends AbstractDTO
 {

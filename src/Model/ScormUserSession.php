@@ -1,11 +1,6 @@
 <?php
 
 declare(strict_types=1);
-/**
- * This file is part of the extension library for Hyperf.
- *
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
- */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
@@ -125,11 +120,6 @@ class ScormUserSession extends AbstractModel
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function trackingRecords(): HasMany
-    {
-        return $this->hasMany(ScormTracking::class, 'attempt_id');
     }
 
     public function interactions(): HasMany

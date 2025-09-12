@@ -5,8 +5,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
-use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
-use \OnixSystemsPHP\HyperfScorm\DTO\ScoDTO;
 /**
  * DTO for parsed SCORM manifest data
  */

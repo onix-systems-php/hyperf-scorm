@@ -1,11 +1,5 @@
 <?php
-
 declare(strict_types=1);
-/**
- * This file is part of the extension library for Hyperf.
- *
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
- */
 
 namespace OnixSystemsPHP\HyperfScorm;
 
@@ -15,32 +9,17 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-                // Repository Interfaces -> Implementations
-                \OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepositoryInterface::class =>
-                    \OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository::class,
-
-                \OnixSystemsPHP\HyperfScorm\Repository\ScormAttemptRepositoryInterface::class =>
-                    \OnixSystemsPHP\HyperfScorm\Repository\ScormAttemptRepository::class,
-
-                \OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepositoryInterface::class =>
-                    \OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepository::class,
 
                 // Service Classes
                 \OnixSystemsPHP\HyperfScorm\Service\ScormPackageService::class =>
                     \OnixSystemsPHP\HyperfScorm\Service\ScormPackageService::class,
 
-                \OnixSystemsPHP\HyperfScorm\Service\ScormAttemptService::class =>
-                    \OnixSystemsPHP\HyperfScorm\Service\ScormAttemptService::class,
-
                 \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class =>
                     \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class,
 
-                Service\ScormApi\ScormPlayerService::class =>
-                    Service\ScormApi\ScormPlayerService::class,
+//                Service\ScormApi\ScormPlayerService::class =>
+//                    Service\ScormApi\ScormPlayerService::class,
 
-                // Legacy interfaces (for backward compatibility)
-                \OnixSystemsPHP\HyperfScorm\Service\ScormTrackingServiceInterface::class =>
-                    \OnixSystemsPHP\HyperfScorm\Service\ScormTrackingService::class,
             ],
             'commands' => [],
             'annotations' => [

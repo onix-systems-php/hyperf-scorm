@@ -4,7 +4,7 @@ Compatible with SCORM 1.2 and SCORM 2004
 Integrates with Hyperf backend API endpoints
 */
 
-(function() {
+(function () {
     'use strict';
 
     var initialized = false;
@@ -47,15 +47,16 @@ Integrates with Hyperf backend API endpoints
     var objectives = {};
 
     // Debug logging
-    function debugLog(message) {
+    function debugLog(message)
+    {
         if (debug) {
             console.log('[SCORM API] ' + message);
         }
     }
 
 
-    function saveDataToServer() {
-      debugger
+    function saveDataToServer()
+    {
         if (!user.sessionToken) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
@@ -73,27 +74,30 @@ Integrates with Hyperf backend API endpoints
             },
 
             body: JSON.stringify({
-              ...compactVersion
+                ...compactVersion
             })
-        }).then(function(response) {
+        }).then(function (response) {
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status + ': ' + response.statusText);
             }
             return response.json();
-        }).then(function(result) {
+        }).then(function (result) {
             if (result.status === 200) {
                 pendingData = {};
                 debugLog('Data saved successfully to server');
             } else {
                 throw new Error(result.message || 'Server error');
             }
-        }).catch(function(error) {
+        }).catch(function (error) {
             console.error('Failed to save SCORM data:', error);
         });
     }
 
-    function loadDataFromServerSync(parameter) {
-        if (!user.sessionToken) return;
+    function loadDataFromServerSync(parameter)
+    {
+        if (!user.sessionToken) {
+            return;
+        }
         try {
             var xhr = new XMLHttpRequest();
             var apiUrl = generateApiUrl('initialize');
@@ -118,7 +122,7 @@ Integrates with Hyperf backend API endpoints
 
     // SCORM 1.2 API
     window.API = {
-        LMSInitialize: function(parameter) {
+        LMSInitialize: function (parameter) {
             apiCalls++;
             debugLog('LMSInitialize called with parameter: ' + parameter);
 
@@ -149,7 +153,7 @@ Integrates with Hyperf backend API endpoints
             return "true";
         },
 
-        LMSFinish: function(parameter) {
+        LMSFinish: function (parameter) {
             apiCalls++;
             debugLog('LMSFinish called with parameter: ' + parameter);
 
@@ -203,7 +207,7 @@ Integrates with Hyperf backend API endpoints
             return "true";
         },
 
-        LMSGetValue: function(element) {
+        LMSGetValue: function (element) {
             apiCalls++;
 
             if (!initialized || terminated) {
@@ -224,8 +228,7 @@ Integrates with Hyperf backend API endpoints
             // Handle objectives
             else if (element.indexOf("cmi.objectives.") === 0) {
                 value = objectives[element] || "";
-            }
-            else {
+            } else {
                 lastError = "401"; // Not implemented
                 return "";
             }
@@ -236,7 +239,7 @@ Integrates with Hyperf backend API endpoints
             return value;
         },
 
-        LMSSetValue: function(element, value) {
+        LMSSetValue: function (element, value) {
             apiCalls++;
             debugLog('LMSSetValue(' + element + ', ' + value + ')');
 
@@ -291,7 +294,7 @@ Integrates with Hyperf backend API endpoints
             return "true";
         },
 
-        LMSCommit: function(parameter) {
+        LMSCommit: function (parameter) {
             apiCalls++;
             debugLog('LMSCommit called with parameter: ' + parameter);
             if (parameter !== "") {
@@ -310,11 +313,11 @@ Integrates with Hyperf backend API endpoints
             return "true";
         },
 
-        LMSGetLastError: function() {
+        LMSGetLastError: function () {
             return lastError;
         },
 
-        LMSGetErrorString: function(errorCode) {
+        LMSGetErrorString: function (errorCode) {
             var errors = {
                 "0": "No Error",
                 "101": "General Exception",
@@ -326,23 +329,22 @@ Integrates with Hyperf backend API endpoints
             return errors[errorCode] || "Unknown Error";
         },
 
-        LMSGetDiagnostic: function(errorCode) {
+        LMSGetDiagnostic: function (errorCode) {
             return this.LMSGetErrorString(errorCode);
         }
     };
 
     // SCORM 2004 API (maps to SCORM 1.2)
     window.API_1484_11 = {
-        Initialize: function(parameter) {
+        Initialize: function (parameter) {
             return window.API.LMSInitialize(parameter);
         },
 
-        Terminate: function(parameter) {
-          debugger
+        Terminate: function (parameter) {
             return window.API.LMSFinish(parameter);
         },
 
-        GetValue: function(element) {
+        GetValue: function (element) {
             // Map SCORM 2004 elements to SCORM 1.2
             let mappings = {
                 "cmi.learner_id": "cmi.core.student_id",
@@ -361,7 +363,7 @@ Integrates with Hyperf backend API endpoints
             return window.API.LMSGetValue(mappedElement);
         },
 
-        SetValue: function(element, value) {
+        SetValue: function (element, value) {
             var mappings = {
                 "cmi.location": "cmi.core.lesson_location",
                 "cmi.completion_status": "cmi.core.lesson_status",
@@ -377,26 +379,26 @@ Integrates with Hyperf backend API endpoints
             return window.API.LMSSetValue(mappedElement, value);
         },
 
-        Commit: function(parameter) {
+        Commit: function (parameter) {
             return window.API.LMSCommit(parameter);
         },
 
-        GetLastError: function() {
+        GetLastError: function () {
             return window.API.LMSGetLastError();
         },
 
-        GetErrorString: function(errorCode) {
+        GetErrorString: function (errorCode) {
             return window.API.LMSGetErrorString(errorCode);
         },
 
-        GetDiagnostic: function(errorCode) {
+        GetDiagnostic: function (errorCode) {
             return window.API.LMSGetDiagnostic(errorCode);
         }
     };
 
     // Auto-commit at intervals
     if (config.autoCommitInterval > 0) {
-        setInterval(function() {
+        setInterval(function () {
             if (initialized && !terminated && Object.keys(pendingData).length > 0) {
                 window.API.LMSCommit("");
             }
@@ -404,7 +406,7 @@ Integrates with Hyperf backend API endpoints
     }
 
     // Commit before page unload
-    window.addEventListener('beforeunload', function() {
+    window.addEventListener('beforeunload', function () {
         if (initialized && !terminated) {
             window.API.LMSCommit("");
             window.API.LMSFinish("");
@@ -412,18 +414,20 @@ Integrates with Hyperf backend API endpoints
     });
 
     // Debug panel update function
-    function updateDebugPanel() {
+    function updateDebugPanel()
+    {
         if (debug && typeof window.updateDebugPanel === 'function') {
             window.updateDebugPanel();
         }
     }
 
-    function generateApiUrl(action) {
-      return `${apiEndpoint}/${window.packageId}/${action}/${user.sessionToken}`;
+    function generateApiUrl(action)
+    {
+        return `${apiEndpoint} / ${window.packageId} / ${action} / ${user.sessionToken}`;
     }
 
     // Make debug data available globally
-    window.scormApiDebugInfo = function() {
+    window.scormApiDebugInfo = function () {
         return {
             initialized: initialized,
             terminated: terminated,

@@ -1,11 +1,6 @@
 <?php
 
 declare(strict_types=1);
-/**
- * This file is part of the extension library for Hyperf.
- *
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
- */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
@@ -15,8 +10,6 @@ use Hyperf\Database\Model\Relations\HasMany;
 use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
 
 /**
- * ScormSco - Sharable Content Object
- *
  * @property int $id
  * @property int $package_id
  * @property string $identifier
@@ -37,9 +30,6 @@ class ScormSco extends AbstractModel
      */
     protected ?string $table = 'scorm_scos';
 
-    /**
-     * The attributes that are mass assignable.
-     */
     protected array $fillable = [
         'package_id',
         'identifier',
@@ -52,9 +42,6 @@ class ScormSco extends AbstractModel
         'time_limit_action',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     */
     protected array $casts = [
         'package_id' => 'integer',
         'prerequisites' => 'array',
@@ -63,19 +50,8 @@ class ScormSco extends AbstractModel
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * Get the SCORM package that owns the SCO.
-     */
     public function package(): BelongsTo
     {
         return $this->belongsTo(ScormPackage::class, 'package_id');
-    }
-
-    /**
-     * Get the tracking records for the SCO.
-     */
-    public function trackingRecords(): HasMany
-    {
-        return $this->hasMany(ScormTracking::class, 'sco_id');
     }
 }

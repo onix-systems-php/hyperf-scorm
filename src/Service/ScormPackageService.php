@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
-use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepositoryInterface;
+use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use Hyperf\Collection\Collection;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 
+#[Service]
 class ScormPackageService
 {
     public function __construct(
-        private ScormPackageRepositoryInterface $packageRepository
+        private ScormPackageRepository $packageRepository
     ) {}
 
     public function getById(int $id): ?ScormPackage
