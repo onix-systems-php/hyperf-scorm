@@ -193,26 +193,6 @@ class ScormPlayer {
 }
 class ScormNormalizer {
   constructor() {
-    this.fieldMapping = {
-      'cmi.core.student_id': 'student_id',
-      'cmi.core.student_name': 'student_mame',
-      'cmi.core.lesson_location': 'lesson_location',
-      'cmi.core.lesson_status': 'lesson_status',
-      'cmi.core.score.raw': 'score_raw',
-      'cmi.core.score.max': 'score_max',
-      'cmi.core.score.min': 'score_min',
-      'cmi.core.score.scaled': 'score_scaled',
-      'cmi.core.total_time': 'total_time',
-      'cmi.core.session_time': 'session_time',
-      'cmi.core.lesson_mode': 'lesson_mode',
-      'cmi.core.exit': 'exit_status',
-      'cmi.core.entry': 'entry',
-      'cmi.core.credit': 'credit',
-      'cmi.suspend_data': 'suspend_data',
-      'cmi.launch_data': 'launch_data',
-      'cmi.comments': 'comments',
-      'cmi.comments_from_lms': 'comments_from_lms'
-    };
   }
 
   /**
@@ -339,7 +319,7 @@ class ScormNormalizer {
       totalTime: this.parseISO8601Duration(data['cmi.core.total_time']) || 0,
       sessionTime: this.parseISO8601Duration(data['cmi.core.session_time']),
       sessionTimeSeconds: this.parseISO8601Duration(data['cmi.core.session_time']),
-      suspendData: data['cmi.suspend_data'] || null,
+      suspendData: data['cmi.suspend_data'] || null, //TODO suspendData if empty then empty array. to fix later
       launchData: data['cmi.launch_data'] || null,
       comments: data['cmi.comments'] || null,
       commentsFromLms: data['cmi.comments_from_lms'] || null
@@ -410,34 +390,6 @@ class ScormNormalizer {
       .replace(/Â/g, " ")
       .replace(/\r/g, " ")
       .trim();
-  }
-
-  /**
-   * Удаляет пустые поля из объекта
-   */
-  cleanEmptyFields(obj) {
-    if (Array.isArray(obj)) {
-      return obj.filter(item => item !== null && item !== undefined);
-    }
-
-    if (obj !== null && typeof obj === 'object') {
-      const cleaned = {};
-      for (const [key, value] of Object.entries(obj)) {
-        if (value !== null && value !== undefined && value !== '') {
-          if (typeof value === 'object') {
-            const cleanedValue = this.cleanEmptyFields(value);
-            if (Array.isArray(cleanedValue) ? cleanedValue.length > 0 : Object.keys(cleanedValue).length > 0) {
-              cleaned[key] = cleanedValue;
-            }
-          } else {
-            cleaned[key] = value;
-          }
-        }
-      }
-      return cleaned;
-    }
-
-    return obj;
   }
 
   /**

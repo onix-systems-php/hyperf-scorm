@@ -15,15 +15,15 @@ Integrates with Hyperf backend API endpoints
     var pendingData = {};
 
     var config = window.SCORM_CONFIG || {};
-    var apiEndpoint = config.apiEndpoint || '/v1/scorm-player/';
-    var sessionToken = window.sessionToken || null;
+    var apiEndpoint = config.apiEndpoint;
+    var user = window.user;
     // var debug = config.debug || false; //notice for test
     var debug = true;
 
     // SCORM data storage - initialize with proper defaults
     var data = {
-        "cmi.core.student_id": window.learnerId || sessionToken || "guest",
-        "cmi.core.student_name": window.learnerName || "Guest User",
+        "cmi.core.student_id": user.id,
+        "cmi.core.student_name": user.name,
         "cmi.core.lesson_location": "",
         "cmi.core.credit": "credit",
         "cmi.core.lesson_status": "not attempted",
@@ -55,14 +55,17 @@ Integrates with Hyperf backend API endpoints
 
 
     function saveDataToServer() {
-        if (!sessionToken) {
+      debugger
+        if (!user.sessionToken) {
             debugLog('No attempt ID, cannot save data');
             return Promise.resolve();
         }
         var cmiData = Object.assign({}, data, interactions, objectives, pendingData);
         var result = window.scormNormalizer.normalize(cmiData);
         var compactVersion = window.scormNormalizer.createCompactVersion(result)
-        return fetch(apiEndpoint + '/session/' + sessionToken + '/commit', {
+        var apiUrl = generateApiUrl('commit');
+
+        return fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -78,8 +81,8 @@ Integrates with Hyperf backend API endpoints
             }
             return response.json();
         }).then(function(result) {
-            if (result.success) {
-                pendingData = {}; // Clear pending data
+            if (result.status === 200) {
+                pendingData = {};
                 debugLog('Data saved successfully to server');
             } else {
                 throw new Error(result.message || 'Server error');
@@ -89,12 +92,12 @@ Integrates with Hyperf backend API endpoints
         });
     }
 
-    // Load initial data from server synchronously
     function loadDataFromServerSync(parameter) {
-        if (!sessionToken) return;
+        if (!user.sessionToken) return;
         try {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', apiEndpoint + '/session/' + sessionToken + '/initialize', false); // async: false
+            var apiUrl = generateApiUrl('initialize');
+            xhr.open('GET', apiUrl, false); // async: false
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
             xhr.send(JSON.stringify({
@@ -113,8 +116,6 @@ Integrates with Hyperf backend API endpoints
         }
     }
 
-    // Load data from server asynchronously in background
-
     // SCORM 1.2 API
     window.API = {
         LMSInitialize: function(parameter) {
@@ -131,9 +132,8 @@ Integrates with Hyperf backend API endpoints
                 return "false";
             }
 
-            //notice maybe duplicate
-            data["cmi.core.student_id"] = window.learnerId || sessionToken || "guest";
-            data["cmi.core.student_name"] = window.learnerName || "Guest User";
+            data["cmi.core.student_id"] = user.id;
+            data["cmi.core.student_name"] = user.name;
             data["cmi.core.lesson_mode"] = "normal";
 
             loadDataFromServerSync(parameter);
@@ -179,21 +179,21 @@ Integrates with Hyperf backend API endpoints
             saveDataToServer();
 
             // Terminate session on server
-            if (sessionToken) {
-                fetch(apiEndpoint + '/session/' + sessionToken + '/terminate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        action: 'terminate',
-                        parameter: parameter
-                    })
-                }).catch(function(error) {
-                    console.error('Failed to terminate session:', error);
-                });
-            }
+            // if (user.sessionToken) {
+            //     fetch(apiEndpoint + '/session/' + user.sessionToken + '/terminate', {
+            //         method: 'POST',
+            //         headers: {
+            //             'Content-Type': 'application/json',
+            //             'X-Requested-With': 'XMLHttpRequest'
+            //         },
+            //         body: JSON.stringify({
+            //             action: 'terminate',
+            //             parameter: parameter
+            //         })
+            //     }).catch(function(error) {
+            //         console.error('Failed to terminate session:', error);
+            //     });
+            // }
 
             terminated = true;
             lastError = "0";
@@ -267,7 +267,6 @@ Integrates with Hyperf backend API endpoints
                         data["cmi.interactions._count"] = (index + 1).toString();
                     }
                 }
-              saveDataToServer()
             } else if (element.indexOf("cmi.objectives.") === 0) {
                 objectives[element] = value;
 
@@ -339,6 +338,7 @@ Integrates with Hyperf backend API endpoints
         },
 
         Terminate: function(parameter) {
+          debugger
             return window.API.LMSFinish(parameter);
         },
 
@@ -418,6 +418,10 @@ Integrates with Hyperf backend API endpoints
         }
     }
 
+    function generateApiUrl(action) {
+      return `${apiEndpoint}/${window.packageId}/${action}/${user.sessionToken}`;
+    }
+
     // Make debug data available globally
     window.scormApiDebugInfo = function() {
         return {
@@ -426,7 +430,7 @@ Integrates with Hyperf backend API endpoints
             lastError: lastError,
             apiCalls: apiCalls,
             pendingDataCount: Object.keys(pendingData).length,
-            sessionToken: sessionToken
+            sessionToken: user.sessionToken
         };
     };
 
