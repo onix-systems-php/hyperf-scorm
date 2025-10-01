@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Strategy;
@@ -30,8 +29,8 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
                 'cmi.suspend_data' => 'suspendData',
                 'cmi.learner_id' => 'studentId',
                 'cmi.learner_name' => 'studentName',
-                'cmi.progress_measure' => 'progressMeasure'
-            ]
+                'cmi.progress_measure' => 'progressMeasure',
+            ],
         ];
     }
 
@@ -42,121 +41,121 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
             'cmi.completion_status' => [
                 'type' => 'string',
                 'values' => ['completed', 'incomplete', 'not_attempted', 'unknown'],
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.success_status' => [
                 'type' => 'string',
                 'values' => ['passed', 'failed', 'unknown'],
-                'writable' => true
+                'writable' => true,
             ],
 
             // Score elements
             'cmi.score.raw' => [
                 'type' => 'decimal',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.score.max' => [
                 'type' => 'decimal',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.score.min' => [
                 'type' => 'decimal',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.score.scaled' => [
                 'type' => 'decimal',
                 'range' => [-1, 1],
-                'writable' => true
+                'writable' => true,
             ],
 
             // Location and time
             'cmi.location' => [
                 'type' => 'string',
                 'max_length' => 1000,
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.session_time' => [
                 'type' => 'timeinterval',
-                'writable' => true
+                'writable' => true,
             ],
 
             // Suspend data - SCORM 2004 increased limit: 64000 characters
             'cmi.suspend_data' => [
                 'type' => 'string',
                 'max_length' => 64000,
-                'writable' => true
+                'writable' => true,
             ],
 
             // Progress measure - new in SCORM 2004
             'cmi.progress_measure' => [
                 'type' => 'decimal',
                 'range' => [0, 1],
-                'writable' => true
+                'writable' => true,
             ],
 
             // Learner information (read-only)
             'cmi.learner_id' => [
                 'type' => 'string',
-                'writable' => false
+                'writable' => false,
             ],
             'cmi.learner_name' => [
                 'type' => 'string',
-                'writable' => false
+                'writable' => false,
             ],
 
             // Enhanced interactions support in SCORM 2004
             'cmi.interactions._count' => [
                 'type' => 'integer',
-                'writable' => false
+                'writable' => false,
             ],
             'cmi.interactions.n.id' => [
                 'type' => 'string',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.interactions.n.type' => [
                 'type' => 'string',
                 'values' => ['true-false', 'choice', 'fill-in', 'long-fill-in', 'matching', 'performance', 'sequencing', 'likert', 'numeric', 'other'],
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.interactions.n.result' => [
                 'type' => 'string',
                 'values' => ['correct', 'incorrect', 'unanticipated', 'neutral'],
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.interactions.n.timestamp' => [
                 'type' => 'datetime',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.interactions.n.description' => [
                 'type' => 'string',
                 'max_length' => 250,
-                'writable' => true
+                'writable' => true,
             ],
 
             // Objectives support - enhanced in SCORM 2004
             'cmi.objectives._count' => [
                 'type' => 'integer',
-                'writable' => false
+                'writable' => false,
             ],
             'cmi.objectives.n.id' => [
                 'type' => 'string',
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.objectives.n.success_status' => [
                 'type' => 'string',
                 'values' => ['passed', 'failed', 'unknown'],
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.objectives.n.completion_status' => [
                 'type' => 'string',
                 'values' => ['completed', 'incomplete', 'not_attempted', 'unknown'],
-                'writable' => true
+                'writable' => true,
             ],
             'cmi.objectives.n.progress_measure' => [
                 'type' => 'decimal',
                 'range' => [0, 1],
-                'writable' => true
-            ]
+                'writable' => true,
+            ],
         ];
     }
 
@@ -170,7 +169,7 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
             'cmi.location' => ['element_name' => 'location', 'element_value' => $value],
             'cmi.session_time' => ['element_name' => 'session_time', 'element_value' => $value],
             'cmi.suspend_data' => ['element_name' => 'suspend_data', 'element_value' => $value],
-            'cmi.progress_measure' => ['element_name' => 'progress_measure', 'element_value' => $value]
+            'cmi.progress_measure' => ['element_name' => 'progress_measure', 'element_value' => $value],
         ];
 
         return $mappings[$element] ?? ['element_name' => $element, 'element_value' => $value];

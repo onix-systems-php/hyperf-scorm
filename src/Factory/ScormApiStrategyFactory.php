@@ -23,7 +23,7 @@ class ScormApiStrategyFactory
         $enum = ScormVersionEnum::fromString($version);
 
         $strategyClass = match ($enum) {
-            ScormVersionEnum::SCORM_12 => Scorm12ApiStrategy::class,
+            ScormVersionEnum::SCORM_12 => Scorm2004ApiStrategy::class,
             ScormVersionEnum::SCORM_2004 => Scorm2004ApiStrategy::class,
         };
 

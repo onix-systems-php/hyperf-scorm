@@ -59,8 +59,6 @@ class ScormPlayerController extends AbstractController
         ResponseInterface $response,
         int $packageId,
     ): PsrResponseInterface {
-        xdebug_break();
-
         $playerData = $scormPlayerService->run($packageId);
 
         return $response->withHeader('Content-Type', 'text/html')

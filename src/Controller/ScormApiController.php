@@ -57,8 +57,8 @@ class ScormApiController extends AbstractController
         InitializeScormService $initializeScormService,
         int $packageId,
     ): ResourceScormInitialize {
-        $userId = $this->sessionManager?->user()->getId() ?? null;
-
+//        $userId = $this->sessionManager?->user()->getId() ?? null;
+        $userId = 1;
         return ResourceScormInitialize::make($initializeScormService->run($packageId, $userId));
     }
 

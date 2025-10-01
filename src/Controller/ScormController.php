@@ -4,11 +4,17 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
+use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OnixSystemsPHP\HyperfScorm\Service\UploadScormPackageService;
 use OpenApi\Attributes as OA;
+use Hyperf\HttpServer\Contract\RequestInterface;
+use function Hyperf\Support\make;
+
 
 class ScormController extends AbstractController
 {
@@ -46,6 +52,16 @@ class ScormController extends AbstractController
         return ResourceScormPackage::make($package);
     }
 
+    public function index(RequestInterface $request): ResourceScormPackagePaginated
+    {
+        /**@var ScormPackageRepository $scormPackageRepository**/
+        $scormPackageRepository = make(ScormPackageRepository::class);
+        $packages = $scormPackageRepository->getPaginated(
+            $request->getQueryParams(),
+            PaginationRequestDTO::make($request)
+        );
+        return ResourceScormPackagePaginated::make($packages);
+    }
 //    public function index(RequestInterface $request): ResponseInterface
 //    {
 //        $limit = (int) $request->query('limit', 50);

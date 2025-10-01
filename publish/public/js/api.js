@@ -13,6 +13,7 @@ Integrates with Hyperf backend API endpoints
   var sessionStartTime = new Date();
   var apiCalls = 0;
   var pendingData = {};
+  var pendingCommits = []; // Track all active commit requests
 
   var config = window.SCORM_CONFIG || {};
   var apiEndpoint = config.apiEndpoint;
@@ -59,6 +60,7 @@ Integrates with Hyperf backend API endpoints
 
 
   function saveDataToServer() {
+    debugger
     if (!user.session_token) {
       debugLog('No attempt ID, cannot save data');
       return Promise.resolve();
@@ -68,13 +70,14 @@ Integrates with Hyperf backend API endpoints
     var compactVersion = window.scormNormalizer.createCompactVersion(result)
     var apiUrl = generateApiUrl('commit');
 
-    return fetch(apiUrl, {
+    // Create promise and track it
+    var commitPromise = fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest'
       },
-
+      keepalive: true, // Keep request alive even if page/iframe is closed
       body: JSON.stringify({
         ...compactVersion
       })
@@ -92,7 +95,18 @@ Integrates with Hyperf backend API endpoints
       }
     }).catch(function(error) {
       console.error('Failed to save SCORM data:', error);
+    }).finally(function() {
+      // Remove from pending commits when done
+      var index = pendingCommits.indexOf(commitPromise);
+      if (index > -1) {
+        pendingCommits.splice(index, 1);
+      }
     });
+
+    // Track this commit
+    pendingCommits.push(commitPromise);
+
+    return commitPromise;
   }
 
   function loadDataFromServerSync(parameter) {
@@ -434,6 +448,62 @@ Integrates with Hyperf backend API endpoints
       pendingDataCount: Object.keys(pendingData).length,
       sessionToken: user.session_token
     };
+  };
+
+  // Export function to wait for all pending commits
+  window.waitForScormCommits = function() {
+    if (pendingCommits.length === 0) {
+      debugLog('No pending commits to wait for');
+      return Promise.resolve();
+    }
+
+    debugLog('Waiting for ' + pendingCommits.length + ' pending commits...');
+    return Promise.all(pendingCommits).then(function() {
+      debugLog('All commits completed successfully');
+    }).catch(function(error) {
+      console.error('Some commits failed:', error);
+    });
+  };
+
+  // Export function to check if there are pending commits
+  window.hasScormPendingCommits = function() {
+    return pendingCommits.length > 0;
+  };
+
+  // Export function to force synchronous save (fallback for critical situations)
+  window.forceScormCommitSync = function() {
+    if (!user.session_token) {
+      debugLog('No attempt ID, cannot save data');
+      return false;
+    }
+
+    try {
+      debugLog('Forcing synchronous commit...');
+      var cmiData = Object.assign({}, data, interactions, objectives, pendingData);
+      var result = window.scormNormalizer.normalize(cmiData);
+      var compactVersion = window.scormNormalizer.createCompactVersion(result);
+      var apiUrl = generateApiUrl('commit');
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', apiUrl, false); // Synchronous request
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.send(JSON.stringify(compactVersion));
+
+      if (xhr.status === 200) {
+        var responseData = JSON.parse(xhr.responseText);
+        if (responseData.status === 200) {
+          pendingData = {};
+          debugLog('Synchronous commit successful');
+          return true;
+        }
+      }
+      console.error('Synchronous commit failed with status:', xhr.status);
+      return false;
+    } catch (error) {
+      console.error('Synchronous commit error:', error);
+      return false;
+    }
   };
 
   debugLog('SCORM API loaded and ready');

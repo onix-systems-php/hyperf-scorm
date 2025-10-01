@@ -4,6 +4,7 @@ class ScormPlayer {
     this.loading = document.getElementById('loading');
     this.container = document.getElementById('scorm-container');
     this.config = window.SCORM_CONFIG || {};
+    this.sessionToken = window.user.sessionToken;
     this.debugPanel = document.getElementById('debug-panel');
 
     this.init();
@@ -16,6 +17,9 @@ class ScormPlayer {
     this.setupDebugPanel();
 
     console.log('SCORM Player initialized');
+  }
+  getSessionToken() {
+    return this.sessionToken;
   }
 
   setupFrameHandlers() {
