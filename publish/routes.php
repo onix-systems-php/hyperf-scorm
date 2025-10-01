@@ -27,12 +27,11 @@ Router::addGroup('/v1/scorm/packages', function () {
 
 // SCORM API Routes
 Router::addGroup('/v1/api/scorm', function () {
-    Router::get('/{packageId:\d+}/initialize/{sessionToken}', [ScormApiController::class, 'initialize']);
+    Router::get('/{packageId:\d+}/initialize', [ScormApiController::class, 'initialize']);
     Router::post('/{packageId:\d+}/commit/{sessionToken}', [ScormApiController::class, 'commit']);
 });
 
 // SCORM Player Routes
 Router::addGroup('/v1/api/scorm/player', function () {
     Router::get('/{packageId:\d+}/launch', [ScormPlayerController::class, 'launch']);
-    Router::get('/{packageId:\d+}/launch/{sessionToken}', [ScormPlayerController::class, 'launch']);
 });

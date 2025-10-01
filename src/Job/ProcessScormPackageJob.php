@@ -8,6 +8,7 @@ use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfScorm\Service\ScormFileProcessor;
+use OnixSystemsPHP\HyperfScorm\Service\ScormWebSocketNotificationService;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -41,49 +42,75 @@ class ProcessScormPackageJob extends Job
         $logger = $container->get(LoggerInterface::class);
         $processor = $container->get(ScormFileProcessor::class);
         $redis = $container->get(Redis::class);
+        $wsService = $container->get(ScormWebSocketNotificationService::class);
         
         $progressKey = self::PROGRESS_KEY_PREFIX . $this->jobId;
         $resultKey = self::RESULT_KEY_PREFIX . $this->jobId;
         
         try {
-            $logger->info('Starting SCORM package processing job', [
-                'job_id' => $this->jobId,
-                'filename' => $this->originalFilename,
-                'file_size' => $this->fileSize,
-                'user_id' => $this->userId,
-                'memory_start' => memory_get_usage(true),
-            ]);
             
-            // Update progress - starting
-            $this->setRedisWithTtl($redis, $progressKey, [
+            // Update progress - starting (send WebSocket notification)
+            $progressData = [
                 'status' => 'processing',
                 'progress' => 0,
                 'stage' => 'initializing',
+                'stage_details' => 'Preparing SCORM package for processing...',
                 'started_at' => time(),
+                'file_size' => $this->fileSize,
                 'memory_usage' => memory_get_usage(true),
-            ], 3600);
+                'processed_bytes' => 0,
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $progressData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $progressData);
             
             // Create UploadedFile from temp path
             $uploadedFile = $this->createUploadedFileFromPath();
             
-            // Update progress - extracting
-            $this->setRedisWithTtl($redis, $progressKey, [
+            // Update progress - extracting (send WebSocket notification)
+            $extractingData = [
                 'status' => 'processing',
-                'progress' => 25,
+                'progress' => 10,
                 'stage' => 'extracting',
+                'stage_details' => 'Extracting files from SCORM package...',
                 'memory_usage' => memory_get_usage(true),
-            ], 3600);
+                'file_size' => $this->fileSize,
+                'processed_bytes' => (int)($this->fileSize * 0.1),
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $extractingData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $extractingData);
             
-            // Process the SCORM package
-            $processedPackage = $processor->run($uploadedFile);
+            // Process the SCORM package with progress callback
+            $progressCallback = function(string $stage, array $progressData) use ($redis, $wsService, $progressKey) {
+                $this->handleProgressCallback($stage, $progressData, $redis, $wsService, $progressKey);
+            };
             
-            // Update progress - uploading to storage
-            $this->setRedisWithTtl($redis, $progressKey, [
+            $processedPackage = $processor->run($uploadedFile, $progressCallback);
+            
+            // Update progress - processing completed (send WebSocket notification)
+            $processingData = [
                 'status' => 'processing',
-                'progress' => 75,
-                'stage' => 'uploading',
+                'progress' => 60,
+                'stage' => 'processing',
+                'stage_details' => 'SCORM manifest processed successfully',
                 'memory_usage' => memory_get_usage(true),
-            ], 3600);
+                'file_size' => $this->fileSize,
+                'processed_bytes' => (int)($this->fileSize * 0.6),
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $processingData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $processingData);
+            
+            // Update progress - uploading to storage (send WebSocket notification)
+            $uploadingData = [
+                'status' => 'processing',
+                'progress' => 80,
+                'stage' => 'uploading',
+                'stage_details' => 'Uploading content to storage...',
+                'file_size' => $this->fileSize,
+                'memory_usage' => memory_get_usage(true),
+                'processed_bytes' => (int)($this->fileSize * 0.8),
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $uploadingData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $uploadingData);
             
             // Save result
             $resultData = [
@@ -100,14 +127,19 @@ class ProcessScormPackageJob extends Job
             
             $redis->setex($resultKey, 86400, json_encode($resultData)); // 24 hours
             
-            // Update progress - completed
-            $this->setRedisWithTtl($redis, $progressKey, [
+            // Update progress - completed (send WebSocket notification)
+            $completedData = [
                 'status' => 'completed',
                 'progress' => 100,
                 'stage' => 'completed',
+                'stage_details' => 'SCORM package processing completed successfully',
                 'completed_at' => time(),
                 'memory_peak' => memory_get_peak_usage(true),
-            ], 3600);
+                'file_size' => $this->fileSize,
+                'processed_bytes' => $this->fileSize,
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $completedData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $completedData);
             
             // Cleanup temp directory
             $processedPackage->cleanup();
@@ -126,15 +158,19 @@ class ProcessScormPackageJob extends Job
                 'memory_peak' => memory_get_peak_usage(true),
             ]);
             
-            // Update progress - failed
-            $this->setRedisWithTtl($redis, $progressKey, [
+            // Update progress - failed (send WebSocket notification)
+            $failedData = [
                 'status' => 'failed',
                 'progress' => 0,
-                'stage' => 'error',
+                'stage' => 'failed',
+                'stage_details' => 'Processing failed: ' . substr($e->getMessage(), 0, 100),
                 'error' => $e->getMessage(),
                 'failed_at' => time(),
                 'memory_peak' => memory_get_peak_usage(true),
-            ], 3600);
+                'file_size' => $this->fileSize,
+            ];
+            $this->setRedisWithTtl($redis, $progressKey, $failedData, 3600);
+            $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $failedData);
             
             // Save error result
             $this->setRedisWithTtl($redis, $resultKey, [
@@ -296,5 +332,20 @@ class ProcessScormPackageJob extends Job
     private function setRedisWithTtl($redis, string $key, array $data, int $ttl): void
     {
         $redis->set($key, json_encode($data), 'EX', $ttl);
+    }
+
+    /**
+     * Handle progress callback from ScormFileProcessor
+     */
+    private function handleProgressCallback(string $stage, array $progressData, $redis, $wsService, string $progressKey): void
+    {
+        $fullProgressData = array_merge($progressData, [
+            'status' => 'processing',
+            'stage' => $stage,
+            'file_size' => $this->fileSize,
+        ]);
+
+        $this->setRedisWithTtl($redis, $progressKey, $fullProgressData, 3600);
+        $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $fullProgressData);
     }
 }

@@ -70,8 +70,9 @@ class ResourceScormInitialize extends AbstractResource
     {
         return [
             'student' => [
-                'id' => $this->resource->user_id,
-                'name' => $this->resource->student_name,
+                'id' => $this->resource->user->id,
+                'name' => $this->resource->user->full_name ?? 'Guest',
+                'session_token' => $this->resource->session_token,
             ],
             'score' => [
                 'raw' => $this->resource->score_raw,
@@ -82,7 +83,7 @@ class ResourceScormInitialize extends AbstractResource
                'id' => $this->resource->id,
                'session_time' =>  $this->resource->session_time,
                'total_time' =>  $this->resource->total_time,
-               'suspend_data' =>  $this->resource->suspend_data,
+               'suspend_data' =>  $this->resource->suspend_data ?? [],
                'session_time_seconds' =>  $this->resource->session_time_seconds,
             ],
             'lesson' => [

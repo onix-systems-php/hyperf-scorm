@@ -5,7 +5,6 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\HttpMessage\Upload\UploadedFile;
-use Hyperf\Coroutine\Parallel;
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
@@ -14,11 +13,9 @@ use Throwable;
 
 /**
  * Service for managing asynchronous SCORM package processing
- * Utilizes Hyperf's coroutine capabilities for efficient processing
  */
 class AsyncScormProcessingService
 {
-    private const MAX_PARALLEL_JOBS = 3;
 
     public function __construct(
         private readonly DriverFactory $queueDriverFactory,
@@ -75,53 +72,6 @@ class AsyncScormProcessingService
         }
     }
 
-    /**
-     * Queue multiple SCORM packages for parallel processing
-     */
-    public function queueBatchProcessing(array $uploadedFiles, int $userId, array $metadata = []): array
-    {
-        if (count($uploadedFiles) > self::MAX_PARALLEL_JOBS) {
-            throw new ScormParsingException("Too many files. Maximum " . self::MAX_PARALLEL_JOBS . " files allowed per batch.");
-        }
-
-        $parallel = new Parallel(count($uploadedFiles));
-        $jobIds = [];
-
-        foreach ($uploadedFiles as $index => $uploadedFile) {
-            $parallel->add(function () use ($uploadedFile, $userId, $metadata, $index) {
-                return $this->queueProcessing($uploadedFile, $userId, array_merge($metadata, ['batch_index' => $index]));
-            });
-        }
-
-        try {
-            $results = $parallel->wait(true);
-
-            foreach ($results as $result) {
-                if ($result instanceof Throwable) {
-                    $this->logger->error('Batch processing job failed', [
-                        'error' => $result->getMessage(),
-                        'user_id' => $userId,
-                    ]);
-                    throw $result;
-                }
-                $jobIds[] = $result;
-            }
-
-            $this->logger->info('Batch SCORM processing jobs queued', [
-                'job_ids' => $jobIds,
-                'user_id' => $userId,
-                'count' => count($jobIds),
-            ]);
-
-            return $jobIds;
-
-        } catch (Throwable $e) {
-            throw new ScormParsingException(
-                "Failed to queue batch SCORM processing: " . $e->getMessage(),
-                previous: $e
-            );
-        }
-    }
 
     /**
      * Get processing progress for a job
@@ -153,57 +103,6 @@ class AsyncScormProcessingService
         return json_decode($resultData, true);
     }
 
-    /**
-     * Get batch processing status
-     */
-    public function getBatchProcessingStatus(array $jobIds): array
-    {
-        $parallel = new Parallel(count($jobIds));
-
-        foreach ($jobIds as $jobId) {
-            $parallel->add(function () use ($jobId) {
-                return [
-                    'job_id' => $jobId,
-                    'progress' => $this->getProcessingProgress($jobId),
-                    'result' => $this->getProcessingResult($jobId),
-                ];
-            });
-        }
-
-        $results = $parallel->wait(true);
-        $status = [
-            'total' => count($jobIds),
-            'completed' => 0,
-            'processing' => 0,
-            'failed' => 0,
-            'jobs' => [],
-        ];
-
-        foreach ($results as $result) {
-            if ($result instanceof Throwable) {
-                continue;
-            }
-
-            $status['jobs'][] = $result;
-
-            if ($result['progress']) {
-                switch ($result['progress']['status']) {
-                    case 'completed':
-                        $status['completed']++;
-                        break;
-                    case 'processing':
-                        $status['processing']++;
-                        break;
-                    case 'failed':
-                    case 'permanently_failed':
-                        $status['failed']++;
-                        break;
-                }
-            }
-        }
-
-        return $status;
-    }
 
     /**
      * Cancel processing job (if still queued)

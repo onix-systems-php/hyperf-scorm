@@ -32,33 +32,21 @@ class ScormPlayerService
     ) {
     }
 
-    public function run(int $packageId, $userId, ?string $sessionToken): ScormPlayerDTO
+    public function run(int $packageId): ScormPlayerDTO
     {
-        xdebug_break();
-
         $package = $this->scormPackageRepository->findById($packageId, true, true);
-
-        $session = $sessionToken
-            ? $this->scormUserSessionRepository->findByIdentifier($package->id, $sessionToken, true, true)
-            : $this->createSession($package, $userId);
 
         $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
 
         return ScormPlayerDTO::make([
             'packageId' => $packageId,
-            'sessionId' => $session->id,
-            'session_token' => $session->session_token,
             'contentUrl' => $this->generateContentUrl($package),
             'launchUrl' => $this->generateLaunchUrl($package),
             'apiConfiguration' => $apiStrategy->getApiConfiguration(),
-            'playerHtml' => $this->generatePlayerHtml($package, $session, $apiStrategy),
+            'playerHtml' => $this->generatePlayerHtml($package, $apiStrategy),
         ]);
     }
 
-    private function generateSessionToken(): string
-    {
-        return bin2hex(random_bytes(16));
-    }
     private function generateContentUrl(ScormPackage $package): string
     {
         return $this->fileProcessor->getPublicUrl($package->content_path);
@@ -77,26 +65,8 @@ class ScormPlayerService
         );
     }
 
-    private function createSession(ScormPackage $package, int $userId): ScormUserSession
-    {
-        $session = $this->scormUserSessionRepository->create([
-            'package_id' => $package->id,
-            'user_id' => $userId,
-            'session_token' => $this->generateSessionToken(),
-            'status' => SessionStatuses::BROWSED,
-            'lesson_location' => '',
-            'suspend_data' => [],
-            'started_at' => now(),
-        ]);
-
-        $this->scormUserSessionRepository->save($session);
-
-        return $session;
-    }
-
     private function generatePlayerHtml(
         ScormPackage $package,
-        ScormUserSession $scormUserSession,
         $apiStrategy
     ): string {
         $launchUrl = $this->generateLaunchUrl($package);
@@ -105,8 +75,11 @@ class ScormPlayerService
         $render = make(RenderInterface::class);
         $template = $render->getContents('OnixSystemsPHP\\HyperfScorm::player', [
             'package' => $package,
-            'user' => $scormUserSession->user,
-            'session_token' => $scormUserSession->session_token,
+//            'user' => [
+//                'id' => null,
+//                'name' => 'Guest User',
+//            ],
+            'session_token' => null,
             'launchUrl' => $launchUrl,
             'apiEndpoint' => $apiEndpoint,
             'apiConfig' => $apiConfig,

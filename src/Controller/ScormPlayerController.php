@@ -58,11 +58,10 @@ class ScormPlayerController extends AbstractController
         ScormPlayerService $scormPlayerService,
         ResponseInterface $response,
         int $packageId,
-        ?string $sessionToken = null
     ): PsrResponseInterface {
-//        $userId = $this->sessionManager->user()?->getId();
-        $userId = 1;
-        $playerData = $scormPlayerService->run($packageId, $userId, $sessionToken);
+        xdebug_break();
+
+        $playerData = $scormPlayerService->run($packageId);
 
         return $response->withHeader('Content-Type', 'text/html')
                        ->withBody(new SwooleStream($playerData->playerHtml));

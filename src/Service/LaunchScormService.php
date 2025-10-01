@@ -20,9 +20,9 @@ class LaunchScormService
     ) {
     }
 
-    public function run(int $packageId, int $userId, ?string $sessionToken): string
+    public function run(int $packageId): string
     {
-        $scormPlayerDto = $this->scormPlayerService->run($packageId, $userId, $sessionToken);
+        $scormPlayerDto = $this->scormPlayerService->run($packageId);
         return $scormPlayerDto->playerHtml;
     }
 }

@@ -11,7 +11,7 @@ class ScormCommitSessionDTO extends AbstractDTO
 
     public int $session_time = 0;
 
-    public int $session_time_seconds;
+    public int $session_time_seconds = 0;
 
-    public string $suspend_data;
+    public string $suspend_data = '{}';
 }

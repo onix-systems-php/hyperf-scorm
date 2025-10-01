@@ -22,7 +22,7 @@ class ScormApiController extends AbstractController
     }
 
     #[OA\Get(//@SONAR_STOP@
-        path: '/v1/api/scorm/{packageId}/initialize/{sessionToken}',
+        path: '/v1/api/scorm/{packageId}/initialize',
         operationId: 'initializeScormSession',
         summary: 'Initialize SCORM session',
         security: [['bearerAuth' => []]],
@@ -56,9 +56,10 @@ class ScormApiController extends AbstractController
     public function initialize(
         InitializeScormService $initializeScormService,
         int $packageId,
-        string $sessionToken
     ): ResourceScormInitialize {
-        return ResourceScormInitialize::make($initializeScormService->run($packageId, $sessionToken));
+        $userId = $this->sessionManager?->user()->getId() ?? null;
+
+        return ResourceScormInitialize::make($initializeScormService->run($packageId, $userId));
     }
 
     #[OA\Post(//@SONAR_STOP@

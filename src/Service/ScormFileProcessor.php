@@ -36,24 +36,20 @@ class ScormFileProcessor
      * Process uploaded SCORM package with memory optimization
      * Supports both local files and S3 URLs
      */
-    public function run(UploadedFile $uploadedFile): ProcessedScormPackage
+    public function run(UploadedFile $uploadedFile, ?callable $progressCallback = null): ProcessedScormPackage
     {
         $startMemory = memory_get_usage(true);
-        $this->logger->info('Starting SCORM processing', [
-            'file_size' => $uploadedFile->getSize(),
-            'memory_start' => $startMemory,
-        ]);
 
         $tempDir = $this->createTempDirectory();
 
         try {
-            $extractPath = $this->extractZipPackageStreaming($uploadedFile, $tempDir);
+            $extractPath = $this->extractZipPackageStreaming($uploadedFile, $tempDir, $progressCallback);
             $this->validateScormStructure($extractPath);
 
             $manifestPath = $extractPath . DIRECTORY_SEPARATOR . self::MANIFEST_FILENAME;
             $manifestDto = $this->manifestParser->parse($manifestPath);
 
-            $storagePath = $this->uploadContentToStorageStreaming($extractPath, $manifestDto);
+            $storagePath = $this->uploadContentToStorageStreaming($extractPath, $manifestDto, $progressCallback);
 
             $endMemory = memory_get_usage(true);
             $peakMemory = memory_get_peak_usage(true);
@@ -88,8 +84,11 @@ class ScormFileProcessor
     /**
      * Extract ZIP package using streaming to avoid memory issues
      */
-    private function extractZipPackageStreaming(UploadedFile $uploadedFile, string $tempDir): string
-    {
+    private function extractZipPackageStreaming(
+        UploadedFile $uploadedFile,
+        string $tempDir,
+        ?callable $progressCallback = null
+    ): string {
         $zipPath = $uploadedFile->getPathname();
 
         if (!file_exists($zipPath)) {
@@ -113,6 +112,7 @@ class ScormFileProcessor
 
         // Extract files one by one to control memory usage
         $numFiles = $zip->numFiles;
+        $extractedFiles = 0;
         $this->logger->info("Extracting {$numFiles} files from SCORM package");
 
         for ($i = 0; $i < $numFiles; $i++) {
@@ -127,15 +127,22 @@ class ScormFileProcessor
             }
 
             $this->extractSingleFileStreaming($zip, $i, $extractPath, $filename);
+            $extractedFiles++;
 
-            // Check memory usage every 100 files
+            // Send progress updates every 25 files or 10% progress
+            if (($extractedFiles % 25 === 0) || ($i % max(1, intval($numFiles * 0.1)) === 0)) {
+                $progress = $this->calculateExtractionProgress($extractedFiles, $numFiles);
+                if ($progressCallback && $progress) {
+                    call_user_func($progressCallback, 'extracting', $progress);
+                }
+            }
+
+            // Memory management every 100 files
             if ($i % 100 === 0) {
-                $this->checkMemoryUsage("Extracted {$i}/{$numFiles} files");
-
                 if (memory_get_usage(true) > self::MAX_MEMORY_USAGE) {
                     $this->logger->warning('High memory usage detected during extraction', [
                         'memory_usage' => memory_get_usage(true),
-                        'files_processed' => $i,
+                        'files_processed' => $extractedFiles,
                     ]);
                     gc_collect_cycles(); // Force garbage collection
                 }
@@ -143,7 +150,6 @@ class ScormFileProcessor
         }
 
         $zip->close();
-        $this->checkMemoryUsage("After ZIP extraction");
 
         return $extractPath;
     }
@@ -190,18 +196,21 @@ class ScormFileProcessor
     /**
      * Upload directory contents to storage using streaming
      */
-    private function uploadContentToStorageStreaming(string $extractPath, ScormManifestDTO $manifest): string
+    private function uploadContentToStorageStreaming(string $extractPath, ScormManifestDTO $manifest, ?callable $progressCallback = null): string
     {
         $storage = $this->config->get('file.default');
         $filesystem = $this->filesystemFactory->get($storage);
         $packagePath = $this->generateStoragePath($manifest);
 
-        $this->checkMemoryUsage("Before storage upload");
-
         try {
             $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS)
             );
+
+            // Count total files first for progress calculation
+            $totalFiles = iterator_count(new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS)
+            ));
 
             $fileCount = 0;
             foreach ($iterator as $file) {
@@ -209,10 +218,16 @@ class ScormFileProcessor
                     $this->uploadSingleFileStreaming($filesystem, $file, $extractPath, $packagePath);
                     $fileCount++;
 
+                    // Send progress updates every 25 files or 10% progress
+                    if (($fileCount % 25 === 0) || ($fileCount % max(1, intval($totalFiles * 0.1)) === 0)) {
+                        $progress = $this->calculateUploadProgress($fileCount, $totalFiles);
+                        if ($progressCallback && $progress) {
+                            call_user_func($progressCallback, 'uploading', $progress);
+                        }
+                    }
+
                     // Monitor memory every 50 files
                     if ($fileCount % 50 === 0) {
-                        $this->checkMemoryUsage("Uploaded {$fileCount} files");
-
                         if (memory_get_usage(true) > self::MAX_MEMORY_USAGE) {
                             gc_collect_cycles();
                         }
@@ -228,8 +243,6 @@ class ScormFileProcessor
                 previous: $e
             );
         }
-
-        $this->checkMemoryUsage("After storage upload");
 
         return $packagePath;
     }
@@ -480,5 +493,41 @@ class ScormFileProcessor
         } catch (FilesystemException) {
             return false;
         }
+    }
+
+    /**
+     * Calculate extraction progress with detailed information
+     */
+    private function calculateExtractionProgress(int $extractedFiles, int $totalFiles): ?array
+    {
+        if ($totalFiles === 0) {
+            return null;
+        }
+
+        $progress = min(50, ($extractedFiles / $totalFiles) * 50); // Max 50% for extraction
+        return [
+            'progress' => (int)$progress,
+            'stage_details' => "Extracting files ({$extractedFiles}/{$totalFiles})",
+            'processed_bytes' => null, // Could calculate based on file sizes if needed
+            'memory_usage' => memory_get_usage(true),
+        ];
+    }
+
+    /**
+     * Calculate upload progress with detailed information
+     */
+    private function calculateUploadProgress(int $uploadedFiles, int $totalFiles): ?array
+    {
+        if ($totalFiles === 0) {
+            return null;
+        }
+
+        $progress = 80 + min(20, ($uploadedFiles / $totalFiles) * 20); // 80-100% for upload
+        return [
+            'progress' => (int)$progress,
+            'stage_details' => "Uploading to storage ({$uploadedFiles}/{$totalFiles})",
+            'processed_bytes' => null,
+            'memory_usage' => memory_get_usage(true),
+        ];
     }
 }

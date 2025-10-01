@@ -6,7 +6,7 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepositoryInterface;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
@@ -26,7 +26,7 @@ class UploadScormPackageService
     public function __construct(
         private readonly ScormFileProcessor $fileProcessor,
         private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly ScormScoRepositoryInterface $scoRepository
+        private readonly ScormScoRepository $scoRepository
     ) {
     }
 
@@ -87,62 +87,5 @@ class UploadScormPackageService
         if (!in_array($mimeType, $allowedMimes)) {
             throw new \InvalidArgumentException("Invalid file type. Expected ZIP file");
         }
-    }
-
-    /**
-     * Create SCORM SCOs (Sharable Content Objects) in database using efficient repository pattern
-     */
-    private function createScormSco(ScormPackage $package, ScormManifestDTO $manifest): void
-    {
-        $scoData = $manifest->getScoDataForDatabase();
-
-        if (!empty($scoData)) {
-            $this->packageRepository->createScos($package, $scoData);
-        }
-    }
-
-    /**
-     * Get SCORM package launch URL
-     */
-    public function getPackageLaunchUrl(ProcessedScormPackage $package): ?string
-    {
-        $scos = $package->scos;
-        if (empty($scos)) {
-            return null;
-        }
-
-        $firstSco = $scos->first();
-        return $this->fileProcessor->getPublicUrl($package->content_path, $firstSco->launch_url);
-    }
-
-    /**
-     * Check if package content exists in storage
-     */
-    public function packageContentExists(ScormPackage $package): bool
-    {
-        return $this->fileProcessor->fileExistsInStorage($package->content_path, 'imsmanifest.xml');
-    }
-
-    /**
-     * Delete package and its content from storage
-     */
-    #[Transactional(attempts: 1)]
-    public function deletePackage(ScormPackage $package): void
-    {
-        // Delete SCOs first
-        foreach ($package->scos as $sco) {
-            $this->scoRepository->delete($sco);
-        }
-
-        // Delete attempts if any exist
-        foreach ($package->attempts as $attempt) {
-            // This will cascade delete through foreign key constraints
-        }
-
-        // Delete package from database
-        $this->packageRepository->delete($package);
-
-        // TODO: Delete content from storage
-        // This should be implemented based on storage strategy
     }
 }

@@ -24,6 +24,18 @@ class ScormUserSessionRepository extends AbstractRepository
         return $this->finder('id', $id)->fetchOne($lock, $force);
     }
 
+    public function findByProjectAndUser(
+        int $packageId,
+        int $userId,
+        bool $lock = false,
+        bool $force = false
+    ): ?ScormUserSession {
+        return $this
+            ->finder('packageId', $packageId)
+            ->finder('scopeUserId', $userId)
+            ->fetchOne($lock, $force);
+    }
+
     public function findByIdentifier(
         int $packageId,
         string $sessionToken,

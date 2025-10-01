@@ -5,15 +5,17 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use OnixSystemsPHP\HyperfCore\Service\Service;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepositoryInterface;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
 
 #[Service]
 class ScormScoService
 {
     public function __construct(
-        private ScormScoRepositoryInterface $scoRepository
-    ) {}
+        private ScormScoRepository $scoRepository
+    ) {
+
+    }
 
     public function getById(int $id): ?ScormSco
     {

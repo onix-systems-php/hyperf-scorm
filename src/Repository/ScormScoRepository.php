@@ -7,12 +7,11 @@ namespace OnixSystemsPHP\HyperfScorm\Repository;
 use Hyperf\Database\Model\Model;
 use OnixSystemsPHP\HyperfCore\Repository\AbstractRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
-use Hyperf\Database\Query\Builder;
 
 /**
  * SCORM SCO Repository implementation
  */
-class ScormScoRepository extends AbstractRepository implements ScormScoRepositoryInterface
+class ScormScoRepository extends AbstractRepository
 {
     protected string $modelClass = \OnixSystemsPHP\HyperfScorm\Model\ScormSco::class;
 
@@ -23,7 +22,8 @@ class ScormScoRepository extends AbstractRepository implements ScormScoRepositor
 
     public function findByIdentifier(string $identifier, int $packageId): ?ScormSco
     {
-        return $this->query()->where('identifier', $identifier)
+        return $this->query()
+            ->where('identifier', $identifier)
             ->where('package_id', $packageId)
             ->first();
     }
@@ -48,7 +48,7 @@ class ScormScoRepository extends AbstractRepository implements ScormScoRepositor
     }
 
     /**
-     * Implementation of ScormScoRepositoryInterface::saveSco()
+     * Save SCO
      */
     public function saveSco(ScormSco $sco): ScormSco
     {
@@ -68,7 +68,7 @@ class ScormScoRepository extends AbstractRepository implements ScormScoRepositor
     }
 
     /**
-     * Implementation of ScormScoRepositoryInterface::deleteById()
+     * Delete SCO by ID
      */
     public function deleteById(int $id): bool
     {
@@ -89,7 +89,7 @@ class ScormScoRepository extends AbstractRepository implements ScormScoRepositor
     }
 
     /**
-     * Implementation of ScormScoRepositoryInterface::createSco()
+     * Create SCO
      */
     public function createSco(array $data): ScormSco
     {

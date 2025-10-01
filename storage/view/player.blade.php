@@ -3,20 +3,12 @@
 @section('title', 'SCORM Player - ' . $package->title)
 
 @section('content')
-    <!-- Initialize SCORM API BEFORE iframe loads -->
     <script>
-        // Global SCORM Configuration - MUST be first
         window.SCORM_CONFIG = {
             apiEndpoint: '{{ $apiEndpoint }}',
             timeout: {{ \Hyperf\Config\config('scorm.player.timeout', 30000) }},
             debug: {{ \Hyperf\Config\config('scorm.player.debug', true) ? 'true' : 'false' }},
             autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }} * 1000
-        };
-
-        window.user = {
-            id: {{ $user->id }},
-            name: '{{ $user->name }}',
-            sessionToken: '{{ $session_token }}'
         };
 
         window.packageId = '{{ $package->id }}';
@@ -60,7 +52,7 @@
     <div id="debug-panel" class="scorm-debug-panel"></div>
 
     <!-- Load Player Logic AFTER iframe -->
-        <script src="/public/scorm/js/player.js"></script>
+    <script src="/public/scorm/js/player.js"></script>
 @endsection
 
 @section('scripts')
