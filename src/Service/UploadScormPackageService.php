@@ -1,38 +1,25 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
-use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormScoRepository;
-use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
-use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
-use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
 use Hyperf\DbConnection\Annotation\Transactional;
-use OnixSystemsPHP\HyperfCore\Service\Service;
 use Hyperf\HttpMessage\Upload\UploadedFile;
-use OnixSystemsPHP\HyperfScorm\Entity\ProcessedScormPackage;
+use OnixSystemsPHP\HyperfCore\Service\Service;
+use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
+use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
+use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use function Hyperf\Config\config;
 
-
-/**
- * Service for uploading SCORM packages from ZIP files
- * Integrates with hyperf-file-upload for file handling
- */
 #[Service]
 class UploadScormPackageService
 {
     public function __construct(
         private readonly ScormFileProcessor $fileProcessor,
         private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly ScormScoRepository $scoRepository
     ) {
     }
 
-    /**
-     * Upload and process SCORM package
-     */
     #[Transactional(attempts: 1)]
     public function run(UploadPackageDTO $uploadScormDTO): ScormPackage
     {
@@ -56,36 +43,27 @@ class UploadScormPackageService
 
         $this->scormPackageRepository->save($package);
 
-        // Create SCOs using repository pattern with createMany for efficiency
-//        $this->createScormSco($package, $processedPackage->manifestData);
-
         $processedPackage->cleanup();
 
         return $package;
     }
 
-    /**
-     * Validate uploaded file
-     */
     private function validateUploadedFile(UploadedFile $file): void
     {
         if ($file->getError() !== UPLOAD_ERR_OK) {
             throw new \InvalidArgumentException("File upload error: " . $file->getError());
         }
 
-        if ($file->getExtension() !== 'zip') {
+        if (!in_array($file->getExtension(), config('scorm.upload.allowed_extensions'))) {
             throw new \InvalidArgumentException("Only ZIP files are allowed");
         }
 
-//        $maxSize = 100 * 1024 * 1024; // 100MB
-//        if ($file->getSize() > $maxSize) {
-//            throw new \InvalidArgumentException("File size exceeds maximum allowed size");
-//        }
-
-        $mimeType = $file->getMimeType();
-        $allowedMimes = ['application/zip', 'application/x-zip-compressed'];
-        if (!in_array($mimeType, $allowedMimes)) {
+        if (!in_array($file->getMimeType(), config('scorm.upload.allowed_mime_types'))) {
             throw new \InvalidArgumentException("Invalid file type. Expected ZIP file");
+        }
+
+        if ($file->getSize() > config('scorm.upload.max_upload_size')) {
+            throw new \InvalidArgumentException("File size exceeds maximum allowed size");
         }
     }
 }

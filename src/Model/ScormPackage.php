@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
@@ -65,22 +64,6 @@ class ScormPackage extends AbstractModel
         return $this->is_active === true;
     }
 
-    public function getFormattedFileSize(): string
-    {
-        if (!$this->file_size) {
-            return 'Unknown';
-        }
-
-        $bytes = $this->file_size;
-        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
-
-        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
-            $bytes /= 1024;
-        }
-
-        return round($bytes, 2) . ' ' . $units[$i];
-    }
-
     public function getLaunchUrl(): ?string
     {
         if (!$this->manifest_data) {
@@ -118,20 +101,5 @@ class ScormPackage extends AbstractModel
         }
 
         return null;
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeByVersion($query, string $version)
-    {
-        return $query->where('scorm_version', $version);
-    }
-
-    public function scopeSearch($query, string $term)
-    {
-        return $query->whereFullText(['title', 'description'], $term);
     }
 }

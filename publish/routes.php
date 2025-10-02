@@ -22,7 +22,7 @@ Router::addGroup('/v1/scorm/packages', function () {
     Router::post('', [ScormController::class, 'create']);
     Router::get('', [ScormController::class, 'index']);
     Router::get('/{id:\d+}', [ScormController::class, 'show']);
-    Router::delete('/{id:\d+}', [ScormController::class, 'delete']);
+    Router::delete('/{id:\d+}', [ScormController::class, 'destroy']);
 });
 
 // SCORM API Routes

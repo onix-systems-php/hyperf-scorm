@@ -1,12 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\Service;
+namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
-use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 
 #[Service]
 class LaunchScormService

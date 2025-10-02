@@ -5,7 +5,6 @@ namespace OnixSystemsPHP\HyperfScorm\Controller;
 
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use Hyperf\HttpServer\Contract\ResponseInterface;
-use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 use OpenApi\Attributes as OA;
@@ -13,11 +12,6 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class ScormPlayerController extends AbstractController
 {
-    public function __construct(
-        private readonly SessionManager $sessionManager
-    ) {
-    }
-
     #[OA\Get(//@SONAR_STOP@
         path: '/v1/api/scorm/player/{packageId}/launch/{sessionToken?}',
         operationId: 'launchScormPlayer',

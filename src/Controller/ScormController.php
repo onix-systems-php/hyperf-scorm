@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
+use Hyperf\HttpServer\Contract\RequestInterface;
+use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
@@ -10,11 +12,10 @@ use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
+use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
 use OnixSystemsPHP\HyperfScorm\Service\UploadScormPackageService;
 use OpenApi\Attributes as OA;
-use Hyperf\HttpServer\Contract\RequestInterface;
 use function Hyperf\Support\make;
-
 
 class ScormController extends AbstractController
 {
@@ -45,113 +46,61 @@ class ScormController extends AbstractController
     )]
     public function upload(
         RequestUploadScormPackage $request,
-        UploadScormPackageService $uploadPackageService
+        UploadScormPackageService $service
     ): ResourceScormPackage {
-        $package = $uploadPackageService->run(UploadPackageDTO::make($request->validated()));
+        $package = $service->run(UploadPackageDTO::make($request->validated()));
 
         return ResourceScormPackage::make($package);
     }
 
+    #[OA\Get(//@SONAR_STOP@
+        path: '/v1/scorm/packages',
+        operationId: 'scormPackagesList',
+        summary: 'Get list of packages',
+        security: [['bearerAuth' => []]],
+        tags: ['scorm'],
+        parameters: [
+            new OA\Parameter(ref: '#/components/parameters/Locale'),
+            new OA\Parameter(ref: '#/components/parameters/Pagination_page'),
+            new OA\Parameter(ref: '#/components/parameters/Pagination_per_page'),
+            new OA\Parameter(ref: '#/components/parameters/Pagination_order'),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: '', content: new OA\JsonContent(properties: [
+                new OA\Property(property: 'data', ref: '#/components/schemas/ResourceScormPackagePaginated'),
+            ])),
+            new OA\Response(ref: '#/components/responses/401', response: 401),
+            new OA\Response(ref: '#/components/responses/403', response: 403),
+            new OA\Response(ref: '#/components/responses/500', response: 500),
+        ],
+    )]
     public function index(RequestInterface $request): ResourceScormPackagePaginated
     {
         /**@var ScormPackageRepository $scormPackageRepository**/
         $scormPackageRepository = make(ScormPackageRepository::class);
+
         $packages = $scormPackageRepository->getPaginated(
             $request->getQueryParams(),
             PaginationRequestDTO::make($request)
         );
+
         return ResourceScormPackagePaginated::make($packages);
     }
-//    public function index(RequestInterface $request): ResponseInterface
-//    {
-//        $limit = (int) $request->query('limit', 50);
-//        $offset = (int) $request->query('offset', 0);
-//        $filters = $request->query('filters', []);
-//        $search = $request->query('search');
-//        $scormVersion = $request->query('scorm_version');
-//        $activeOnly = filter_var($request->query('active_only', 'false'), FILTER_VALIDATE_BOOLEAN);
-//
-//        $packages = $this->scormPackageService->getAll(
-//            $filters,
-//            $limit,
-//            $offset,
-//            $search,
-//            $scormVersion,
-//            $activeOnly
-//        );
-//        $total = $this->scormPackageService->count($filters, $search, $scormVersion, $activeOnly);
-//
-//        return $this->response->json([
-//            'success' => true,
-//            'data' => ResourceScormPackage::collection($packages),
-//            'meta' => [
-//                'total' => $total,
-//                'limit' => $limit,
-//                'offset' => $offset,
-//                'filters' => [
-//                    'search' => $search,
-//                    'scorm_version' => $scormVersion,
-//                    'active_only' => $activeOnly
-//                ]
-//            ]
-//        ]);
-//    }
-//
-//    #[OA\Get(
-//        path: '/v1/scorm/packages/{id}',
-//        operationId: 'getScormPackage',
-//        summary: 'Get SCORM package details',
-//        tags: ['scorm'],
-//        responses: [
-//            new OA\Response(response: 200, description: 'SCORM package details'),
-//            new OA\Response(ref: '#/components/responses/404', response: 404),
-//            new OA\Response(ref: '#/components/responses/401', response: 401),
-//            new OA\Response(ref: '#/components/responses/500', response: 500),
-//        ],
-//    )]
-//    public function show(RequestInterface $request, int $id): ResponseInterface
-//    {
-//        $package = $this->scormPackageService->getById($id);
-//
-//        if (!$package) {
-//            return $this->response->json([
-//                'success' => false,
-//                'message' => 'Package not found'
-//            ], 404);
-//        }
-//
-//        return $this->response->json([
-//            'success' => true,
-//            'data' => ResourceScormPackage::make($package)
-//        ]);
-//    }
-//
-//    #[OA\Delete(
-//        path: '/v1/scorm/packages/{id}',
-//        operationId: 'deleteScormPackage',
-//        summary: 'Delete SCORM package',
-//        tags: ['scorm'],
-//        responses: [
-//            new OA\Response(response: 204, description: 'SCORM package deleted successfully'),
-//            new OA\Response(ref: '#/components/responses/404', response: 404),
-//            new OA\Response(ref: '#/components/responses/401', response: 401),
-//            new OA\Response(ref: '#/components/responses/500', response: 500),
-//        ],
-//    )]
-//    public function delete(RequestInterface $request, int $id): ResponseInterface
-//    {
-//        $deleted = $this->scormPackageService->delete($id);
-//
-//        if (!$deleted) {
-//            return $this->response->json([
-//                'success' => false,
-//                'message' => 'Package not found'
-//            ], 404);
-//        }
-//
-//        return $this->response->json([
-//            'success' => true,
-//            'message' => 'Package deleted successfully'
-//        ], 204);
-//    }
+    #[OA\Delete(
+        path: '/v1/scorm/packages/{id}',
+        operationId: 'deleteScormPackage',
+        summary: 'Delete SCORM package',
+        tags: ['scorm'],
+        responses: [
+            new OA\Response(response: 204, description: 'SCORM package deleted successfully'),
+            new OA\Response(ref: '#/components/responses/404', response: 404),
+            new OA\Response(ref: '#/components/responses/401', response: 401),
+            new OA\Response(ref: '#/components/responses/500', response: 500),
+        ],
+    )]
+    public function destroy(DeleteScormPackageService $service, int $id): ResourceSuccess
+    {
+        $service->run($id);
+        return ResourceSuccess::make([]);
+    }
 }

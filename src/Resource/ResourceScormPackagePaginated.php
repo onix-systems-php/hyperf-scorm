@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Resource;
 
 use OnixSystemsPHP\HyperfCore\Resource\AbstractPaginatedResource;
-use OnixSystemsPHP\HyperfCore\Resource\AbstractResource;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
-use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 use OpenApi\Attributes as OA;
 
 /**
  * @method __construct(ScormPackage $resource)
- * @property OnixSystemsPHP\HyperfScorm\Model\ScormPackage $resource
+ * @property ScormPackage $resource
  */
 #[
     OA\Schema(

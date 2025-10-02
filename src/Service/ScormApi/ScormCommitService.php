@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\Service;
+namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
 use Hyperf\DbConnection\Annotation\Transactional;
 use OnixSystemsPHP\HyperfCore\Service\Service;

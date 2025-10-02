@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
-use Hyperf\HttpServer\Annotation\Controller;
 use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
@@ -11,7 +10,7 @@ use OnixSystemsPHP\HyperfScorm\Request\RequestScormCommit;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormCommit;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormInitialize;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\InitializeScormService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormCommitService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormCommitService;
 use OpenApi\Attributes as OA;
 
 class ScormApiController extends AbstractController

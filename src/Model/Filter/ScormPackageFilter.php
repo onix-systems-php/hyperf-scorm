@@ -22,9 +22,10 @@ use OpenApi\Attributes as OA;
 )]
 class ScormPackageFilter extends AbstractFilter
 {
-    public function name(string $param): void
+    public function title(string $param): void
     {
-        $this->builder->whereRaw('LOWER(name) = ?', [Str::lower($param)]);
+        $like = '%' . Str::lower($param) . '%';
+        $this->builder->whereRaw('LOWER(title) LIKE ?', [$like]);
     }
 
     public function isActive(): void

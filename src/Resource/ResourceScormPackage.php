@@ -61,7 +61,6 @@ class ResourceScormPackage extends AbstractResource
             "scorm_version" => $this->resource->scorm_version,
             "original_filename" => $this->resource->original_filename,
             "file_size" => $this->resource->file_size,
-            "file_size_formatted" => $this->resource->getFormattedFileSize(),
             "file_hash" => $this->resource->file_hash,
             "is_active" => $this->resource->is_active,
             "manifest_data" => $this->resource->manifest_data,
