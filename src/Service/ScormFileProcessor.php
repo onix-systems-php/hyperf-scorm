@@ -38,7 +38,6 @@ class ScormFileProcessor
      */
     public function run(UploadedFile $uploadedFile, ?callable $progressCallback = null): ProcessedScormPackage
     {
-        xdebug_break();
         $startMemory = memory_get_usage(true);
 
         $tempDir = $this->createTempDirectory();

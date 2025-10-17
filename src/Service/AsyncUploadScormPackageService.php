@@ -25,7 +25,6 @@ class AsyncUploadScormPackageService
     {
 //        $this->validateUploadedFile($uploadScormDTO->file);
         $processedPackage = $this->fileProcessor->run($uploadScormDTO->file);
-        print_r(json_encode($processedPackage->manifestData));
         $package = $this->scormPackageRepository->create([
             'title' => $uploadScormDTO->title ?? $processedPackage->manifestData->title ?? 'Untitled SCORM Package',
             'description' => $uploadScormDTO->description,

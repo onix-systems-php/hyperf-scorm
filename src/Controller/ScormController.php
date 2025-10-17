@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
 use Hyperf\HttpServer\Contract\RequestInterface;
-use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
+use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
 use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;

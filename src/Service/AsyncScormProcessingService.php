@@ -5,9 +5,9 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\HttpMessage\Upload\UploadedFile;
-use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
-use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfCore\Service\Service;
+use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
+use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -25,9 +25,6 @@ class AsyncScormProcessingService
     ) {
     }
 
-    /**
-     * Queue SCORM package for asynchronous processing
-     */
     public function queueProcessing(
         UploadedFile $uploadedFile,
         int $userId,
@@ -74,35 +71,23 @@ class AsyncScormProcessingService
     }
 
 
-    /**
-     * Get processing progress for a job
-     */
     public function getProcessingProgress(string $jobId): ?array
     {
         return $this->jobStatusService->getProgress($jobId);
     }
 
-    /**
-     * Get processing result for a job
-     */
     public function getProcessingResult(string $jobId): ?array
     {
         return $this->jobStatusService->getResult($jobId);
     }
 
-    /**
-     * Cancel processing job (if still queued)
-     */
     public function cancelProcessing(string $jobId): bool
     {
-        // Check if job is still processing
         $progress = $this->getProcessingProgress($jobId);
         if ($progress && $progress['status'] === 'processing') {
-            // Cannot cancel already processing job
             return false;
         }
 
-        // Mark as cancelled
         $this->jobStatusService->updateProgress($jobId, [
             'status' => 'cancelled',
             'progress' => 0,

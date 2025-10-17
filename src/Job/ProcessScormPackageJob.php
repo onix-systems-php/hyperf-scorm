@@ -38,7 +38,6 @@ class ProcessScormPackageJob extends Job
 
     public function handle(): void
     {
-        xdebug_break();
         $container = ApplicationContext::getContainer();
         $logger = $container->get(LoggerInterface::class);
         $asyncUploadScormPackageService = $container->get(AsyncUploadScormPackageService::class);

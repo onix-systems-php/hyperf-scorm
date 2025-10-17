@@ -2,21 +2,11 @@
 declare(strict_types=1);
 
 use Hyperf\HttpServer\Router\Router;
-use OnixSystemsPHP\HyperfScorm\Controller\AsyncScormController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormJobStatusController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController;
 use OnixSystemsPHP\HyperfScorm\WebSocket\ScormProgressWebSocketController;
-
-// Async SCORM Processing Routes
-Router::addGroup('/v1/scorm/async', function () {
-    Router::post('/upload', [AsyncScormController::class, 'uploadAsync']);
-    Router::post('/upload-batch', [AsyncScormController::class, 'uploadBatchAsync']);
-//    Router::get('/status/{jobId}', [AsyncScormController::class, 'getStatus']);
-    Router::post('/batch-status', [AsyncScormController::class, 'getBatchStatus']);
-    Router::post('/cancel/{jobId}', [AsyncScormController::class, 'cancelJob']);
-});
 
 // SCORM Package Management Routes
 Router::addGroup('/v1/scorm/packages', function () {
@@ -41,6 +31,8 @@ Router::addGroup('/v1/api/scorm/player', function () {
 // SCORM Job Status Routes
 Router::addGroup('/v1/scorm/jobs', function () {
     Router::get('/{jobId}/status', [ScormJobStatusController::class, 'status']);
+    Router::post('/batch-status', [ScormJobStatusController::class, 'getBatchStatus']);
+    Router::post('/{jobId}/cancel', [ScormJobStatusController::class, 'cancelJob']);
 });
 
 // WebSocket Routes для SCORM progress tracking

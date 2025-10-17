@@ -24,9 +24,9 @@ class SmartScormUploadService
     {
         $fileSize = $dto->file->getSize();
 
-        if ($fileSize < self::SYNC_THRESHOLD) {
-            return ResourceScormPackage::make($this->syncUpload->run($dto));
-        }
+//        if ($fileSize < self::SYNC_THRESHOLD) {
+//            return ResourceScormPackage::make($this->syncUpload->run($dto));
+//        }
 
         return ResourceScormAsyncJob::make($this->asyncUpload->run($dto));
     }
