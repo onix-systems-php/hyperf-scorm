@@ -10,10 +10,11 @@ use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
-use OnixSystemsPHP\HyperfScorm\Service\UploadScormPackageService;
+use OnixSystemsPHP\HyperfScorm\Service\SmartScormUploadService;
 use OpenApi\Attributes as OA;
 use function Hyperf\Support\make;
 
@@ -46,11 +47,9 @@ class ScormController extends AbstractController
     )]
     public function upload(
         RequestUploadScormPackage $request,
-        UploadScormPackageService $service
-    ): ResourceScormPackage {
-        $package = $service->run(UploadPackageDTO::make($request->validated()));
-
-        return ResourceScormPackage::make($package);
+        SmartScormUploadService $service
+    ): ResourceScormPackage|ResourceScormAsyncJob {
+        return $service->run(UploadPackageDTO::make($request));
     }
 
     #[OA\Get(//@SONAR_STOP@

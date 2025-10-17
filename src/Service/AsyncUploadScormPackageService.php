@@ -12,7 +12,7 @@ use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use function Hyperf\Config\config;
 
 #[Service]
-class UploadScormPackageService
+class AsyncUploadScormPackageService
 {
     public function __construct(
         private readonly ScormFileProcessor $fileProcessor,
@@ -23,10 +23,9 @@ class UploadScormPackageService
     #[Transactional(attempts: 1)]
     public function run(UploadPackageDTO $uploadScormDTO): ScormPackage
     {
-        $this->validateUploadedFile($uploadScormDTO->file);
-
+//        $this->validateUploadedFile($uploadScormDTO->file);
         $processedPackage = $this->fileProcessor->run($uploadScormDTO->file);
-
+        print_r(json_encode($processedPackage->manifestData));
         $package = $this->scormPackageRepository->create([
             'title' => $uploadScormDTO->title ?? $processedPackage->manifestData->title ?? 'Untitled SCORM Package',
             'description' => $uploadScormDTO->description,
@@ -47,22 +46,22 @@ class UploadScormPackageService
         return $package;
     }
 
-    private function validateUploadedFile(UploadedFile $file): void
+    public function validateUploadedFile(UploadedFile $file): void
     {
         if ($file->getError() !== UPLOAD_ERR_OK) {
             throw new \InvalidArgumentException("File upload error: " . $file->getError());
         }
 
-//        if (!in_array($file->getExtension(), config('scorm.upload.allowed_extensions'))) {
-//            throw new \InvalidArgumentException("Only ZIP files are allowed");
-//        }
+        if (!in_array($file->getExtension(), config('scorm.upload.allowed_extensions'))) {
+            throw new \InvalidArgumentException("Only ZIP files are allowed");
+        }
 
 //        if (!in_array($file->getMimeType(), config('scorm.upload.allowed_mime_types'))) {
 //            throw new \InvalidArgumentException("Invalid file type. Expected ZIP file");
 //        }
 
-//        if ($file->getSize() > config('scorm.upload.max_upload_size')) {
-//            throw new \InvalidArgumentException("File size exceeds maximum allowed size");
-//        }
+        if ($file->getSize() > config('scorm.upload.max_upload_size')) {
+            throw new \InvalidArgumentException("File size exceeds maximum allowed size");
+        }
     }
 }

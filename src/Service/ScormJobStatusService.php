@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OnixSystemsPHP\HyperfScorm\Service;
+
+use Hyperf\Redis\Redis;
+use OnixSystemsPHP\HyperfCore\Service\Service;
+
+/**
+ * Service for managing SCORM job statuses in Redis
+ * Provides centralized status tracking for async SCORM processing jobs
+ */
+#[Service]
+class ScormJobStatusService
+{
+    private const JOB_STATUS_PREFIX = 'scorm:job:';
+    private const PROGRESS_PREFIX = 'scorm_progress:';
+    private const RESULT_PREFIX = 'scorm_result:';
+    private const JOB_TTL = 3600; // 1 hour
+    private const RESULT_TTL = 86400; // 24 hours
+
+    public function __construct(
+        private readonly Redis $redis,
+    ) {}
+
+    /**
+     * Initialize job status when job is queued
+     */
+    public function initializeJob(string $jobId, array $data): void
+    {
+        $key = self::JOB_STATUS_PREFIX . $jobId;
+        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+    }
+
+    /**
+     * Update job progress during processing
+     */
+    public function updateProgress(string $jobId, array $data): void
+    {
+        $key = self::PROGRESS_PREFIX . $jobId;
+        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+    }
+
+    /**
+     * Set final job result
+     */
+    public function setResult(string $jobId, array $data, ?int $ttl = null): void
+    {
+        $key = self::RESULT_PREFIX . $jobId;
+        $this->redis->setex($key, $ttl ?? self::RESULT_TTL, json_encode($data));
+    }
+
+    /**
+     * Get job status
+     */
+    public function getStatus(string $jobId): ?array
+    {
+        $key = self::JOB_STATUS_PREFIX . $jobId;
+        $data = $this->redis->get($key);
+        return $data ? json_decode($data, true) : null;
+    }
+
+    /**
+     * Get job progress
+     */
+    public function getProgress(string $jobId): ?array
+    {
+        $key = self::PROGRESS_PREFIX . $jobId;
+        $data = $this->redis->get($key);
+        return $data ? json_decode($data, true) : null;
+    }
+
+    /**
+     * Get job result
+     */
+    public function getResult(string $jobId): ?array
+    {
+        $key = self::RESULT_PREFIX . $jobId;
+        $data = $this->redis->get($key);
+        return $data ? json_decode($data, true) : null;
+    }
+
+    /**
+     * Delete job status and progress data
+     */
+    public function deleteJob(string $jobId): void
+    {
+        $this->redis->del(self::JOB_STATUS_PREFIX . $jobId);
+        $this->redis->del(self::PROGRESS_PREFIX . $jobId);
+        $this->redis->del(self::RESULT_PREFIX . $jobId);
+    }
+}

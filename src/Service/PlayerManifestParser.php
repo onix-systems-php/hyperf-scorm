@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
@@ -7,24 +6,17 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\PlayerManifestDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\PlayerScoDTO;
 
-/**
- * Simplified SCORM manifest parser optimized for player needs
- * Parses only essential data required for SCORM playback
- */
 class PlayerManifestParser
 {
-    /**
-     * Parse SCORM manifest XML and return player-optimized DTO
-     */
     public function parse(string $xmlContent): PlayerManifestDTO
     {
         $xml = new \SimpleXMLElement($xmlContent);
-        
+
         // Register namespaces
         $xml->registerXPathNamespace('adlcp', 'http://www.adlnet.org/xsd/adlcp_rootv1p2');
         $xml->registerXPathNamespace('adlseq', 'http://www.adlnet.org/xsd/adlseq_rootv1p2');
         $xml->registerXPathNamespace('adlnav', 'http://www.adlnet.org/xsd/adlnav_rootv1p2');
-        
+
         return new PlayerManifestDTO(
             title: $this->extractTitle($xml),
             version: $this->extractVersion($xml),
@@ -43,12 +35,12 @@ class PlayerManifestParser
         if (isset($xml->metadata->lom->general->title->string)) {
             return (string) $xml->metadata->lom->general->title->string;
         }
-        
+
         // Fallback to organizations title
         if (isset($xml->organizations->organization->title)) {
             return (string) $xml->organizations->organization->title;
         }
-        
+
         return 'Untitled SCORM Package';
     }
 
@@ -75,12 +67,12 @@ class PlayerManifestParser
                 return '1.2';
             }
         }
-        
+
         // Check for SCORM 2004 specific elements
         if (isset($xml->organizations->organization->sequencing)) {
             return '2004';
         }
-        
+
         return '1.2'; // Default to SCORM 1.2
     }
 
@@ -92,7 +84,7 @@ class PlayerManifestParser
         if (isset($xml->metadata->lom->general->description->string)) {
             return (string) $xml->metadata->lom->general->description->string;
         }
-        
+
         return null;
     }
 
@@ -102,22 +94,22 @@ class PlayerManifestParser
     private function createPlayerScos(\SimpleXMLElement $xml): array
     {
         $scos = [];
-        
+
         if (isset($xml->resources->resource)) {
             foreach ($xml->resources->resource as $resource) {
                 $identifier = (string) ($resource['identifier'] ?? '');
                 $href = (string) ($resource['href'] ?? '');
-                
+
                 if (empty($identifier) || empty($href)) {
                     continue; // Skip invalid resources
                 }
-                
+
                 // Get item data from organizations
                 $itemData = $this->getItemDataFromOrganizations($xml, $identifier);
-                
+
                 // Parse time limit to seconds
                 $maxTimeSeconds = $this->parseTimeToSeconds($itemData['max_time_allowed'] ?? '');
-                
+
                 $scos[] = new PlayerScoDTO(
                     identifier: $identifier,
                     title: $itemData['title'] ?? 'Untitled SCO',
@@ -127,7 +119,7 @@ class PlayerManifestParser
                 );
             }
         }
-        
+
         return $scos;
     }
 
@@ -153,7 +145,7 @@ class PlayerManifestParser
                 }
             }
         }
-        
+
         // Fallback data
         return [
             'title' => $resourceId ?: 'Untitled SCO',
@@ -171,7 +163,7 @@ class PlayerManifestParser
         if (empty($parameters)) {
             return $href;
         }
-        
+
         $separator = strpos($href, '?') !== false ? '&' : '?';
         return $href . $separator . $parameters;
     }
@@ -185,38 +177,38 @@ class PlayerManifestParser
         if (empty($timeString)) {
             return null;
         }
-        
+
         // Handle ISO 8601 duration format (PT30M, PT1H30M, etc.)
         if (preg_match('/^PT(\d+H)?(\d+M)?(\d+S)?$/', $timeString, $matches)) {
             $hours = (int) (preg_replace('/[^0-9]/', '', $matches[1] ?? ''));
             $minutes = (int) (preg_replace('/[^0-9]/', '', $matches[2] ?? ''));
             $seconds = (int) (preg_replace('/[^0-9]/', '', $matches[3] ?? ''));
-            
+
             return $hours * 3600 + $minutes * 60 + $seconds;
         }
-        
+
         // Handle HH:MM:SS format
         if (preg_match('/^(\d+):(\d+):(\d+)$/', $timeString, $matches)) {
             $hours = (int) $matches[1];
             $minutes = (int) $matches[2];
             $seconds = (int) $matches[3];
-            
+
             return $hours * 3600 + $minutes * 60 + $seconds;
         }
-        
+
         // Handle MM:SS format
         if (preg_match('/^(\d+):(\d+)$/', $timeString, $matches)) {
             $minutes = (int) $matches[1];
             $seconds = (int) $matches[2];
-            
+
             return $minutes * 60 + $seconds;
         }
-        
+
         // Try to parse as plain seconds
         if (is_numeric($timeString)) {
             return (int) $timeString;
         }
-        
+
         return null;
     }
 }

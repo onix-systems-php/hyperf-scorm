@@ -5,21 +5,22 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\AsyncQueue\Driver\DriverFactory;
 use Hyperf\HttpMessage\Upload\UploadedFile;
-use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
+use OnixSystemsPHP\HyperfCore\Service\Service;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
  * Service for managing asynchronous SCORM package processing
  */
+#[Service]
 class AsyncScormProcessingService
 {
-
     public function __construct(
         private readonly DriverFactory $queueDriverFactory,
-        private readonly Redis $redis,
+        private readonly ScormJobIdGenerator $jobIdGenerator,
+        private readonly ScormJobStatusService $jobStatusService,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -32,7 +33,7 @@ class AsyncScormProcessingService
         int $userId,
         array $metadata = []
     ): string {
-        $jobId = $this->generateJobId();
+        $jobId = $this->jobIdGenerator->generate();
 
         try {
             $tempFilePath = $uploadedFile->getPathname();
@@ -78,14 +79,7 @@ class AsyncScormProcessingService
      */
     public function getProcessingProgress(string $jobId): ?array
     {
-        $progressKey = ProcessScormPackageJob::PROGRESS_KEY_PREFIX . $jobId;
-        $progressData = $this->redis->get($progressKey);
-
-        if (!$progressData) {
-            return null;
-        }
-
-        return json_decode($progressData, true);
+        return $this->jobStatusService->getProgress($jobId);
     }
 
     /**
@@ -93,25 +87,14 @@ class AsyncScormProcessingService
      */
     public function getProcessingResult(string $jobId): ?array
     {
-        $resultKey = ProcessScormPackageJob::RESULT_KEY_PREFIX . $jobId;
-        $resultData = $this->redis->get($resultKey);
-
-        if (!$resultData) {
-            return null;
-        }
-
-        return json_decode($resultData, true);
+        return $this->jobStatusService->getResult($jobId);
     }
-
 
     /**
      * Cancel processing job (if still queued)
      */
     public function cancelProcessing(string $jobId): bool
     {
-        $progressKey = ProcessScormPackageJob::PROGRESS_KEY_PREFIX . $jobId;
-        $resultKey = ProcessScormPackageJob::RESULT_KEY_PREFIX . $jobId;
-
         // Check if job is still processing
         $progress = $this->getProcessingProgress($jobId);
         if ($progress && $progress['status'] === 'processing') {
@@ -120,67 +103,20 @@ class AsyncScormProcessingService
         }
 
         // Mark as cancelled
-        $this->redis->setex($progressKey, 3600, json_encode([
+        $this->jobStatusService->updateProgress($jobId, [
             'status' => 'cancelled',
             'progress' => 0,
             'stage' => 'cancelled',
             'cancelled_at' => time(),
-        ]));
+        ]);
 
-        $this->redis->setex($resultKey, 86400, json_encode([
+        $this->jobStatusService->setResult($jobId, [
             'status' => 'cancelled',
             'cancelled_at' => time(),
-        ]));
+        ]);
 
         $this->logger->info('SCORM processing job cancelled', ['job_id' => $jobId]);
 
         return true;
     }
-
-    /**
-     * Cleanup expired job data
-     */
-    public function cleanupExpiredJobs(): int
-    {
-        $progressPattern = ProcessScormPackageJob::PROGRESS_KEY_PREFIX . '*';
-        $resultPattern = ProcessScormPackageJob::RESULT_KEY_PREFIX . '*';
-
-        $progressKeys = $this->redis->keys($progressPattern);
-        $resultKeys = $this->redis->keys($resultPattern);
-
-        $cleanedCount = 0;
-        $expiredBefore = time() - 86400; // 24 hours ago
-
-        foreach (array_merge($progressKeys, $resultKeys) as $key) {
-            $data = $this->redis->get($key);
-            if (!$data) {
-                continue;
-            }
-
-            $decoded = json_decode($data, true);
-            $completedAt = $decoded['completed_at'] ?? $decoded['failed_at'] ?? $decoded['cancelled_at'] ?? null;
-
-            if ($completedAt && $completedAt < $expiredBefore) {
-                $this->redis->del($key);
-                $cleanedCount++;
-            }
-        }
-
-        if ($cleanedCount > 0) {
-            $this->logger->info('Cleaned up expired SCORM processing jobs', [
-                'cleaned_count' => $cleanedCount,
-            ]);
-        }
-
-        return $cleanedCount;
-    }
-
-    /**
-     * Generate unique job ID
-     */
-    private function generateJobId(): string
-    {
-        return 'scorm_' . uniqid() . '_' . time();
-    }
-
 }
