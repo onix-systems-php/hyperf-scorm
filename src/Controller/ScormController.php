@@ -7,14 +7,14 @@ use Hyperf\HttpServer\Contract\RequestInterface;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
 use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
-use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
-use OnixSystemsPHP\HyperfScorm\Service\SmartScormUploadService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormUploadOrchestratorService;
 use OpenApi\Attributes as OA;
 use function Hyperf\Support\make;
 
@@ -47,9 +47,9 @@ class ScormController extends AbstractController
     )]
     public function upload(
         RequestUploadScormPackage $request,
-        SmartScormUploadService $service
+        ScormUploadOrchestratorService $service
     ): ResourceScormPackage|ResourceScormAsyncJob {
-        return $service->run(UploadPackageDTO::make($request));
+        return $service->process(ScormUploadDTO::make($request));
     }
 
     #[OA\Get(//@SONAR_STOP@

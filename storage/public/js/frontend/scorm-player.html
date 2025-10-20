@@ -964,6 +964,42 @@
                             uploadProgress.value = result.data.progress || 0;
                             asyncUploadStage.value = result.data.stage || 'queued';
 
+                            // Проверяем доступность ScormUploadClient
+                            if (typeof ScormUploadClient === 'undefined') {
+                                console.error('[SCORM Upload] ScormUploadClient class not loaded!');
+                                console.error('[SCORM Upload] Falling back to polling...');
+                                uploadError.value = 'WebSocket unavailable, using polling fallback';
+
+                                // Простой fallback на polling без класса
+                                const pollingInterval = setInterval(async () => {
+                                    try {
+                                        const statusResponse = await fetch(`${API_BASE_URL}/v1/scorm/jobs/${result.data.job_id}/status`);
+                                        const statusResult = await statusResponse.json();
+
+                                        uploadProgress.value = statusResult.data.progress || 0;
+                                        asyncUploadStage.value = statusResult.data.stage || 'processing';
+
+                                        if (statusResult.data.status === 'completed') {
+                                            clearInterval(pollingInterval);
+                                            uploadProgress.value = 100;
+                                            uploadSuccess.value = true;
+                                            uploadInProgress.value = false;
+                                            uploadedPackage.value = { id: statusResult.data.package_id };
+                                            loadPackages(currentPage.value, searchQuery.value);
+                                            alert(`Package "${uploadForm.value.title}" uploaded successfully!`);
+                                        } else if (statusResult.data.status === 'failed') {
+                                            clearInterval(pollingInterval);
+                                            uploadError.value = `Upload failed: ${statusResult.data.error}`;
+                                            uploadInProgress.value = false;
+                                        }
+                                    } catch (error) {
+                                        console.error('[SCORM Poll] Error:', error);
+                                    }
+                                }, 2000);
+
+                                return;
+                            }
+
                             // Создаем WebSocket клиент если еще не создан
                             if (!uploadClient) {
                                 uploadClient = new ScormUploadClient(API_BASE_URL);
@@ -1244,6 +1280,14 @@
                 // Initialize
                 onMounted(() => {
                     loadPackages();
+
+                    // Add global error handler for script loading failures
+                    window.addEventListener('error', (event) => {
+                        if (event.target && event.target.tagName === 'SCRIPT') {
+                            console.error('[SCORM] Failed to load script:', event.target.src);
+                            console.error('[SCORM] This may cause WebSocket to fall back to polling');
+                        }
+                    }, true);
                 });
 
                 return {
@@ -1299,6 +1343,6 @@
     </script>
 
     <!-- SCORM Upload WebSocket Client -->
-    <script src="/public/assets/frontend/js/scorm-upload-ws-client.js"></script>
+    <script src="/public/js/frontend/js/scorm-upload-ws-client.js"></script>
 </body>
 </html>

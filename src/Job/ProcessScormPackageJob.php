@@ -6,9 +6,9 @@ namespace OnixSystemsPHP\HyperfScorm\Job;
 use Hyperf\AsyncQueue\Job;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\HttpMessage\Upload\UploadedFile;
-use OnixSystemsPHP\HyperfScorm\DTO\UploadPackageDTO;
+use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
-use OnixSystemsPHP\HyperfScorm\Service\AsyncUploadScormPackageService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormPackageProcessor;
 use OnixSystemsPHP\HyperfScorm\Service\ScormJobStatusService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormTempFileService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormWebSocketNotificationService;
@@ -40,12 +40,13 @@ class ProcessScormPackageJob extends Job
     {
         $container = ApplicationContext::getContainer();
         $logger = $container->get(LoggerInterface::class);
-        $asyncUploadScormPackageService = $container->get(AsyncUploadScormPackageService::class);
+        $packageProcessor = $container->get(ScormPackageProcessor::class);
         $jobStatusService = $container->get(ScormJobStatusService::class);
         $tempFileService = $container->get(ScormTempFileService::class);
         $wsService = $container->get(ScormWebSocketNotificationService::class);
 
         try {
+            // Stage 1: Initializing
             $progressData = [
                 'status' => 'processing',
                 'progress' => 0,
@@ -57,10 +58,20 @@ class ProcessScormPackageJob extends Job
                 'processed_bytes' => 0,
             ];
             $jobStatusService->updateProgress($this->jobId, $progressData);
+
+            $logger->info('[Job Debug] Sending Stage 1 (Initializing) progress update', [
+                'job_id' => $this->jobId,
+                'user_id' => $this->userId,
+                'progress' => 0,
+                'stage' => 'initializing',
+            ]);
+
             $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $progressData);
 
+            // Create UploadedFile from temp path
             $uploadedFile = $this->createUploadedFileFromPath();
 
+            // Stage 2: Extracting
             $extractingData = [
                 'status' => 'processing',
                 'progress' => 10,
@@ -71,17 +82,23 @@ class ProcessScormPackageJob extends Job
                 'processed_bytes' => (int)($this->fileSize * 0.1),
             ];
             $jobStatusService->updateProgress($this->jobId, $extractingData);
+
+            $logger->info('[Job Debug] Sending Stage 2 (Extracting) progress update', [
+                'job_id' => $this->jobId,
+                'user_id' => $this->userId,
+                'progress' => 10,
+                'stage' => 'extracting',
+            ]);
+
             $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $extractingData);
 
-//            $progressCallback = function (string $stage, array $progressData) use ($jobStatusService, $wsService) {
-//                $this->handleProgressCallback($stage, $progressData, $jobStatusService, $wsService);
-//            };
-
-            $scormPackage = $asyncUploadScormPackageService->run(UploadPackageDTO::make([
+            // Stage 3: Processing with unified processor
+            $scormPackage = $packageProcessor->process(ScormUploadDTO::make([
                 'file' => $uploadedFile,
                 ...$this->metadata,
             ]));
 
+            // Stage 4: Completed
             $completedData = [
                 'status' => 'completed',
                 'progress' => 100,
@@ -95,6 +112,15 @@ class ProcessScormPackageJob extends Job
                 'title' => $scormPackage->title,
             ];
             $jobStatusService->updateProgress($this->jobId, $completedData);
+
+            $logger->info('[Job Debug] Sending Stage 4 (Completed) progress update', [
+                'job_id' => $this->jobId,
+                'user_id' => $this->userId,
+                'progress' => 100,
+                'stage' => 'completed',
+                'package_id' => $scormPackage->id,
+            ]);
+
             $wsService->sendUploadProgressUpdate($this->userId, $this->jobId, $completedData);
         } catch (Throwable $e) {
             $logger->error('SCORM package processing job failed', [

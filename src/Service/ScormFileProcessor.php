@@ -7,8 +7,8 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Filesystem\FilesystemFactory;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use League\Flysystem\FilesystemException;
+use OnixSystemsPHP\HyperfScorm\DTO\ProcessedScormPackageDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
-use OnixSystemsPHP\HyperfScorm\Entity\ProcessedScormPackage;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -36,7 +36,7 @@ class ScormFileProcessor
      * Process uploaded SCORM package with memory optimization
      * Supports both local files and S3 URLs
      */
-    public function run(UploadedFile $uploadedFile, ?callable $progressCallback = null): ProcessedScormPackage
+    public function run(UploadedFile $uploadedFile, ?callable $progressCallback = null): ProcessedScormPackageDTO
     {
         $startMemory = memory_get_usage(true);
 
@@ -60,12 +60,12 @@ class ScormFileProcessor
                 'storage_path' => $storagePath,
             ]);
 
-            return new ProcessedScormPackage(
-                manifestData: $manifestDto,
-                contentPath: $storagePath,
-                extractPath: $extractPath,
-                tempDir: $tempDir
-            );
+            return ProcessedScormPackageDTO::make([
+                'manifestData' => $manifestDto,
+                'contentPath' => $storagePath,
+                'extractPath' => $extractPath,
+                'tempDir' => $tempDir,
+            ]);
 
         } catch (Throwable $e) {
             $this->cleanupTempDirectory($tempDir);
