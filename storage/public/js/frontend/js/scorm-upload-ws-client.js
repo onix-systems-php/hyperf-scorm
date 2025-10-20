@@ -69,25 +69,15 @@ class ScormUploadClient {
             };
 
             this.ws.onmessage = (event) => {
-                // DEBUG: Log raw message
-                console.log('[SCORM WS] RAW MESSAGE:', event.data);
-
                 try {
                     const message = JSON.parse(event.data);
-
-                    // DEBUG: Log parsed message
-                    console.log('[SCORM WS] PARSED MESSAGE:', JSON.stringify(message, null, 2));
 
                     if (message.type === 'connected') {
                         console.log('[SCORM WS] Handshake complete:', message.job_id);
                     } else if (message.type === 'progress' && message.data) {
-                        console.log('[SCORM WS] Progress message received:', message.data);
                         this.handleProgressUpdate(message.data);
                     } else if (message.type === 'pong') {
                         // Keep-alive response
-                        console.log('[SCORM WS] Pong received');
-                    } else {
-                        console.warn('[SCORM WS] Unknown message type:', message.type);
                     }
                 } catch (error) {
                     console.error('[SCORM WS] Failed to parse message:', error);
