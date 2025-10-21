@@ -1,169 +1,372 @@
-# onix-systems-php/hyperf-support
+# Hyperf SCORM Package
 
-**Hyperf-support** is a package for fluently managing your tickets and comments within Slack, Trello, Jira and other systems. Made by [onix-systems-php](https://github.com/onix-systems-php)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-blue.svg)](https://php.net)
+[![Hyperf Version](https://img.shields.io/badge/hyperf-%5E3.1-brightgreen.svg)](https://hyperf.io)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Installation:
-```shell
-composer require onix-systems-php/hyperf-support
+Enterprise-grade SCORM (Sharable Content Object Reference Model) package for Hyperf framework with real-time WebSocket progress tracking and asynchronous processing.
+
+## Features
+
+- ✅ **SCORM 1.2 & 2004** - Full compliance with SCORM 1.2 and SCORM 2004 (CAM 1.3, 3rd Edition)
+- ✅ **Async Processing** - Queue-based handling for large SCORM packages
+- ✅ **Real-time Progress** - WebSocket notifications during upload and processing
+- ✅ **CMI Data Model** - Complete SCORM Run-Time Environment implementation
+- ✅ **Multi-SCO Support** - Handle complex course structures with multiple SCOs
+- ✅ **Production Ready** - Battle-tested architecture with comprehensive error handling
+- ✅ **SOLID Architecture** - Service layer pattern, Repository pattern, DTOs
+- ✅ **Automatic Version Detection** - Intelligently detects SCORM version from manifest
+
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [WebSocket Real-Time Progress](#websocket-real-time-progress)
+- [API Reference](#api-reference)
+- [Architecture](#architecture)
+- [SCORM Version Support](#scorm-version-support)
+- [Production Deployment](#production-deployment)
+
+## Requirements
+
+- **PHP** 8.1 or higher
+- **Hyperf** 3.1.42 or higher
+- **Redis** - For async queue and WebSocket support
+- **Database** - PostgreSQL or MySQL
+- **Swoole** - PHP extension (installed with Hyperf)
+
+### Recommended for Production
+
+- PHP 8.2+ for optimal performance
+- Redis cluster for high availability
+- Separate queue workers for SCORM processing
+- CDN for SCORM content delivery
+
+## Installation
+
+### 1. Install via Composer
+
+```bash
+composer require onix-systems-php/hyperf-scorm
 ```
 
-## Publishing the config:
-```shell
-php bin/hyperf.php vendor:publish onix-systems-php/hyperf-support
+### 2. Publish Configuration
+
+```bash
+# Publish configuration file
+php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_config
+```
+
+### 3. Publish Migrations
+
+```bash
+# Publish database migrations
+php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_migrations
+```
+
+### 4. Publish Public Assets
+
+```bash
+# Publish JavaScript API and SCORM player
+php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_public_data
+```
+
+### 5. Run Migrations
+
+```bash
+php bin/hyperf.php migrate
+```
+
+### 6. Register Routes
+
+Add to your `config/routes.php`:
+
+```php
+<?php
+
+require_once './vendor/onix-systems-php/hyperf-scorm/publish/routes.php';
 ```
 
 ## Configuration
 
-### Configure `app`
-1. `domain` - application URL e.g. (https://github.com).
-2. `name` - application name.
-3. `team_name` - name of your support team.
-4. `user_model_class` - User model path. Then implement `OnixSystemsPHP\HyperfSupport\Contract\SupportUserInterface` contract in the model class.
+After publishing, configure the package in `config/autoload/scorm.php`:
 
-### Configure `integrations.trello`
-1. `key` - API Key. (You may find it here: https://trello.com/power-ups/admin)
-2. `token` - Authorization token.
-3. `webhook_url` - `app.domain` + `/v1/support/webhooks/trello`.
-4. `board_name` - Trello board name.
-5. `members` - For each type of ticket specify members which should be attached to the card on Trello.
-6. `lists` - Specify mapping for each status of ticket with corresponding list on Trello.
-7. `custom_fields` - Determine which custom fields should be on card on Trello.
-8. `trigger_lists` - Specify trigger lists on Trello. These lists determine whether to notify users if the ticket moved in one of these lists.
-9. `is_private_discussion` - This option must be `true` or `false`. If `true`, discussion under the ticket on Trello will be private and anyone can see it except on Trello.
-10. `keys_to_source` - Specify `your_api_username` => `your_source`.
+### Storage Configuration
 
-### Configure `integrations.slack`
-1. `token` - Bot Authorization key.
-2. `channel_id` - Slack channel id.
-3. Don't forget to enable subscriptions for your Slack bot and specify request URL: `app.domain` + `/v1/support/webhooks/slack`.
-4. `app_icon` - Your application's icon URL. e.g.
-5. `trello_icon` - Trello icon URL. (optional)
-6. `members` - For each type of ticket specify members which should be mentioned on Slack ticket. **Without '@'.**
-7. `custom_fields` - Determine which custom fields should be showed on Slack ticket.
-8. `is_private_discussion` - This option must be `true` or `false`. If `true`, discussion under the ticket on Slack will be private and anyone can see it except on Slack.
-9. `keys_to_source` - Specify `your_slack_channel_id` => `your_source`.
-
-### Configure `integrations.jira`
-1. `base_url` - Jira instance URL (e.g., https://your-domain.atlassian.net).
-2. `username` - Jira username or email.
-3. `password` - Jira API token (not your login password).
-4. `project_key` - Jira project key (e.g., "PROJ").
-5. `custom_fields` - Map custom field IDs to field names.
-6. `webhook_url` - `app.domain` + `/v1/support/webhooks/jira`.
-7. `issue_types` - Map ticket types to Jira issue types.
-8. `priorities` - Map priority levels to Jira priorities.
-9. `keys_to_source` - Specify `your_jira_project_key` => `your_source`.
-
-### Configure `routes`
-`require_once './vendor/onix-systems-php/hyperf-support/publish/routes.php';`
-
-## Basic Usage
-
-### Creating simple ticket:
-Try to send this `JSON` to `/v1/support/tickets` via `POST` method.
-```json
-{
-  "source": "default",
-  "title": "Lorem ipsum.",
-  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-  "custom_fields": {
-    "type": "Tweak",
-    "level": 3,
-    "priority": "Medium",
-    "status": "New"
-  },
-  "page_url": "https://google.com"
-}
+```php
+'storage' => [
+    'disk' => env('SCORM_STORAGE_DISK', 'local'),
+    'path' => env('SCORM_STORAGE_PATH', 'scorm-packages'),
+    'temp_path' => env('SCORM_TEMP_PATH', 'temp/scorm'),
+    'max_file_size' => env('SCORM_MAX_FILE_SIZE', 100 * 1024 * 1024), // 100MB
+],
 ```
 
-You should get something like this object:
-```json
-{
-    "id": 1,
-    "title": "Lorem ipsum.",
-    "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    "source": "default",
-    "custom_fields": {
-        "type": "Tweak",
-        "level": 3,
-        "status": "New",
-        "priority": "Medium"
-    },
-    "created_by": 6,
-    "modified_by": null,
-    "deleted_by": null,
-    "completed_at": null,
-    "trello_id": "660bc45ce19c204556caf1f5",
-    "trello_short_link": "qTHPdFoL",
-    "slack_id": "1712047194.779679",
-    "jira_id": "PROJ-123",
-    "jira_short_link": "PROJ-123",
-    "page_url": null,
-    "created_at": "2024-04-02 08:39:54",
-    "updated_at": "2024-04-02 08:40:36",
-    "deleted_at": null,
-    "files": []
-}
+### Tracking Configuration
+
+```php
+'tracking' => [
+    'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30), // seconds
+    'enable_debug_logging' => env('SCORM_DEBUG_LOGGING', false),
+],
 ```
 
-Finally, it should appear on Slack, Trello, and Jira.
+### Player Configuration
 
-### Creating ticket with files:
-Logic the same as for creating simple ticket, but you need to pass array with files' IDs:
-```json
-{
-    ...
-    "files": [1, 2, 3]
-}
+```php
+'player' => [
+    'timeout' => env('SCORM_PLAYER_TIMEOUT', 30000), // milliseconds
+    'debug' => env('SCORM_PLAYER_DEBUG', false),
+    'api_endpoint' => env('SCORM_API_ENDPOINT', '/api/v1/scorm/api'),
+],
 ```
 
-Finally, the ticket should appear on Slack, Trello, and Jira with attached files.
+### API Configuration
 
-### Updating ticket on Trello.
-Once the `ticket.done_status` is "Done" everytime when ticket moved to Done list on Trello the ticket will be marked as "completed".
+```php
+'api' => [
+    'version' => '1.2', // Default SCORM version
+    'strict_mode' => env('SCORM_STRICT_MODE', false),
+    'error_reporting' => env('SCORM_ERROR_REPORTING', true),
+],
+```
 
-### Updating ticket on Jira.
-When a ticket is updated in your system, it will automatically sync to Jira with the latest information including title, description, and custom fields.
+### Security Configuration
+
+```php
+'security' => [
+    'allowed_domains' => env('SCORM_ALLOWED_DOMAINS', '*'),
+    'iframe_sandbox' => env('SCORM_IFRAME_SANDBOX', 'allow-scripts allow-same-origin allow-forms'),
+    'csrf_protection' => env('SCORM_CSRF_PROTECTION', true),
+],
+```
+## WebSocket Real-Time Progress
+
+### Why WebSocket?
+
+Processing SCORM packages, especially large ones with complex structures, can take significant time. This package uses **WebSocket to provide real-time feedback** during the entire processing pipeline.
+
+### Processing Stages
+
+The WebSocket connection provides updates for these stages:
+
+1. **Initializing** - File upload started, job created
+2. **Extracting** - Unzipping SCORM package with progress percentage
+3. **Parsing** - Reading and validating imsmanifest.xml
+4. **Processing** - Creating database records and organizing files
+5. **Completed** - Package ready for use
+6. **Failed** - Error occurred with detailed error message
+
+### WebSocket Endpoint
+
+```
+ws://your-domain/scorm-progress?job_id={jobId}
+```
+
+### Client Example (JavaScript)
+
+```javascript
+const jobId = 'your-job-id-from-upload-response';
+const ws = new WebSocket(`ws://your-domain/scorm-progress?job_id=${jobId}`);
+
+ws.onopen = () => {
+  console.log('WebSocket connection established');
+};
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+
+  switch(data.status) {
+    case 'initializing':
+      console.log('Starting upload...');
+      break;
+    case 'extracting':
+      console.log(`Extracting: ${data.progress}%`);
+      updateProgressBar(data.progress);
+      break;
+    case 'parsing':
+      console.log('Parsing manifest...');
+      break;
+    case 'completed':
+      console.log('Package ready!', data.package);
+      redirectToPlayer(data.package.id);
+      break;
+    case 'failed':
+      console.error('Upload failed:', data.error);
+      showError(data.error);
+      break;
+  }
+};
+
+ws.onerror = (error) => {
+  console.error('WebSocket error:', error);
+};
+
+ws.onclose = () => {
+  console.log('WebSocket connection closed');
+};
+```
+
+## API Reference
+
+### Package Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/v1/scorm/packages/upload` | Upload SCORM .zip file |
+| POST | `/v1/scorm/packages` | Create package from uploaded file |
+| GET | `/v1/scorm/packages` | List all packages |
+| GET | `/v1/scorm/packages/{id}` | Get package details |
+| DELETE | `/v1/scorm/packages/{id}` | Delete package |
+
+### Player
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/v1/api/scorm/player/{packageId}/launch` | Launch SCORM player |
+
+### Job Monitoring
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/v1/scorm/jobs/{jobId}/status` | Get processing status |
+| POST | `/v1/scorm/jobs/batch-status` | Batch status check |
+| POST | `/v1/scorm/jobs/{jobId}/cancel` | Cancel processing job |
+
+### WebSocket
+
+| Protocol | Endpoint | Description |
+|----------|----------|-------------|
+| WS | `/scorm-progress?job_id={jobId}` | Real-time progress updates |
 
 ## Architecture
 
-### Core Components
-- **Domain-Driven Design**: Clear separation between business domains
-- **Repository Pattern**: Data access abstraction through repositories
-- **Service Layer**: Business logic encapsulation in service classes
-- **DTO Pattern**: Data transfer objects for API communication
+### Service Layer Components
 
-### Integration Patterns
-- **Facade Pattern**: Unifies mapping and formatting operations
-- **Strategy Pattern**: Different formatters for different field types
-- **Factory Pattern**: Creates appropriate formatters dynamically
-- **Open/Closed Principle**: Easy to extend without modifying existing code
+- **ScormPackageService** - Package management and CRUD operations
+- **ScormManifestParser** - XML manifest parsing with version detection
+- **ScormProgressTrackerService** - Learning progress tracking and CMI data management
+- **ScormWebSocketNotificationService** - Real-time WebSocket notifications
+- **ScormPackageProcessor** - Async processing of uploaded packages
 
-### SOLID Principles
-- **Single Responsibility**: Each class has one clear purpose
-- **Open/Closed**: Extensible through interfaces and abstract classes
-- **Liskov Substitution**: Proper inheritance hierarchies
-- **Interface Segregation**: Focused, specific interfaces
-- **Dependency Inversion**: Dependencies on abstractions, not concretions
+### SCORM Standards Compliance
 
-## Recent Improvements
+- **SCORM 1.2** - Full Run-Time Environment implementation
+- **SCORM 2004** - CAM 1.3 and 4th Edition support
+- **Automatic Version Detection** - From `<schemaversion>` in manifest
+- **CMI Data Model** - Complete implementation for both versions
 
-### Jira Integration Enhancements
-- **Proper JSON Structure**: Correct Jira Document Format generation
-- **204 Response Handling**: Proper handling of Jira API 204 No Content responses
-- **Error Handling**: Comprehensive exception handling for API failures
-- **Code Quality**: 43% code reduction through SOLID principles implementation
+## SCORM Version Support
 
-### Package Analysis
-- **186 Classes Analyzed**: Comprehensive review of the entire package
-- **10 Unused Classes Identified**: Opportunities for cleanup
-- **Architecture Quality**: High adherence to SOLID principles
-- **Maintainability**: Improved code organization and documentation
+| Feature | SCORM 1.2 | SCORM 2004 |
+|---------|:---------:|:----------:|
+| Manifest Parsing | ✅ | ✅ |
+| Auto Version Detection | ✅ | ✅ |
+| Multiple SCOs | ✅ | ✅ |
+| Launch URL Construction | ✅ | ✅ |
+| Parameters Support | ✅ | ✅ |
+| xml:base Support | ✅ | ✅ |
+| CMI Data Model | SCORM 1.2 | SCORM 2004 |
+| Sequencing Rules | ❌ | ✅ |
+| Navigation Controls | Basic | Advanced |
+| Objectives Tracking | Basic | Advanced |
+| Interactions | ✅ | ✅ |
+| Suspend Data | ✅ | ✅ |
 
-## Contributing
+### Supported schemaversion Values
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+**SCORM 1.2:**
+- `1.2`
+- `CAM 1.2`
+- Any version containing "1.2"
 
-## License
+**SCORM 2004:**
+- `CAM 1.3`
+- `2004`
+- `2004 3rd Edition`
+- `2004 4th Edition`
+- Any version containing "2004" or "CAM 1.3"
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Production Deployment
+
+### Pre-Deployment Checklist
+
+- [ ] Configure Redis for queue and cache
+- [ ] Set up WebSocket server on separate port (default: 9502)
+- [ ] Configure file storage (local/S3/NFS)
+- [ ] Set `SCORM_MAX_FILE_SIZE` appropriate for your needs
+- [ ] Enable CORS if frontend is on different domain
+- [ ] Configure async queue workers (minimum 2-3 workers)
+- [ ] Set up monitoring and logging
+- [ ] Review security settings
+- [ ] Configure backup strategy for SCORM packages
+- [ ] Test WebSocket connectivity
+
+### Environment Variables
+
+```bash
+# Storage
+SCORM_STORAGE_DISK=local
+SCORM_STORAGE_PATH=scorm-packages
+SCORM_TEMP_PATH=temp/scorm
+SCORM_MAX_FILE_SIZE=104857600  # 100MB in bytes
+
+# Tracking
+SCORM_AUTO_COMMIT_INTERVAL=30
+SCORM_DEBUG_LOGGING=false
+
+# Player
+SCORM_PLAYER_TIMEOUT=30000
+SCORM_PLAYER_DEBUG=false
+
+# API
+SCORM_STRICT_MODE=false
+SCORM_ERROR_REPORTING=true
+
+# Security
+SCORM_ALLOWED_DOMAINS=*
+SCORM_CSRF_PROTECTION=true
+
+# Cache
+SCORM_CACHE_TTL=3600
+```
+
+### Queue Workers
+
+Start queue workers for SCORM processing:
+
+```bash
+# Production: Run 2-3 workers
+php bin/hyperf.php queue:work scorm-processing --daemon
+
+# Development: Single worker
+php bin/hyperf.php queue:work scorm-processing
+```
+
+### WebSocket Server
+
+Configure WebSocket server in `config/autoload/server.php`:
+
+```php
+'servers' => [
+    [
+        'name' => 'socket-io',
+        'type' => Server::SERVER_WEBSOCKET,
+        'host' => '0.0.0.0',
+        'port' => 9502,
+        'sock_type' => SWOOLE_SOCK_TCP,
+        'callbacks' => [
+            Event::ON_HAND_SHAKE => [Hyperf\WebSocketServer\Server::class, 'onHandShake'],
+            Event::ON_MESSAGE => [Hyperf\WebSocketServer\Server::class, 'onMessage'],
+            Event::ON_CLOSE => [Hyperf\WebSocketServer\Server::class, 'onClose'],
+        ],
+    ],
+],
+```
+
+### Performance Recommendations
+
+- **Redis Cluster** - For high availability and scalability
+- **Queue Workers** - Minimum 2-3 dedicated workers for SCORM processing
+- **File Storage** - Use S3 or similar for scalable storage
