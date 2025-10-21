@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Factory;
 
-use OnixSystemsPHP\HyperfScorm\Strategy\ScormApiStrategyInterface;
-use OnixSystemsPHP\HyperfScorm\Strategy\Scorm12ApiStrategy;
-use OnixSystemsPHP\HyperfScorm\Strategy\Scorm2004ApiStrategy;
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\Scorm2004ApiStrategy;
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\ScormApiStrategyInterface;
+use OnixSystemsPHP\HyperfScorm\Strategy\Scorm12ApiStrategy;
 
 /**
  * Factory for creating SCORM API strategies based on version

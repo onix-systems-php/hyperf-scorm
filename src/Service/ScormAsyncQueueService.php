@@ -8,7 +8,7 @@ use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormAsyncJobDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
-use OnixSystemsPHP\HyperfScorm\Service\AsyncScormProcessingService;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Service for managing async SCORM processing queue
@@ -23,7 +23,8 @@ class ScormAsyncQueueService
         private readonly ScormTempFileService $tempFileService,
         private readonly ScormJobStatusService $jobStatusService,
         private readonly AsyncScormProcessingService $processingService,
-    ) {}
+    ) {
+    }
 
     /**
      * Queue SCORM package for async processing
@@ -33,13 +34,10 @@ class ScormAsyncQueueService
      */
     public function queueProcessing(ScormUploadDTO $dto): ScormAsyncJobDTO
     {
-        // Generate unique job ID
-        $jobId = $this->jobIdGenerator->generate();
+        $jobId = Uuid::uuid4()->toString();
 
-        // Save uploaded file to temporary location
         $tempPath = $this->tempFileService->saveTempFile($dto->file);
 
-        // Initialize job status in Redis
         $this->jobStatusService->initializeJob($jobId, [
             'job_id' => $jobId,
             'status' => 'queued',
@@ -50,7 +48,6 @@ class ScormAsyncQueueService
             'created_at' => time(),
         ]);
 
-        // Push job to async queue
         $driver = $this->driverFactory->get('scorm-processing');
         $driver->push(new ProcessScormPackageJob(
             $jobId,
@@ -64,7 +61,6 @@ class ScormAsyncQueueService
             ]
         ));
 
-        // Return job status DTO
         return ScormAsyncJobDTO::make([
             'job_id' => $jobId,
             'status' => 'queued',
@@ -84,7 +80,7 @@ class ScormAsyncQueueService
     {
         // Estimate: 1MB = 2 seconds processing time
         $megabytes = $fileSize / (1024 * 1024);
-        return (int) ($megabytes * 2);
+        return (int)($megabytes * 2);
     }
 
     /**
@@ -95,7 +91,6 @@ class ScormAsyncQueueService
      */
     public function cancelJob(string $jobId): bool
     {
-        // Delegate to async processing service
         return $this->processingService->cancelProcessing($jobId);
     }
 

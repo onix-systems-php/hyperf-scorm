@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\Strategy;
+namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy;
 
 /**
  * Strategy interface for different SCORM API versions

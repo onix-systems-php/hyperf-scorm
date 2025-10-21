@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\WebSocket;
+namespace OnixSystemsPHP\HyperfScorm\Constants\WebSocket;
 
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\OnCloseInterface;
@@ -11,9 +11,6 @@ use Hyperf\Contract\OnOpenInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Context;
 use Psr\Log\LoggerInterface;
-use Swoole\Http\Request;
-use Swoole\WebSocket\Frame;
-use Swoole\WebSocket\Server;
 
 class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInterface, OnCloseInterface
 {

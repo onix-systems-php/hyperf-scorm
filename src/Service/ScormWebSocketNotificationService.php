@@ -5,8 +5,7 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
-use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
-use OnixSystemsPHP\HyperfScorm\WebSocket\ScormProgressWebSocketController;
+use OnixSystemsPHP\HyperfScorm\Constants\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -32,7 +31,7 @@ class ScormWebSocketNotificationService
     public function subscribeToUpdates(int $userId, int $fd): void
     {
         $channel = self::USER_CHANNEL_PREFIX . $userId;
-        
+
         try {
             // Store user connection mapping
             $this->redis->sadd("ws_connections:{$userId}", (string)$fd);
@@ -71,7 +70,6 @@ class ScormWebSocketNotificationService
     public function sendUploadProgressUpdate(int $userId, string $jobId, array $progressData): void
     {
         try {
-            // Get WebSocket connections subscribed to this job_id
             $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
 
             if (empty($connections)) {
@@ -82,7 +80,6 @@ class ScormWebSocketNotificationService
                 return; // No active connections
             }
 
-            // Format message to match client expectations
             $message = json_encode([
                 'type' => 'progress',
                 'data' => [
@@ -136,14 +133,12 @@ class ScormWebSocketNotificationService
     public function sendCompletionNotification(int $userId, string $jobId, array $result): void
     {
         try {
-            // Get WebSocket connections subscribed to this job_id
             $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 return; // No active connections
             }
 
-            // Send completion as progress message with status=completed
             $message = json_encode([
                 'type' => 'progress',
                 'data' => [
@@ -193,14 +188,12 @@ class ScormWebSocketNotificationService
     public function sendErrorNotification(int $userId, string $jobId, string $error): void
     {
         try {
-            // Get WebSocket connections subscribed to this job_id
             $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 return; // No active connections
             }
 
-            // Send error as progress message with status=failed
             $message = json_encode([
                 'type' => 'progress',
                 'data' => [
@@ -272,7 +265,7 @@ class ScormWebSocketNotificationService
 
             foreach ($keys as $key) {
                 $connections = $this->redis->smembers($key);
-                
+
                 foreach ($connections as $fd) {
                     try {
                         // Try to send a ping to test connection
@@ -313,12 +306,11 @@ class ScormWebSocketNotificationService
     {
         $fileSize = $progressData['file_size'] ?? null;
         $progress = $progressData['progress'] ?? 0;
-        
+
         if ($fileSize === null || $progress <= 0) {
             return null;
         }
 
-        // Calculate processed bytes based on progress percentage
         return (int)($fileSize * ($progress / 100));
     }
 

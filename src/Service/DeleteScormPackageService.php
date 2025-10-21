@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\DbConnection\Annotation\Transactional;
+use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 #[Service]

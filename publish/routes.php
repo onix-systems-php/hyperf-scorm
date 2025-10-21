@@ -2,11 +2,11 @@
 declare(strict_types=1);
 
 use Hyperf\HttpServer\Router\Router;
+use OnixSystemsPHP\HyperfScorm\Constants\WebSocket\ScormProgressWebSocketController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormJobStatusController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormPlayerController;
-use OnixSystemsPHP\HyperfScorm\WebSocket\ScormProgressWebSocketController;
 
 // SCORM Package Management Routes
 Router::addGroup('/v1/scorm/packages', function () {

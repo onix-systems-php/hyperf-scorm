@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\Strategy;
+namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy;
 
 /**
  * SCORM 2004 API Strategy - handles SCORM 2004 specific tracking and API

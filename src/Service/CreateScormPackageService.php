@@ -9,6 +9,8 @@ use OnixSystemsPHP\HyperfScorm\DTO\CreateScormPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 
 /**
  * Service for creating SCORM packages
@@ -16,8 +18,11 @@ use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 #[Service]
 class CreateScormPackageService
 {
+    public const ACTION = 'create_scorm_package';
+
     public function __construct(
-        private readonly ScormPackageRepository $scormPackageRepository
+        private readonly ScormPackageRepository $scormPackageRepository,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -35,6 +40,8 @@ class CreateScormPackageService
             'scorm_version' => $dto->scormVersion ?? ScormVersionEnum::SCORM_12->value,
         ]);
 
+        $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, $package->toArray()));
+
         return $this->scormPackageRepository->save($package);
     }
 
@@ -48,7 +55,7 @@ class CreateScormPackageService
             throw new \InvalidArgumentException('Package identifier is required');
         }
 
-        if (!in_array($dto->scormVersion, ScormVersionEnum::values())) {
+        if (!in_array($dto->version, ScormVersionEnum::values())) {
             throw new \InvalidArgumentException('Invalid SCORM version');
         }
     }
