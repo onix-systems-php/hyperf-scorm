@@ -56,7 +56,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'completedAt', type: 'string', format: 'date-time', example: '2025-08-29T18:26:40.006Z'),
     ]
 )]
-class RequestScormCommit extends FormRequest
+class RequestCommitScorm extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

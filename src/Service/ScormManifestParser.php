@@ -313,10 +313,8 @@ class ScormManifestParser
         $base = $resource['base'];
         $parameters = (string)($item['parameters'] ?? '');
 
-        // Объединяем base + href
         $launchUrl = $base ? rtrim($base, '/') . '/' . ltrim($href, '/') : $href;
 
-        // Добавляем parameters если есть
         if (!empty($parameters)) {
             $separator = strpos($launchUrl, '?') !== false ? '&' : '?';
             $launchUrl .= $separator . $parameters;

@@ -26,8 +26,7 @@ class CreateScormPackageService
     {
         $this->validatePackage($dto);
 
-        $package = new ScormPackage();
-        $package->fill([
+        $package = $this->scormPackageRepository->create([
             'title' => $dto->title,
             'version' => $dto->version ?? '1.0',
             'identifier' => $dto->identifier,

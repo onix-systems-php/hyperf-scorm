@@ -89,7 +89,7 @@ class ScormJobStatusController extends AbstractController
                         new OA\Property(
                             property: 'data',
                             type: 'object',
-                            additionalProperties: new OA\Schema(
+                            additionalProperties: new OA\AdditionalProperties(
                                 ref: '#/components/schemas/ResourceScormJobStatus'
                             )
                         ),

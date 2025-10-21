@@ -6,7 +6,7 @@ namespace OnixSystemsPHP\HyperfScorm\Controller;
 use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
-use OnixSystemsPHP\HyperfScorm\Request\RequestScormCommit;
+use OnixSystemsPHP\HyperfScorm\Request\RequestCommitScorm;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormCommit;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormInitialize;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\InitializeScormService;
@@ -98,10 +98,10 @@ class ScormApiController extends AbstractController
         ],
     )]//@SONAR_START@
     public function commit(
-        RequestScormCommit $request,
+        RequestCommitScorm $request,
         ScormCommitService $service,
-        int $packageId,
-        string $sessionToken,
+        int                $packageId,
+        string             $sessionToken,
     ): ResourceScormCommit {
         $scormCommitDTO = ScormCommitDTO::make([...$request->validated(), 'session_token' => $sessionToken]);
         $result = $service->run($packageId, $scormCommitDTO);

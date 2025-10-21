@@ -31,7 +31,7 @@ class ScormCommitService
         $this->updateSessionSummary($session, $scormCommitDTO);
         $this->createInteractions($session, $scormCommitDTO->interactions);
 
-
+        //todo should  return dto not array
         return [
             'session_id' => $session->id,
             'student_id' => $scormCommitDTO->student_id,
