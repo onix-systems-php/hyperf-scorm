@@ -56,7 +56,7 @@ class ScormApiController extends AbstractController
         InitializeScormService $initializeScormService,
         int $packageId,
     ): ResourceScormInitialize {
-//        $userId = $this->sessionManager?->user()->getId() ?? null;
+    //        $userId = $this->sessionManager?->user()->getId() ?? null;
         $userId = 1;
         return ResourceScormInitialize::make($initializeScormService->run($packageId, $userId));
     }
@@ -100,8 +100,8 @@ class ScormApiController extends AbstractController
     public function commit(
         RequestCommitScorm $request,
         ScormCommitService $service,
-        int                $packageId,
-        string             $sessionToken,
+        int $packageId,
+        string $sessionToken,
     ): ResourceScormCommit {
         $scormCommitDTO = ScormCommitDTO::make([...$request->validated(), 'session_token' => $sessionToken]);
         $result = $service->run($packageId, $scormCommitDTO);

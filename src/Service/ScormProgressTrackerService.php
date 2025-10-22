@@ -7,7 +7,7 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
 use OnixSystemsPHP\HyperfCore\Service\Service;
-use OnixSystemsPHP\HyperfScorm\Constants\WebSocket\ScormProgressWebSocketController;
+use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
 
 #[Service]

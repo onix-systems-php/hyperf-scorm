@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace OnixSystemsPHP\HyperfScorm\Constants\WebSocket;
+namespace OnixSystemsPHP\HyperfScorm\Controller\WebSocket;
 
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Contract\OnCloseInterface;

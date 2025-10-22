@@ -10,16 +10,6 @@ class ConfigProvider
         return [
             'dependencies' => [
 
-                // Service Classes
-                \OnixSystemsPHP\HyperfScorm\Service\ScormPackageService::class =>
-                    \OnixSystemsPHP\HyperfScorm\Service\ScormPackageService::class,
-
-                \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class =>
-                    \OnixSystemsPHP\HyperfScorm\Service\ScormScoService::class,
-
-//                Service\ScormApi\ScormPlayerService::class =>
-//                    Service\ScormApi\ScormPlayerService::class,
-
             ],
             'commands' => [],
             'annotations' => [
@@ -49,10 +39,10 @@ class ConfigProvider
                     'destination' => BASE_PATH . '/migrations',
                 ],
                 [
-                    'id' => 'scorm_public_data',
-                    'description' => 'Move public data',
-                    'source' => __DIR__ . '../public/',
-                    'destination' => BASE_PATH . '/public/scorm/',
+                    'id' => 'scorm_example',
+                    'description' => 'Move example SCORM files to public directory.',
+                    'source' => __DIR__ . '/../publish/public/example',
+                    'destination' => BASE_PATH . '/storage/public/assets/scorm/',
                 ],
             ],
         ];
