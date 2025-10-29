@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller\WebSocket;
@@ -11,12 +10,12 @@ use Hyperf\Contract\OnOpenInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Context;
 use Psr\Log\LoggerInterface;
+use function Hyperf\Config\config;
 
 class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInterface, OnCloseInterface
 {
     private const REDIS_KEY_PREFIX = 'ws_job_connections:';
     private const REDIS_FD_TO_JOB_PREFIX = 'ws_fd_to_job:';
-    private const REDIS_TTL = 86400; // 24 hours
 
     public function onMessage($server, $frame): void
     {
@@ -32,7 +31,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
         }
 
         if (isset($data['action']) && $data['action'] === 'subscribe' && isset($data['job_id'])) {
-            // Validate job_id format (UUID)
             if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $data['job_id'])) {
                 $server->push($frame->fd, json_encode([
                     'type' => 'error',
@@ -41,10 +39,13 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
                 return;
             }
 
-            // Store connection in Redis (cross-process)
             $redis = ApplicationContext::getContainer()->get(Redis::class);
             $redis->hSet(self::REDIS_KEY_PREFIX . $data['job_id'], (string)$frame->fd, time());
-            $redis->set(self::REDIS_FD_TO_JOB_PREFIX . $frame->fd, $data['job_id'], ['EX' => self::REDIS_TTL]);
+            $redis->set(
+                self::REDIS_FD_TO_JOB_PREFIX . $frame->fd,
+                $data['job_id'],
+                ['EX' => config('scorm.redis.ttl.websocket', 86400)]
+            );
 
             $server->push($frame->fd, json_encode([
                 'type' => 'subscribed',
@@ -68,7 +69,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
             'query_string' => $queryString,
         ]);
 
-        // Validate job_id format (UUID)
         if ($jobId && !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $jobId)) {
             $logger->warning('[WS Debug] Invalid job_id format', [
                 'fd' => $request->fd,
@@ -84,12 +84,15 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
         }
 
         if ($jobId) {
-            // Store connection in Redis (cross-process shared storage)
             $redis = ApplicationContext::getContainer()->get(Redis::class);
-            $redis->hSet(self::REDIS_KEY_PREFIX . $jobId, (string)$request->fd, time());
-            $redis->set(self::REDIS_FD_TO_JOB_PREFIX . $request->fd, $jobId, ['EX' => self::REDIS_TTL]);
 
-            // Get all connections for this job
+            $redis->hSet(self::REDIS_KEY_PREFIX . $jobId, (string)$request->fd, time());
+            $redis->set(
+                self::REDIS_FD_TO_JOB_PREFIX . $request->fd,
+                $jobId,
+                ['EX' => config('scorm.redis.ttl.websocket', 86400)]
+            );
+
             $allConnections = $redis->hGetAll(self::REDIS_KEY_PREFIX . $jobId);
 
             $logger->info('[WS Debug] Connection registered in Redis', [
@@ -124,11 +127,9 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
         $logger = ApplicationContext::getContainer()->get(LoggerInterface::class);
         $redis = ApplicationContext::getContainer()->get(Redis::class);
 
-        // Get job_id from Redis
         $jobId = $redis->get(self::REDIS_FD_TO_JOB_PREFIX . $fd);
 
         if ($jobId) {
-            // Remove connection from Redis
             $redis->hDel(self::REDIS_KEY_PREFIX . $jobId, (string)$fd);
             $redis->del(self::REDIS_FD_TO_JOB_PREFIX . $fd);
 
@@ -141,7 +142,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
                 'remaining_connections' => count($remainingConnections),
             ]);
 
-            // Clean up empty job keys
             if (empty($remainingConnections)) {
                 $redis->del(self::REDIS_KEY_PREFIX . $jobId);
             }
@@ -157,7 +157,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
         $logger = ApplicationContext::getContainer()->get(LoggerInterface::class);
         $redis = ApplicationContext::getContainer()->get(Redis::class);
 
-        // Get all FDs for this job from Redis (cross-process)
         $connections = $redis->hGetAll(self::REDIS_KEY_PREFIX . $jobId);
 
         $logger->info('[WS Debug] Getting subscribed FDs from Redis', [
@@ -167,7 +166,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
             'total_connections' => count($connections),
         ]);
 
-        // Extract FD integers from Redis hash keys
         $fds = array_map('intval', array_keys($connections));
 
         $logger->info('[WS Debug] Found FDs for job from Redis', [

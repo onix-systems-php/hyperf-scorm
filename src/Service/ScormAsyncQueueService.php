@@ -17,9 +17,10 @@ use Ramsey\Uuid\Uuid;
 #[Service]
 class ScormAsyncQueueService
 {
+    private const TIME_PER_MB = 2;
+
     public function __construct(
         private readonly DriverFactory $driverFactory,
-        private readonly ScormJobIdGenerator $jobIdGenerator,
         private readonly ScormTempFileService $tempFileService,
         private readonly ScormJobStatusService $jobStatusService,
         private readonly AsyncScormProcessingService $processingService,
@@ -54,7 +55,7 @@ class ScormAsyncQueueService
             $tempPath,
             $dto->file->getClientFilename(),
             $dto->file->getSize(),
-            1, // TODO: Get actual user ID from context
+            1, // FIXME: Get actual user ID from authentication context - requires UserContextService implementation
             [
                 'title' => $dto->title,
                 'description' => $dto->description ?? null,
@@ -78,9 +79,8 @@ class ScormAsyncQueueService
      */
     private function estimateProcessingTime(int $fileSize): int
     {
-        // Estimate: 1MB = 2 seconds processing time
         $megabytes = $fileSize / (1024 * 1024);
-        return (int)($megabytes * 2);
+        return (int)($megabytes * self::TIME_PER_MB);
     }
 
     /**

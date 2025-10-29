@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
@@ -21,18 +20,19 @@ class ScormTempFileService
     public function __construct(
         private readonly ScormJobIdGenerator $jobIdGenerator,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     /**
      * Save uploaded file to temporary location
      */
     public function saveTempFile(UploadedFile $file): string
     {
-        if (!is_dir(self::TEMP_DIR)) {
-            mkdir(self::TEMP_DIR, 0755, true);
+        if (!is_dir($this->getTempDir())) {
+            mkdir($this->getTempDir(), 0755, true);
         }
 
-        $tempPath = self::TEMP_DIR . '/' . $this->jobIdGenerator->generate() . '.zip';
+        $tempPath = $this->getTempDir() . '/' . $this->jobIdGenerator->generate() . '.zip';
         $file->moveTo($tempPath);
 
         return $tempPath;

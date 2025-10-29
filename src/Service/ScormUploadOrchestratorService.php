@@ -7,6 +7,7 @@ use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
+use function Hyperf\Config\config;
 
 /**
  * Orchestrator for SCORM package uploads
@@ -15,17 +16,11 @@ use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 #[Service]
 class ScormUploadOrchestratorService
 {
-    /**
-     * File size threshold for async processing (25MB)
-     * Files larger than this will be processed asynchronously
-     * Based on analysis: 25MB+ files risk 60s timeout
-     */
-    private const ASYNC_THRESHOLD_BYTES = 25 * 1024 * 1024;
-
     public function __construct(
         private readonly ScormPackageProcessor $packageProcessor,
         private readonly ScormAsyncQueueService $asyncQueueService,
-    ) {}
+    ) {
+    }
 
     /**
      * Process SCORM package upload
@@ -78,7 +73,7 @@ class ScormUploadOrchestratorService
      */
     private function shouldProcessAsync(int $fileSize): bool
     {
-        return $fileSize >= self::ASYNC_THRESHOLD_BYTES;
+        return $fileSize >= $this->getAsyncThreshold();
     }
 
     /**
@@ -88,7 +83,7 @@ class ScormUploadOrchestratorService
      */
     public function getAsyncThreshold(): int
     {
-        return self::ASYNC_THRESHOLD_BYTES;
+        return config('scorm.processing.async_threshold_bytes');
     }
 
     /**

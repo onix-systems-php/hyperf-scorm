@@ -14,6 +14,7 @@ use OnixSystemsPHP\HyperfScorm\Service\ScormTempFileService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormWebSocketNotificationService;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use function Hyperf\Config\config;
 
 /**
  * Asynchronous job for processing SCORM packages
@@ -23,8 +24,8 @@ class ProcessScormPackageJob extends Job
 {
     public const QUEUE_NAME = 'scorm-processing';
 
-    protected int $maxAttempts = 3;
-    protected int $delay = 0;
+    protected int $maxAttempts;
+    protected int $delay;
 
     public function __construct(
         private readonly string $jobId,
@@ -34,6 +35,8 @@ class ProcessScormPackageJob extends Job
         private readonly int $userId,
         private readonly array $metadata = []
     ) {
+        $this->maxAttempts = config('scorm.queue.max_attempts', 3);
+        $this->delay = config('scorm.queue.retry_delay', 0);
     }
 
     public function handle(): void

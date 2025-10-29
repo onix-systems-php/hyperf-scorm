@@ -3,11 +3,13 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
 use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use function Hyperf\Config\config;
 
 /**
  * WebSocket notification service for SCORM file upload progress
@@ -18,11 +20,22 @@ class ScormWebSocketNotificationService
     private const CHANNEL_PREFIX = 'scorm_notifications:';
     private const USER_CHANNEL_PREFIX = 'scorm_user:';
 
+    private readonly array $stageMessages;
+
     public function __construct(
         private readonly Redis $redis,
         private readonly Sender $sender,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ConfigInterface $config,
     ) {
+        $this->stageMessages = $this->config->get('scorm.messages.stage_details', [
+            'initializing' => 'Preparing SCORM package...',
+            'extracting' => 'Extracting files from package...',
+            'processing' => 'Processing SCORM manifest...',
+            'uploading' => 'Uploading content to storage...',
+            'completed' => 'Package processing completed',
+            'failed' => 'Processing failed',
+        ]);
     }
 
     /**
@@ -35,8 +48,7 @@ class ScormWebSocketNotificationService
         try {
             // Store user connection mapping
             $this->redis->sadd("ws_connections:{$userId}", (string)$fd);
-            $this->redis->expire("ws_connections:{$userId}", 86400); // 24 hours
-
+            $this->redis->expire("ws_connections:{$userId}", config('scorm.redis.ttl.websocket', 86400));
         } catch (Throwable $e) {
             $this->logger->error('Failed to subscribe user to SCORM notifications', [
                 'user_id' => $userId,
@@ -53,7 +65,6 @@ class ScormWebSocketNotificationService
     {
         try {
             $this->redis->srem("ws_connections:{$userId}", (string)$fd);
-
         } catch (Throwable $e) {
             $this->logger->error('Failed to unsubscribe user from SCORM notifications', [
                 'user_id' => $userId,
@@ -114,7 +125,6 @@ class ScormWebSocketNotificationService
                 'progress' => $progressData['progress'] ?? 0,
                 'stage' => $progressData['stage'] ?? 'unknown',
             ]);
-
         } catch (Throwable $e) {
             $this->logger->error('Failed to send SCORM upload progress update via WebSocket', [
                 'user_id' => $userId,
@@ -172,7 +182,6 @@ class ScormWebSocketNotificationService
                 'connections' => count($connections),
                 'sent' => $sentCount,
             ]);
-
         } catch (Throwable $e) {
             $this->logger->error('Failed to send SCORM completion notification via WebSocket', [
                 'user_id' => $userId,
@@ -227,7 +236,6 @@ class ScormWebSocketNotificationService
                 'connections' => count($connections),
                 'sent' => $sentCount,
             ]);
-
         } catch (Throwable $e) {
             $this->logger->error('Failed to send SCORM error notification via WebSocket', [
                 'user_id' => $userId,
@@ -290,7 +298,6 @@ class ScormWebSocketNotificationService
             }
 
             return $cleanedCount;
-
         } catch (Throwable $e) {
             $this->logger->error('Failed to cleanup dead WebSocket connections', [
                 'error' => $e->getMessage(),
@@ -311,7 +318,7 @@ class ScormWebSocketNotificationService
             return null;
         }
 
-        return (int)($fileSize * ($progress / 100));
+        return (int)($fileSize * $progress / 100);
     }
 
     /**
@@ -319,14 +326,6 @@ class ScormWebSocketNotificationService
      */
     private function getDefaultStageDetails(string $stage): string
     {
-        return match ($stage) {
-            'initializing' => 'Preparing SCORM package...',
-            'extracting' => 'Extracting files from package...',
-            'processing' => 'Processing SCORM manifest...',
-            'uploading' => 'Uploading content to storage...',
-            'completed' => 'Package processing completed',
-            'failed' => 'Processing failed',
-            default => 'Processing...',
-        };
+        return $this->stageMessages[$stage] ?? 'Processing...';
     }
 }

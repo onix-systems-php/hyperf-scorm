@@ -1,11 +1,11 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfCore\Service\Service;
+use function Hyperf\Config\config;
 
 /**
  * Service for managing SCORM job statuses in Redis
@@ -17,12 +17,11 @@ class ScormJobStatusService
     private const JOB_STATUS_PREFIX = 'scorm:job:';
     private const PROGRESS_PREFIX = 'scorm_progress:';
     private const RESULT_PREFIX = 'scorm_result:';
-    private const JOB_TTL = 3600; // 1 hour
-    private const RESULT_TTL = 86400; // 24 hours
 
     public function __construct(
         private readonly Redis $redis,
-    ) {}
+    ) {
+    }
 
     /**
      * Initialize job status when job is queued
@@ -30,7 +29,8 @@ class ScormJobStatusService
     public function initializeJob(string $jobId, array $data): void
     {
         $key = self::JOB_STATUS_PREFIX . $jobId;
-        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+        $ttl = config('scorm.redis.ttl.job_status', 3600);
+        $this->redis->setex($key, $ttl, json_encode($data));
     }
 
     /**
@@ -39,7 +39,8 @@ class ScormJobStatusService
     public function updateProgress(string $jobId, array $data): void
     {
         $key = self::PROGRESS_PREFIX . $jobId;
-        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+        $ttl = config('scorm.redis.ttl.job_status', 3600);
+        $this->redis->setex($key, $ttl, json_encode($data));
     }
 
     /**
@@ -48,7 +49,8 @@ class ScormJobStatusService
     public function setResult(string $jobId, array $data, ?int $ttl = null): void
     {
         $key = self::RESULT_PREFIX . $jobId;
-        $this->redis->setex($key, $ttl ?? self::RESULT_TTL, json_encode($data));
+        $defaultTtl = config('scorm.redis.ttl.job_result', 86400);
+        $this->redis->setex($key, $ttl ?? $defaultTtl, json_encode($data));
     }
 
     /**

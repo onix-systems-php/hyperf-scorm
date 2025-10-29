@@ -13,16 +13,16 @@ use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-/**
- * Memory-efficient SCORM File Processor using streams
- * Handles large SCORM packages without loading entire files into memory
- */
 class ScormFileProcessor
 {
     private const MANIFEST_FILENAME = 'imsmanifest.xml';
-    private const TEMP_EXTRACT_PREFIX = 'scorm_extract_';
     private const CHUNK_SIZE = 8 * 1024 * 1024; // 8MB chunks
-    private const MAX_MEMORY_USAGE = 512 * 1024 * 1024; // 512MB limit
+    private const TEMP_EXTRACT_PREFIX = 'scorm_extract_';
+    private const MEMORY_CHECK_INTERVAL_UPLOAD = 50;
+    private const PROGRESS_INTERVAL_FILES = 25;
+    private const MEMORY_WARNING_THRESHOLD = 0.8;
+    private const MEMORY_TEMP_FILE_THRESHOLD = 0.7;
+    private readonly int $maxMemoryUsage;
 
     public function __construct(
         private readonly ScormManifestParser $manifestParser,
@@ -30,6 +30,7 @@ class ScormFileProcessor
         private readonly ConfigInterface $config,
         private readonly LoggerInterface $logger
     ) {
+        $this->maxMemoryUsage = $this->config->get('scorm.performance.max_memory_usage', 512 * 1024 * 1024);
     }
 
     /**
@@ -130,7 +131,7 @@ class ScormFileProcessor
             $extractedFiles++;
 
             // Send progress updates every 25 files or 10% progress
-            if (($extractedFiles % 25 === 0) || ($i % max(1, intval($numFiles * 0.1)) === 0)) {
+            if (($extractedFiles % self::PROGRESS_INTERVAL_FILES === 0) || ($i % max(1, intval($numFiles * 0.1)) === 0)) {
                 $progress = $this->calculateExtractionProgress($extractedFiles, $numFiles);
                 if ($progressCallback && $progress) {
                     call_user_func($progressCallback, 'extracting', $progress);
@@ -139,7 +140,7 @@ class ScormFileProcessor
 
             // Memory management every 100 files
             if ($i % 100 === 0) {
-                if (memory_get_usage(true) > self::MAX_MEMORY_USAGE) {
+                if (memory_get_usage(true) > $this->maxMemoryUsage) {
                     $this->logger->warning('High memory usage detected during extraction', [
                         'memory_usage' => memory_get_usage(true),
                         'files_processed' => $extractedFiles,
@@ -218,17 +219,17 @@ class ScormFileProcessor
                     $this->uploadSingleFileStreaming($filesystem, $file, $extractPath, $packagePath);
                     $fileCount++;
 
-                    // Send progress updates every 25 files or 10% progress
-                    if (($fileCount % 25 === 0) || ($fileCount % max(1, intval($totalFiles * 0.1)) === 0)) {
+                    // Send progress updates based on configured intervals
+                    if (($fileCount % self::PROGRESS_INTERVAL_FILES === 0) || ($fileCount % max(1, intval($totalFiles * 0.1)) === 0)) {
                         $progress = $this->calculateUploadProgress($fileCount, $totalFiles);
                         if ($progressCallback && $progress) {
                             call_user_func($progressCallback, 'uploading', $progress);
                         }
                     }
 
-                    // Monitor memory every 50 files
-                    if ($fileCount % 50 === 0) {
-                        if (memory_get_usage(true) > self::MAX_MEMORY_USAGE) {
+                    // Monitor memory at configured intervals
+                    if ($fileCount % self::MEMORY_CHECK_INTERVAL_UPLOAD === 0) {
+                        if (memory_get_usage(true) > $this->maxMemoryUsage) {
                             gc_collect_cycles();
                         }
                     }
@@ -307,10 +308,10 @@ class ScormFileProcessor
             $totalContent .= $chunk;
 
             // Check memory usage and flush if needed
-            $this->checkMemoryUsage();
+            $this->checkMemoryUsage('Chunked upload');
 
             // If we're approaching memory limit, we need to switch strategy
-            if (memory_get_usage(true) > self::MAX_MEMORY_USAGE * 0.7) {
+            if (memory_get_usage(true) > $this->maxMemoryUsage * self::MEMORY_TEMP_FILE_THRESHOLD) {
                 // For very large files, save to temp file first
                 $this->uploadViaTempFile($filesystem, $inputHandle, $storageKey, $totalContent, $chunk);
                 return;
@@ -459,11 +460,12 @@ class ScormFileProcessor
             'memory_limit' => ini_get('memory_limit'),
         ]);
 
-        if ($currentMemory > self::MAX_MEMORY_USAGE * 0.8) { // 80% of limit
+        if ($currentMemory > $this->maxMemoryUsage * self::MEMORY_WARNING_THRESHOLD) {
             $this->logger->warning('High memory usage detected', [
                 'context' => $context,
                 'memory_usage' => $currentMemory,
-                'memory_limit' => self::MAX_MEMORY_USAGE,
+                'memory_limit' => $this->maxMemoryUsage,
+                'threshold' => self::MEMORY_WARNING_THRESHOLD,
             ]);
         }
     }

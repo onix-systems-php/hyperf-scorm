@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
@@ -9,18 +8,19 @@ use Hyperf\WebSocketServer\Sender;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
+use function Hyperf\Config\config;
 
 #[Service]
 class ScormProgressTrackerService
 {
     private const JOB_STATUS_PREFIX = 'scorm:job:';
-    private const JOB_TTL = 3600; // 1 hour
 
     public function __construct(
         private readonly Redis $redis,
         private readonly Sender $sender,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function updateProgress(string $jobId, string $stage, int $progress): void
     {
@@ -34,10 +34,9 @@ class ScormProgressTrackerService
             'updated_at' => time(),
         ];
 
-        // Сохраняем в Redis
-        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+        $ttl = config('scorm.redis.ttl.job_status', 3600);
+        $this->redis->setex($key, $ttl, json_encode($data));
 
-        // WebSocket broadcast всем подписанным клиентам
         $this->broadcastToWebSocket($jobId, $data);
     }
 
@@ -54,7 +53,8 @@ class ScormProgressTrackerService
             'completed_at' => time(),
         ];
 
-        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+        $ttl = config('scorm.redis.ttl.job_result', 86400);
+        $this->redis->setex($key, $ttl, json_encode($data));
         $this->broadcastToWebSocket($jobId, $data);
     }
 
@@ -71,7 +71,8 @@ class ScormProgressTrackerService
             'failed_at' => time(),
         ];
 
-        $this->redis->setex($key, self::JOB_TTL, json_encode($data));
+        $ttl = config('scorm.redis.ttl.job_result', 86400);
+        $this->redis->setex($key, $ttl, json_encode($data));
         $this->broadcastToWebSocket($jobId, $data);
     }
 

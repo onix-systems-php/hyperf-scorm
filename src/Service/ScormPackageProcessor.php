@@ -18,6 +18,13 @@ use function Hyperf\Config\config;
 #[Service]
 class ScormPackageProcessor
 {
+
+    private const ALLOWED_EXTENSIONS = ['zip'];
+    private const ALLOWED_MIME_TYPES = [
+        'application/zip',
+        'application/x-zip-compressed',
+    ];
+
     public function __construct(
         private readonly ScormFileProcessor $fileProcessor,
         private readonly ScormPackageRepository $scormPackageRepository,
@@ -56,13 +63,13 @@ class ScormPackageProcessor
         }
 
         $allowedExtensions = config('scorm.upload.allowed_extensions', ['zip']);
-        if (!in_array($file->getExtension(), $allowedExtensions)) {
+        if (!in_array($file->getExtension(), self::ALLOWED_EXTENSIONS)) {
             throw new \InvalidArgumentException(
                 "Invalid file extension. Allowed: " . implode(', ', $allowedExtensions)
             );
         }
 
-        $maxSize = config('scorm.upload.max_upload_size', 600 * 1024 * 1024); // 100MB default
+        $maxSize = config('scorm.upload.max_file_size', 100 * 1024 * 1024); // 100MB default
         if ($file->getSize() > $maxSize) {
             $maxSizeMB = $maxSize / (1024 * 1024);
             throw new \InvalidArgumentException(
@@ -70,11 +77,7 @@ class ScormPackageProcessor
             );
         }
 
-        $allowedMimeTypes = config('scorm.upload.allowed_mime_types', [
-            'application/zip',
-            'application/x-zip-compressed',
-        ]);
-        if (!empty($allowedMimeTypes) && !in_array($file->getMimeType(), $allowedMimeTypes)) {
+        if (!empty($allowedMimeTypes) && !in_array($file->getMimeType(), self::ALLOWED_MIME_TYPES)) {
             throw new \InvalidArgumentException(
                 "Invalid file type. Expected ZIP file, got: " . $file->getMimeType()
             );

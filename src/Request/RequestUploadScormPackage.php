@@ -18,6 +18,7 @@ class RequestUploadScormPackage extends FormRequest
 
     public function rules(): array
     {
+
         return [
             'file' => [
                 'required',

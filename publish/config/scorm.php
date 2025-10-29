@@ -2,56 +2,85 @@
 
 declare(strict_types=1);
 
-/**
- * Configuration for SCORM package.
- */
+use function Hyperf\Support\env;
 
 return [
-    // Player Configuration
-    'player' => [
-        'timeout' => env('SCORM_PLAYER_TIMEOUT', 30000),
-        'debug' => env('SCORM_PLAYER_DEBUG', false),
-        'api_endpoint' => env('SCORM_API_ENDPOINT', '/api/v1/scorm/api'),
-    ],
-
-    // Tracking Configuration
-    'tracking' => [
-        'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30), // seconds
-        'enable_debug_logging' => env('SCORM_DEBUG_LOGGING', false),
-    ],
-
-    // File Storage Configuration
     'storage' => [
-        'disk' => env('SCORM_STORAGE_DISK', 'local'),
-        'path' => env('SCORM_STORAGE_PATH', 'scorm-packages'),
-        'temp_path' => env('SCORM_TEMP_PATH', 'temp/scorm'),
-        'max_file_size' => env('SCORM_MAX_FILE_SIZE', 100 * 1024 * 1024), // 100MB
+        'default' => env('SCORM_STORAGE_DRIVER', 's3'),
+        'base_path' => env('SCORM_STORAGE_BASE_PATH', 'scorm-packages'),
+
+        's3' => [
+            'public_url' => env('SCORM_S3_PUBLIC_URL', env('AWS_URL')),
+            'bucket' => env('SCORM_S3_BUCKET', env('AWS_BUCKET', 'scorm-content')),
+            'region' => env('SCORM_S3_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
+        ],
+
+        'local' => [
+            'public_url' => env('SCORM_LOCAL_PUBLIC_URL', 'http://localhost/public'),
+            'path' => env('SCORM_LOCAL_PATH', BASE_PATH . '/storage/scorm'),
+        ],
+
     ],
 
-    // View Configuration
-    'view' => [
-        'namespace' => 'OnixSystemsPHP\\HyperfScorm',
-        'path' => BASE_PATH . '/vendor/onix-systems-php/hyperf-scorm/storage/view',
-        'cache' => env('SCORM_VIEW_CACHE', true),
+    'upload' => [
+        'max_file_size' => env('SCORM_MAX_FILE_SIZE', 100) * 1024 * 1024, // 100MB
     ],
 
-    // Security Configuration
-    'security' => [
-        'allowed_domains' => env('SCORM_ALLOWED_DOMAINS', '*'),
-        'iframe_sandbox' => env('SCORM_IFRAME_SANDBOX', 'allow-scripts allow-same-origin allow-forms'),
-        'csrf_protection' => env('SCORM_CSRF_PROTECTION', true),
+    'player' => [
+        'api_endpoint' => env('SCORM_API_ENDPOINT', '/v1/api/scorm'),
+        'timeout' => env('SCORM_API_TIMEOUT', 30000), // 30 seconds in milliseconds
+        'debug' => env('SCORM_DEBUG', false),
     ],
 
-    // API Configuration
-    'api' => [
-        'version' => '1.2', // Default SCORM version
-        'strict_mode' => env('SCORM_STRICT_MODE', false),
-        'error_reporting' => env('SCORM_ERROR_REPORTING', true),
+    'tracking' => [
+        'store_detailed_logs' => env('SCORM_DETAILED_LOGS', true),
+        'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30), // seconds
+//        'max_suspend_data_length' => [
+//            '1.2' => 4096,   // SCORM 1.2 limit
+//            '2004' => 64000, // SCORM 2004 limit
+//        ],
     ],
 
-    // Cache Configuration
     'cache' => [
         'ttl' => env('SCORM_CACHE_TTL', 3600), // 1 hour
-        'key_prefix' => env('SCORM_CACHE_PREFIX', 'scorm:'),
+    ],
+
+    'performance' => [
+        'max_memory_usage' => env('SCORM_MAX_MEMORY_USAGE', 512 * 1024 * 1024), // 512MB
+//        'chunk_size' => env('SCORM_CHUNK_SIZE', 8 * 1024 * 1024), // 8MB chunks for memory-efficient processing
+        'memory_warning_threshold' => 0.8, // 80% - trigger warnings
+        'memory_temp_file_threshold' => 0.7, // 70% - switch to temp file strategy
+        'temp_cleanup_ttl' => env('SCORM_TEMP_CLEANUP_TTL', 86400), // 24 hours
+        's3_streaming_enabled' => env('SCORM_S3_STREAMING_ENABLED', true),
+        'parallel_processing_limit' => env('SCORM_PARALLEL_LIMIT', 3),
+    ],
+
+    'processing' => [
+        'async_threshold_bytes' => env('SCORM_ASYNC_THRESHOLD', 25 ) * 1024 * 1024, // 25MB - files larger than this will be processed asynchronously
+        'memory_check_interval_extraction' => 100, // Check memory every N files during extraction
+    ],
+
+    'queue' => [
+        'max_attempts' => env('SCORM_QUEUE_MAX_ATTEMPTS', 3), // Maximum retry attempts for failed jobs
+        'retry_delay' => env('SCORM_QUEUE_RETRY_DELAY', 0), // Delay in seconds between retry attempts
+    ],
+
+    'redis' => [
+        'ttl' => [
+            'job_status' => (int)env('SCORM_REDIS_TTL_JOB_STATUS', 3600), // 1 hour
+            'job_result' => (int)env('SCORM_REDIS_TTL_JOB_RESULT', 86400), // 24 hours
+            'websocket' => (int)env('SCORM_REDIS_TTL_WEBSOCKET', 86400), // 24 hours
+        ],
+    ],
+
+    'messages' => [
+        'stage_details' => [
+            'initializing' => 'Preparing SCORM package...',
+            'extracting' => 'Extracting files from package...',
+            'processing' => 'Processing SCORM manifest...',
+            'uploading' => 'Uploading content to storage...',
+            'completed' => 'Package processing completed',
+            'failed' => 'Processing failed',
+        ],
     ],
 ];
