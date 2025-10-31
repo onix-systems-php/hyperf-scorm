@@ -33,7 +33,7 @@ class ScormAsyncQueueService
      * @param ScormUploadDTO $dto Upload data transfer object
      * @return ScormAsyncJobDTO Job status information
      */
-    public function queueProcessing(ScormUploadDTO $dto): ScormAsyncJobDTO
+    public function run(ScormUploadDTO $dto): ScormAsyncJobDTO
     {
         $jobId = Uuid::uuid4()->toString();
 

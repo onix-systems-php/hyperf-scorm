@@ -19,13 +19,6 @@
     </script>
 
     <script>
-
-        /*
-SCORM API Implementation for Hyperf Package
-Compatible with SCORM 1.2 and SCORM 2004
-Integrates with Hyperf backend API endpoints
-*/
-
         (function() {
             'use strict';
 
@@ -44,8 +37,7 @@ Integrates with Hyperf backend API endpoints
                 name: "Guest",
                 session_token:  null
             };
-            // var debug = config.debug || false; //notice for test
-            var debug = true;
+            var debug = config.debug || false; //notice for test
 
             // SCORM data storage - initialize with proper defaults
             var data = {
@@ -181,7 +173,7 @@ Integrates with Hyperf backend API endpoints
                     lastError = "0";
 
                     debugLog('SCORM session initialized');
-                    updateDebugPanel();
+                    // updateDebugPanel();
 
                     return "true";
                 },
@@ -269,7 +261,7 @@ Integrates with Hyperf backend API endpoints
 
                     debugLog('LMSGetValue(' + element + ') = ' + value);
                     lastError = "0";
-                    updateDebugPanel();
+                    // updateDebugPanel();
                     return value;
                 },
 
@@ -324,7 +316,7 @@ Integrates with Hyperf backend API endpoints
                     pendingData[element] = value;
 
                     lastError = "0";
-                    updateDebugPanel();
+                    // updateDebugPanel();
                     return "true";
                 },
 
@@ -561,7 +553,7 @@ Integrates with Hyperf backend API endpoints
         <iframe id="scorm-frame" src="{{ $launchUrl }}" style="display:none;"></iframe>
     </div>
 
-    <div id="debug-panel" class="scorm-debug-panel"></div>
+    <div id="debug-panel" class="scorm-debug-panel" style="display:none"></div>
 
     <script>
         class ScormPlayer {
@@ -715,7 +707,7 @@ Integrates with Hyperf backend API endpoints
             }
 
             updateDebugPanel() {
-                // if (!this.debugPanel || !this.config.debug) return;
+                if (!this.debugPanel || !this.config.debug) return;
 
                 const debugInfo = window.scormApiDebugInfo ? window.scormApiDebugInfo() : null;
                 const api = window.API;

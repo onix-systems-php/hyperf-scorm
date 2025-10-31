@@ -11,10 +11,9 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
-use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormUploadOrchestratorService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormAsyncQueueService;
 use OpenApi\Attributes as OA;
 use function Hyperf\Support\make;
 
@@ -47,9 +46,10 @@ class ScormController extends AbstractController
     )]
     public function upload(
         RequestUploadScormPackage $request,
-        ScormUploadOrchestratorService $service
-    ): ResourceScormPackage|ResourceScormAsyncJob {
-        return $service->process(ScormUploadDTO::make($request));
+        ScormAsyncQueueService $service
+    ): ResourceScormAsyncJob {
+        $jobDTO = $service->run(ScormUploadDTO::make($request));
+        return ResourceScormAsyncJob::make($jobDTO);
     }
 
     #[OA\Get(//@SONAR_STOP@
