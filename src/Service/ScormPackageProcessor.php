@@ -12,24 +12,12 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Psr\Log\LoggerInterface;
 use Throwable;
 use function Hyperf\Config\config;
 
-/**
- * Core SCORM package processor - handles validation, processing, and storage
- * Unified service for both sync and async upload paths
- *
- * Variant A Architecture: Processor with Optional ProgressTracker
- * - Clean separation: business logic vs progress tracking
- * - Optional tracking: sync paths don't need progress updates
- * - Dependency injection: tracker is optional through constructor
- * - Error handling: Retry-aware notifications (don't notify on retryable failures)
- */
 #[Service]
 class ScormPackageProcessor
 {
-
     public const ACTION = 'upload_scorm_package';
 
     private const ALLOWED_EXTENSIONS = ['zip'];
@@ -41,48 +29,34 @@ class ScormPackageProcessor
     public function __construct(
         private readonly ScormFileProcessor $fileProcessor,
         private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly LoggerInterface $logger,
-        private readonly ScormWebSocketNotificationService  $webSocketNotificationService,
-        private readonly ScormJobStatusService $scormJobStatusService,
-        private EventDispatcherInterface $eventDispatcher,
+        private readonly EventDispatcherInterface $eventDispatcher,
+        private readonly ScormProgressTracker $progressTracker,
     ) {
     }
 
-    /**
-     * Process SCORM package with optional progress tracking
-     *
-     * Handles errors intelligently based on retry context:
-     * - If isRetryable=true: logs error but doesn't notify user (job will retry)
-     * - If isRetryable=false: notifies user about permanent failure
-     *
-     * @param ScormUploadDTO $dto Upload data
-     * @param ProgressContext|null $progressContext Optional context for async tracking
-     * @return ScormPackage Processed and saved package
-     * @throws Throwable Re-throws exceptions for Job to handle retry logic
-     */
     #[Transactional(attempts: 1)]
-    public function process(ScormUploadDTO $dto, ?ProgressContext $progressContext = null): ScormPackage
+    public function process(ScormUploadDTO $dto, ProgressContext $progressContext): ScormPackage
     {
         try {
-            $this->trackProgress($progressContext, [
+            $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
-                'progress' => 0,
+                'progress' => 10,
                 'stage' => 'validating',
                 'stage_details' => 'Validating SCORM package...',
             ]);
 
             $this->validateUploadedFile($dto->file);
 
-            $this->trackProgress($progressContext, [
+            $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
-                'progress' => 25,
+                'progress' => 35,
                 'stage' => 'processing',
                 'stage_details' => 'Extracting and processing SCORM content...',
             ]);
 
             $processedPackage = $this->fileProcessor->run($dto->file);
 
-            $this->trackProgress($progressContext, [
+            $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
                 'progress' => 90,
                 'stage' => 'saving',
@@ -106,7 +80,7 @@ class ScormPackageProcessor
 
             $processedPackage->cleanup();
 
-            $this->trackProgress($progressContext, [
+            $this->progressTracker->track($progressContext, [
                 'status' => 'completed',
                 'progress' => 100,
                 'stage' => 'completed',
@@ -115,42 +89,20 @@ class ScormPackageProcessor
             ]);
 
             return $package;
+        } catch (Throwable $error) {
+            if (!$progressContext->isRetryable) {
+                $this->progressTracker->track($progressContext, [
+                    'status' => 'failed',
+                    'progress' => 0,
+                    'stage' => 'failed',
+                    'stage_details' => 'SCORM package processing failed',
+                    'error' => $error->getMessage(),
+                    'failed_at' => time(),
+                ]);
+            }
 
-        } catch (Throwable $e) {
-            $this->handleProcessingError($progressContext, $e);
-
-            throw $e;
+            throw $error;
         }
-    }
-
-    private function handleProcessingError(?ProgressContext $context, Throwable $error): void
-    {
-        if ($context->isRetryable) {
-            return;
-        }
-
-        $this->trackProgress($context, [
-            'status' => 'failed',
-            'progress' => 0,
-            'stage' => 'failed',
-            'stage_details' => 'SCORM package processing failed',
-            'error' => $error->getMessage(),
-            'failed_at' => time(),
-        ]);
-    }
-
-    private function trackProgress(?ProgressContext $context, array $progressData): void
-    {
-        if ($this->scormJobStatusService === null || $context === null) {
-            return;
-        }
-
-        $this->scormJobStatusService->updateProgress($context->jobId, $progressData);
-        $this->webSocketNotificationService->sendUploadProgressUpdate(
-            $context->userId,
-            $context->jobId,
-            $progressData
-        );
     }
 
     private function validateUploadedFile(UploadedFile $file): void
