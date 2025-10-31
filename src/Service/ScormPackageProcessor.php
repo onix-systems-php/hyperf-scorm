@@ -5,11 +5,13 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\DbConnection\Annotation\Transactional;
 use Hyperf\HttpMessage\Upload\UploadedFile;
+use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ProgressContext;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function Hyperf\Config\config;
@@ -28,6 +30,8 @@ use function Hyperf\Config\config;
 class ScormPackageProcessor
 {
 
+    public const ACTION = 'upload_scorm_package';
+
     private const ALLOWED_EXTENSIONS = ['zip'];
     private const ALLOWED_MIME_TYPES = [
         'application/zip',
@@ -40,6 +44,7 @@ class ScormPackageProcessor
         private readonly LoggerInterface $logger,
         private readonly ScormWebSocketNotificationService  $webSocketNotificationService,
         private readonly ScormJobStatusService $scormJobStatusService,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -97,6 +102,8 @@ class ScormPackageProcessor
             ]);
 
             $this->scormPackageRepository->save($package);
+            $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, $package->toArray()));
+
             $processedPackage->cleanup();
 
             $this->trackProgress($progressContext, [

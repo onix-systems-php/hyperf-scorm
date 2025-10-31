@@ -22,13 +22,9 @@ class RequestUploadScormPackage extends FormRequest
         return [
             'file' => [
                 'required',
-//                'file',
-//                'mimetypes:application/zip,application/x-zip-compressed',
-//                'max:102400', // 100MB in KB
             ],
             'title' => ['required', 'string', 'min:5', 'max:255'],
             'description' => ['string', 'max:1000'],
         ];
     }
-
 }
