@@ -10,8 +10,6 @@ use OnixSystemsPHP\HyperfScorm\DTO\ProgressContext;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfScorm\Service\ScormPackageProcessor;
-use OnixSystemsPHP\HyperfScorm\Service\ScormJobStatusService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormTempFileService;
 use Psr\Log\LoggerInterface;
 use Throwable;
 

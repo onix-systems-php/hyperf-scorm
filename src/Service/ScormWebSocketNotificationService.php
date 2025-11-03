@@ -6,15 +6,10 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 use Hyperf\Contract\ConfigInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
-use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function Hyperf\Config\config;
 
-/**
- * WebSocket notification service for SCORM file upload progress
- * Sends real-time updates during file upload process
- */
 class ScormWebSocketNotificationService
 {
     private const CHANNEL_PREFIX = 'scorm_notifications:';
@@ -27,6 +22,7 @@ class ScormWebSocketNotificationService
         private readonly Sender $sender,
         private readonly LoggerInterface $logger,
         private readonly ConfigInterface $config,
+        private readonly WebSocketConnectionService $connectionRegistry,
     ) {
         $this->stageMessages = $this->config->get('scorm.messages.stage_details', [
             'initializing' => 'Preparing SCORM package...',
@@ -38,9 +34,6 @@ class ScormWebSocketNotificationService
         ]);
     }
 
-    /**
-     * Subscribe to SCORM processing updates
-     */
     public function subscribeToUpdates(int $userId, int $fd): void
     {
         $channel = self::USER_CHANNEL_PREFIX . $userId;
@@ -58,9 +51,6 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Unsubscribe from SCORM processing updates
-     */
     public function unsubscribeFromUpdates(int $userId, int $fd): void
     {
         try {
@@ -74,14 +64,10 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Send progress update to WebSocket connections subscribed to this job
-     * Uses ScormProgressWebSocketController to get connections by job_id
-     */
     public function sendUploadProgressUpdate(int $userId, string $jobId, array $progressData): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 $this->logger->debug('No WebSocket connections for job', [
@@ -135,18 +121,13 @@ class ScormWebSocketNotificationService
     }
 
 
-    /**
-     * Send completion notification via WebSocket
-     * Note: Progress updates already handle completion status,
-     * this method is kept for compatibility but may not be needed
-     */
     public function sendCompletionNotification(int $userId, string $jobId, array $result): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
-                return; // No active connections
+                return;
             }
 
             $message = json_encode([
@@ -191,13 +172,10 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Send error notification via WebSocket
-     */
     public function sendErrorNotification(int $userId, string $jobId, string $error): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 return; // No active connections
@@ -245,9 +223,6 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Get user's active WebSocket connections count
-     */
     public function getUserConnectionsCount(int $userId): int
     {
         try {
@@ -261,9 +236,6 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Clean up dead connections for all users
-     */
     public function cleanupDeadConnections(): int
     {
         try {
@@ -306,9 +278,6 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Calculate processed bytes based on progress data
-     */
     private function calculateProcessedBytes(array $progressData): ?int
     {
         $fileSize = $progressData['file_size'] ?? null;
@@ -321,9 +290,6 @@ class ScormWebSocketNotificationService
         return (int)($fileSize * $progress / 100);
     }
 
-    /**
-     * Get default stage details for better UX
-     */
     private function getDefaultStageDetails(string $stage): string
     {
         return $this->stageMessages[$stage] ?? 'Processing...';

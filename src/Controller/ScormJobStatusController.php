@@ -7,14 +7,14 @@ use Hyperf\HttpServer\Annotation\Controller;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormJobStatus;
-use OnixSystemsPHP\HyperfScorm\Service\AsyncScormProcessingService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormJobStatusService;
 use OpenApi\Attributes as OA;
 
 #[Controller(prefix: 'v1/scorm/jobs')]
 class ScormJobStatusController extends AbstractController
 {
     public function __construct(
-        private readonly AsyncScormProcessingService $processingService,
+        private readonly ScormJobStatusService $jobStatusService,
     ) {
     }
 
@@ -45,8 +45,8 @@ class ScormJobStatusController extends AbstractController
     )]
     public function status(string $jobId): ResourceScormJobStatus
     {
-        $progress = $this->processingService->getProcessingProgress($jobId);
-        $result = $this->processingService->getProcessingResult($jobId);
+        $progress = $this->jobStatusService->getProgress($jobId);
+        $result = $this->jobStatusService->getResult($jobId);
 
         // Use progress data as primary source, fallback to result if job completed
         $status = $progress ?? $result;
@@ -109,8 +109,8 @@ class ScormJobStatusController extends AbstractController
 
         $statuses = [];
         foreach ($jobIds as $jobId) {
-            $progress = $this->processingService->getProcessingProgress($jobId);
-            $result = $this->processingService->getProcessingResult($jobId);
+            $progress = $this->jobStatusService->getProgress($jobId);
+            $result = $this->jobStatusService->getResult($jobId);
 
             $status = $progress ?? $result;
 
@@ -158,20 +158,32 @@ class ScormJobStatusController extends AbstractController
     )]
     public function cancelJob(string $jobId): array
     {
-        $progress = $this->processingService->getProcessingProgress($jobId);
+        $progress = $this->jobStatusService->getProgress($jobId);
         if ($progress === null) {
             throw new \RuntimeException('Job not found or expired', 404);
         }
 
-        $cancelled = $this->processingService->cancelProcessing($jobId);
-
-        if (!$cancelled) {
+        // Check if job can be cancelled (not already processing)
+        if ($progress && $progress['status'] === 'processing') {
             return [
                 'success' => false,
                 'message' => 'Job cannot be cancelled (already processing or completed)',
                 'job_id' => $jobId,
             ];
         }
+
+        // Cancel the job by updating status
+        $this->jobStatusService->updateProgress($jobId, [
+            'status' => 'cancelled',
+            'progress' => 0,
+            'stage' => 'cancelled',
+            'cancelled_at' => time(),
+        ]);
+
+        $this->jobStatusService->setResult($jobId, [
+            'status' => 'cancelled',
+            'cancelled_at' => time(),
+        ]);
 
         return [
             'success' => true,

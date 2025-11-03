@@ -23,10 +23,10 @@ class ScormFileProcessor
     private const MEMORY_WARNING_THRESHOLD = 0.8;
 
     // Security and extraction strategy constants
-    private const MAX_PACKAGE_SIZE = 800 * 1024 * 1024; // 800MB maximum
-    private const EXTRACT_SIZE_THRESHOLD = 200 * 1024 * 1024; // 200MB threshold for strategy selection
-    private const MAX_COMPRESSION_RATIO = 1000; // Maximum allowed compression ratio
-    private const HIGH_COMPRESSION_WARNING_RATIO = 100; // Warning threshold for compression ratio
+    private const MAX_PACKAGE_SIZE = 800 * 1024 * 1024;
+    private const EXTRACT_SIZE_THRESHOLD = 200 * 1024 * 1024;
+    private const MAX_COMPRESSION_RATIO = 1000;
+    private const HIGH_COMPRESSION_WARNING_RATIO = 100;
 
     private readonly int $maxMemoryUsage;
 

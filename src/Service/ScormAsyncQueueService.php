@@ -10,10 +10,6 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Job\ProcessScormPackageJob;
 use Ramsey\Uuid\Uuid;
 
-/**
- * Service for managing async SCORM processing queue
- * Handles job creation, status tracking, and queue management
- */
 #[Service]
 class ScormAsyncQueueService
 {
@@ -23,16 +19,9 @@ class ScormAsyncQueueService
         private readonly DriverFactory $driverFactory,
         private readonly ScormTempFileService $tempFileService,
         private readonly ScormJobStatusService $jobStatusService,
-        private readonly AsyncScormProcessingService $processingService,
     ) {
     }
 
-    /**
-     * Queue SCORM package for async processing
-     *
-     * @param ScormUploadDTO $dto Upload data transfer object
-     * @return ScormAsyncJobDTO Job status information
-     */
     public function run(ScormUploadDTO $dto): ScormAsyncJobDTO
     {
         $jobId = Uuid::uuid4()->toString();
@@ -71,48 +60,41 @@ class ScormAsyncQueueService
         ]);
     }
 
-    /**
-     * Estimate processing time based on file size
-     *
-     * @param int $fileSize File size in bytes
-     * @return int Estimated time in seconds
-     */
     private function estimateProcessingTime(int $fileSize): int
     {
         $megabytes = $fileSize / (1024 * 1024);
         return (int)($megabytes * self::TIME_PER_MB);
     }
 
-    /**
-     * Cancel queued or processing job
-     *
-     * @param string $jobId Job identifier
-     * @return bool Success status
-     */
     public function cancelJob(string $jobId): bool
     {
-        return $this->processingService->cancelProcessing($jobId);
+        $progress = $this->jobStatusService->getProgress($jobId);
+        if ($progress && $progress['status'] === 'processing') {
+            return false;
+        }
+
+        $this->jobStatusService->updateProgress($jobId, [
+            'status' => 'cancelled',
+            'progress' => 0,
+            'stage' => 'cancelled',
+            'cancelled_at' => time(),
+        ]);
+
+        $this->jobStatusService->setResult($jobId, [
+            'status' => 'cancelled',
+            'cancelled_at' => time(),
+        ]);
+
+        return true;
     }
 
-    /**
-     * Get job processing progress
-     *
-     * @param string $jobId Job identifier
-     * @return array|null Progress data or null if not found
-     */
     public function getJobProgress(string $jobId): ?array
     {
-        return $this->processingService->getProcessingProgress($jobId);
+        return $this->jobStatusService->getProgress($jobId);
     }
 
-    /**
-     * Get job processing result
-     *
-     * @param string $jobId Job identifier
-     * @return array|null Result data or null if not found
-     */
     public function getJobResult(string $jobId): ?array
     {
-        return $this->processingService->getProcessingResult($jobId);
+        return $this->jobStatusService->getResult($jobId);
     }
 }

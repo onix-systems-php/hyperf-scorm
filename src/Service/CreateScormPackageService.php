@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\DbConnection\Annotation\Transactional;
+use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\CreateScormPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use OnixSystemsPHP\HyperfActionsLog\Event\Action;
 
 /**
  * Service for creating SCORM packages

@@ -8,10 +8,6 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 
-/**
- * SCORM Manifest Parser for imsmanifest.xml files
- * Supports both SCORM 1.2 and SCORM 2004 standards
- */
 class ScormManifestParser
 {
     public function parse(string $manifestPath): ScormManifestDTO
@@ -32,11 +28,6 @@ class ScormManifestParser
         ]);
     }
 
-    /**
-     * Safely load XML with SimpleXML and error handling
-     *
-     * @throws ScormParsingException
-     */
     private function loadXmlSafely(string $manifestPath): \SimpleXMLElement
     {
         libxml_use_internal_errors(true);
@@ -57,9 +48,6 @@ class ScormManifestParser
         return $xml;
     }
 
-    /**
-     * Validate required SCORM manifest elements according to specification
-     */
     private function validateRequiredElements(\SimpleXMLElement $xml): void
     {
         if (!isset($xml->metadata->schema)) {
@@ -83,14 +71,6 @@ class ScormManifestParser
         }
     }
 
-    /**
-     * Detect SCORM version from manifest XML using only required schemaversion element
-     * According to SCORM specification, schemaversion is required and sufficient for version detection
-     *
-     * CAM (Content Aggregation Model) Version Mapping:
-     * - CAM 1.3 = SCORM 2004 (by specification)
-     * - CAM 1.2 = SCORM 1.2 (by specification)
-     */
     private function detectScormVersion(\SimpleXMLElement $xml): string
     {
         $schemaVersion = $this->getSchemaVersion($xml);
@@ -137,17 +117,14 @@ class ScormManifestParser
 
     private function getManifestTitle(\SimpleXMLElement $xml): string
     {
-        // Try to get title from organizations
         if (isset($xml->organizations->organization->title)) {
             return (string)$xml->organizations->organization->title;
         }
 
-        // Try to get title from organization attribute
         if (isset($xml->organizations->organization['title'])) {
             return (string)$xml->organizations->organization['title'];
         }
 
-        // Try to get title from metadata (less common)
         if (isset($xml->metadata->title)) {
             return (string)$xml->metadata->title;
         }
@@ -217,9 +194,6 @@ class ScormManifestParser
         return $metadata;
     }
 
-    /**
-     * Parse SCORM 1.2 specific metadata using SimpleXML
-     */
     private function parseScorm12Metadata(\SimpleXMLElement $xml): array
     {
         return [
@@ -242,9 +216,6 @@ class ScormManifestParser
         return $scos;
     }
 
-    /**
-     * Create a map of resources for quick lookup
-     */
     private function createResourcesMap(\SimpleXMLElement $xml): array
     {
         $resourcesMap = [];
@@ -264,9 +235,6 @@ class ScormManifestParser
         return $resourcesMap;
     }
 
-    /**
-     * Extract SCOs from organization items recursively
-     */
     private function extractScosFromItems(\SimpleXMLElement $parent, array $resourcesMap): array
     {
         $scos = [];
@@ -282,7 +250,9 @@ class ScormManifestParser
                         'identifier' =>  $identifierref,
                         'title' =>  (string)($item->title ?? 'Untitled SCO'),
                         'launch_url' =>  $this->buildLaunchUrl($resource, $item),
-                        'mastery_score' =>  isset($item['adlcp:masteryscore']) ? (float)$item['adlcp:masteryscore'] : null,
+                        'mastery_score' =>  isset($item['adlcp:masteryscore'])
+                            ? (float)$item['adlcp:masteryscore']
+                            : null,
                     ]);
                 }
 
@@ -297,11 +267,11 @@ class ScormManifestParser
 
     private function extractDescription(\SimpleXMLElement $xml): ?string
     {
-        if (isset($xml->metadata->lom->general->description->string)) {
-            return (string) $xml->metadata->lom->general->description->string;
+        if (!isset($xml->metadata->lom->general->description->string)) {
+            return null;
         }
 
-        return null;
+        return (string) $xml->metadata->lom->general->description->string;
     }
 
     /**
