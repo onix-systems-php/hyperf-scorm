@@ -27,7 +27,7 @@
   ],
   "require": {
     "php": ">=8.1",
-    "hyperf/framework": "^3.1.42",
+    "hyperf/framework": "^3.1.41",
     "onix-systems-php/hyperf-core": ">=1.2.0",
     "onix-systems-php/hyperf-actions-log": "^1.2",
     "onix-systems-php/hyperf-file-upload": "^1.2",
