@@ -34,9 +34,9 @@ class ConfigProvider
                 ],
                 [
                     'id' => 'scorm_migrations',
-                    'description' => 'The database migrations for SCORM package.',
-                    'source' => __DIR__ . '/../publish/migrations',
-                    'destination' => BASE_PATH . '/migrations',
+                    'description' => 'The database migrations for onix-systems-php/hyperf-scorm.',
+                    'source' => __DIR__ . '/../publish/migrations/2025_01_31_000001_create_scorm_packages_table.php',
+                    'destination' => BASE_PATH . '/migrations/2025_01_31_000001_create_scorm_packages_table.php',
                 ],
                 [
                     'id' => 'scorm_example',
