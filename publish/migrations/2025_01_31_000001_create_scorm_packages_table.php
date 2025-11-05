@@ -60,7 +60,7 @@ class CreateScormPackagesTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('scorm_packages');
         Schema::dropIfExists('scorm_user_sessions');
+        Schema::dropIfExists('scorm_packages');
     }
 }
