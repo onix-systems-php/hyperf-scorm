@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm;
 
+use function Hyperf\Support\env;
+
 class ConfigProvider
 {
     public function __invoke(): array
@@ -36,11 +38,26 @@ class ConfigProvider
             ],
             'file' => [
                 'storage'=> [
+                    'scormS3' => [
+                        'driver' => \Hyperf\Filesystem\Adapter\S3AdapterFactory::class,
+                        'credentials' => [
+                            'key' => env('SCORM_S3_KEY'),
+                            'secret' => env('SCORM_S3_SECRET'),
+                        ],
+                        'region' => env('SCORM_S3_REGION'),
+                        'version' => 'latest',
+                        'bucket_endpoint' => false,
+                        'use_path_style_endpoint' => env('SCORM_S3_PATH_STYLE', 'no') === 'yes',
+                        'endpoint' => env('SCORM_S3_ENDPOINT'),
+                        'bucket_name' => env('SCORM_S3_BUCKET'),
+                        'domain' => env('SCORM_S3_DOMAIN'),
+                    ],
                     'temp-queue' => [
                         'driver' => \Hyperf\Filesystem\Adapter\LocalAdapterFactory::class,
                         'root' => BASE_PATH . '/runtime/scorm-queue-tmp',
                     ]
                 ],
+
             ],
             'async_queue' => [
                 'scorm-processing' => [
@@ -49,12 +66,12 @@ class ConfigProvider
                         'pool' => 'default',
                     ],
                     'channel' => 'scorm-jobs',
-                    'timeout' => 2,
+                    'timeout' => 3,
                     'retry_seconds' => 10,
                     'handle_timeout' => 1800, // 30 minutes for large SCORM files
-                    'processes' => 2,
+                    'processes' => 3,
                     'concurrent' => [
-                        'limit' => 2,
+                        'limit' => 3,
                     ],
                     'max_attempts' => 3,
                 ],
