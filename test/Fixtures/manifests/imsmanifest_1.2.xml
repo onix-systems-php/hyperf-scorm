@@ -16,9 +16,9 @@
   </metadata>
   <organizations default="B0">
     <organization identifier="B0" adlseq:objectivesGlobalToSystem="false">
-      <title>Incorporating Trauma-Informed Care Into HIV Practices</title>
+      <title>Incorporating</title>
       <item identifier="i1" identifierref="r1" isvisible="true">
-        <title>Incorporating Trauma-Informed Care Into HIV Practices</title>
+        <title>Incorporating</title>
         <adlcp:dataFromLMS>eyJjcHYiOiJOaG43RnBhXyIsInJsZCI6ZmFsc2V9</adlcp:dataFromLMS>
         <imsss:sequencing>
           <imsss:deliveryControls tracked="true" completionSetByContent="true" objectiveSetByContent="true"/>

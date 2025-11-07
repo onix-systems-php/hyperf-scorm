@@ -30,7 +30,7 @@ hard coding the passing score within the content.
 	</metadata>
   <organizations default="golf_sample_default_org">
 		<organization identifier="golf_sample_default_org" adlseq:objectivesGlobalToSystem="false">
-			<title>Golf Explained - Run-time Advanced Calls</title>
+			<title>Golf Explained</title>
 			<item identifier="item_1" identifierref="resource_1">
 				<title>Golf Explained</title>
         <imsss:sequencing>
