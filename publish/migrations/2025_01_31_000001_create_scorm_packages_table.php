@@ -42,7 +42,7 @@ class CreateScormPackagesTable extends Migration
             $table->fullText(['title', 'description'], 'idx_search_text');
         });
 
-        Schema::create('scorm_user_sessions', function (Blueprint $table) {
+        Schema::create('scorm_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('package_id')
                 ->constrained('scorm_packages')
