@@ -30,6 +30,35 @@ class ConfigProvider
                     'scorm_public' => __DIR__ . '/../storage/public',
                 ],
             ],
+            'process' => [
+                \Hyperf\AsyncQueue\Process\ConsumerProcess::class,
+                \OnixSystemsPHP\HyperfScorm\Process\UploadQueueConsumer::class ,
+            ],
+            'file' => [
+                'storage'=> [
+                    'temp-queue' => [
+                        'driver' => \Hyperf\Filesystem\Adapter\LocalAdapterFactory::class,
+                        'root' => BASE_PATH . '/runtime/scorm-queue-tmp',
+                    ]
+                ],
+            ],
+            'async_queue' => [
+                'scorm-processing' => [
+                    'driver' => \Hyperf\AsyncQueue\Driver\RedisDriver::class,
+                    'redis' => [
+                        'pool' => 'default',
+                    ],
+                    'channel' => 'scorm-jobs',
+                    'timeout' => 2,
+                    'retry_seconds' => 10,
+                    'handle_timeout' => 1800, // 30 minutes for large SCORM files
+                    'processes' => 2,
+                    'concurrent' => [
+                        'limit' => 2,
+                    ],
+                    'max_attempts' => 3,
+                ],
+            ],
             'publish' => [
                 [
                     'id' => 'scorm_config',
