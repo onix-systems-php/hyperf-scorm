@@ -55,7 +55,7 @@ class ScormFileProcessor
             return ProcessedScormPackageDTO::make([
                 'manifestData' => $manifestDto,
                 'contentPath' => $publicPath,
-                'launch_url' => $domain . $publicPath . $manifestDto->getPrimaryLaunchUrl(),
+                'launch_url' => $this->getLaunchUrl($domain, $publicPath, $manifestDto->getPrimaryLaunchUrl()),
                 'domain' => $domain,
             ]);
         } catch (\Exception $exception) {
@@ -122,5 +122,10 @@ class ScormFileProcessor
     private function getKeyWithPrefix(string $keyPrefix, string $relativePath): string
     {
         return ltrim($keyPrefix, '/') . DIRECTORY_SEPARATOR . $relativePath;
+    }
+
+    private function getLaunchUrl(string $domain, string $publicPath, string $launch_path): string
+    {
+        return  $domain.$publicPath. DIRECTORY_SEPARATOR . $launch_path;
     }
 }
