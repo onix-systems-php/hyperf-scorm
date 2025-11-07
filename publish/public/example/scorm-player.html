@@ -986,7 +986,7 @@
                                     // Refresh packages list
                                     loadPackages(currentPage.value, searchQuery.value);
 
-                                    alert(`Package "${uploadForm.value.title}" uploaded successfully!`);
+                                    console.log(`Package "${uploadForm.value.title}" uploaded successfully!`);
                                 },
                                 onError: (error) => {
                                     console.error('[SCORM Upload] Failed:', error);
@@ -1006,7 +1006,7 @@
                             // Refresh packages list
                             loadPackages(currentPage.value, searchQuery.value);
 
-                            alert(`Package "${uploadForm.value.title}" uploaded successfully!`);
+                            console.log(`Package "${uploadForm.value.title}" uploaded successfully!`);
                         }
 
                     } catch (error) {
@@ -1059,8 +1059,7 @@
                         // Reload packages list after successful deletion
                         await loadPackages(currentPage.value, searchQuery.value);
 
-                        // Show success message
-                        alert(`Package "${packageTitle}" deleted successfully!`);
+                        console.log(`Package "${packageTitle}" deleted successfully!`);
                     } catch (error) {
                         console.error('Failed to delete package:', error);
                         alert(`Failed to delete package: ${error.message}`);
