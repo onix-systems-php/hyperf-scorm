@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
@@ -13,18 +19,20 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
 /**
  * @property int $id
  * @property string $title
- * @property string|null $description
+ * @property null|string $description
  * @property string $identifier
  * @property string $scorm_version
  * @property string $content_path
- * @property string|null $original_filename
- * @property int|null $file_size
- * @property string|null $file_hash
+ * @property string $domain
+ * @property string $launch_url
+ * @property null|string $original_filename
+ * @property null|int $file_size
+ * @property null|string $file_hash
  * @property ScormManifestDTO $manifest_data
  * @property bool $is_active
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property Carbon|null $deleted_at
+ * @property null|Carbon $deleted_at
  */
 class ScormPackage extends AbstractModel
 {
@@ -38,6 +46,8 @@ class ScormPackage extends AbstractModel
         'identifier',
         'scorm_version',
         'content_path',
+        'domain',
+        'launch_url',
         'original_filename',
         'file_size',
         'file_hash',
@@ -64,18 +74,9 @@ class ScormPackage extends AbstractModel
         return $this->is_active === true;
     }
 
-    public function getLaunchUrl(): ?string
-    {
-        if (!$this->manifest_data) {
-            return null;
-        }
-
-        return $this->manifest_data->getPrimaryLaunchUrl();
-    }
-
     public function getAuthor(): ?string
     {
-        if (!$this->manifest_data) {
+        if (! $this->manifest_data) {
             return null;
         }
 
@@ -90,7 +91,7 @@ class ScormPackage extends AbstractModel
 
     public function getMasteryScore(): ?float
     {
-        if (!$this->manifest_data) {
+        if (! $this->manifest_data) {
             return null;
         }
 
@@ -102,5 +103,4 @@ class ScormPackage extends AbstractModel
 
         return null;
     }
-
 }

@@ -1,18 +1,25 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Exception;
 
 use Hyperf\Server\Exception\ServerException;
-use Throwable;
 
 /**
- * Enhanced SCORM upload exception with detailed error context
+ * Enhanced SCORM upload exception with detailed error context.
  */
 class ScormUploadException extends ServerException
 {
     private array $context = [];
+
     private string $errorCode;
+
     private int $httpStatusCode;
 
     public function __construct(
@@ -20,10 +27,10 @@ class ScormUploadException extends ServerException
         string $errorCode = 'SCORM_UPLOAD_ERROR',
         int $httpStatusCode = 500,
         array $context = [],
-        Throwable $previous = null
+        ?\Throwable $previous = null
     ) {
         parent::__construct($message, $httpStatusCode, $previous);
-        
+
         $this->errorCode = $errorCode;
         $this->httpStatusCode = $httpStatusCode;
         $this->context = $context;
@@ -62,13 +69,14 @@ class ScormUploadException extends ServerException
     }
 
     /**
-     * Factory methods for common error types
+     * Factory methods for common error types.
      */
     public static function fileSizeExceeded(int $actualSize, int $maxSize, array $context = []): self
     {
         return new self(
-            sprintf('File size %s exceeds maximum allowed size of %s', 
-                self::formatBytes($actualSize), 
+            sprintf(
+                'File size %s exceeds maximum allowed size of %s',
+                self::formatBytes($actualSize),
                 self::formatBytes($maxSize)
             ),
             'FILE_SIZE_EXCEEDED',
@@ -84,8 +92,9 @@ class ScormUploadException extends ServerException
     public static function invalidFileType(string $actualType, array $allowedTypes, array $context = []): self
     {
         return new self(
-            sprintf('Invalid file type "%s". Allowed types: %s', 
-                $actualType, 
+            sprintf(
+                'Invalid file type "%s". Allowed types: %s',
+                $actualType,
                 implode(', ', $allowedTypes)
             ),
             'INVALID_FILE_TYPE',
@@ -113,8 +122,9 @@ class ScormUploadException extends ServerException
     public static function memoryLimitExceeded(int $currentMemoryMB, int $limitMB, array $context = []): self
     {
         return new self(
-            sprintf('Memory limit exceeded. Current usage: %dMB, Limit: %dMB', 
-                $currentMemoryMB, 
+            sprintf(
+                'Memory limit exceeded. Current usage: %dMB, Limit: %dMB',
+                $currentMemoryMB,
                 $limitMB
             ),
             'MEMORY_LIMIT_EXCEEDED',
@@ -149,7 +159,6 @@ class ScormUploadException extends ServerException
             ])
         );
     }
-
 
     public static function processingFailed(string $reason, array $context = []): self
     {

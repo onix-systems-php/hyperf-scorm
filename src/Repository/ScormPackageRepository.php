@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Repository;
 
@@ -28,7 +34,7 @@ class ScormPackageRepository extends AbstractRepository
         array $contain = []
     ): PaginationResultDTO {
         $query = $this->query()->filter(new ScormPackageFilter($filters));
-        if (!empty($contain)) {
+        if (! empty($contain)) {
             $query->with($contain);
         }
         return $query->paginateDTO($paginationDTO);

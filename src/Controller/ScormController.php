@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
@@ -11,11 +17,11 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
-use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormUploadOrchestratorService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormAsyncQueueService;
 use OpenApi\Attributes as OA;
+
 use function Hyperf\Support\make;
 
 class ScormController extends AbstractController
@@ -47,12 +53,13 @@ class ScormController extends AbstractController
     )]
     public function upload(
         RequestUploadScormPackage $request,
-        ScormUploadOrchestratorService $service
-    ): ResourceScormPackage|ResourceScormAsyncJob {
-        return $service->process(ScormUploadDTO::make($request));
+        ScormAsyncQueueService $service
+    ): ResourceScormAsyncJob {
+        $jobDTO = $service->run(ScormUploadDTO::make($request));
+        return ResourceScormAsyncJob::make($jobDTO);
     }
 
-    #[OA\Get(//@SONAR_STOP@
+    #[OA\Get(// @SONAR_STOP@
         path: '/v1/scorm/packages',
         operationId: 'scormPackagesList',
         summary: 'Get list of packages',
@@ -75,7 +82,7 @@ class ScormController extends AbstractController
     )]
     public function index(RequestInterface $request): ResourceScormPackagePaginated
     {
-        /**@var ScormPackageRepository $scormPackageRepository**/
+        /* @var ScormPackageRepository $scormPackageRepository */
         $scormPackageRepository = make(ScormPackageRepository::class);
 
         $packages = $scormPackageRepository->getPaginated(
@@ -85,6 +92,7 @@ class ScormController extends AbstractController
 
         return ResourceScormPackagePaginated::make($packages);
     }
+
     #[OA\Delete(
         path: '/v1/scorm/packages/{id}',
         operationId: 'deleteScormPackage',

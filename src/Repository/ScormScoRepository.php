@@ -1,6 +1,11 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Repository;
 
@@ -9,11 +14,11 @@ use OnixSystemsPHP\HyperfCore\Repository\AbstractRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
 
 /**
- * SCORM SCO Repository implementation
+ * SCORM SCO Repository implementation.
  */
 class ScormScoRepository extends AbstractRepository
 {
-    protected string $modelClass = \OnixSystemsPHP\HyperfScorm\Model\ScormSco::class;
+    protected string $modelClass = ScormSco::class;
 
     public function findById(int $id): ?ScormSco
     {
@@ -37,18 +42,18 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Implementation of AbstractRepository::save()
+     * Implementation of AbstractRepository::save().
      */
     public function save(Model $model): bool
     {
-        if (!$model instanceof ScormSco) {
+        if (! $model instanceof ScormSco) {
             return false;
         }
         return $model->save();
     }
 
     /**
-     * Save SCO
+     * Save SCO.
      */
     public function saveSco(ScormSco $sco): ScormSco
     {
@@ -57,18 +62,18 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Implementation of AbstractRepository::delete()
+     * Implementation of AbstractRepository::delete().
      */
     public function delete(Model $model): bool
     {
-        if (!$model instanceof ScormSco) {
+        if (! $model instanceof ScormSco) {
             return false;
         }
         return $model->delete();
     }
 
     /**
-     * Delete SCO by ID
+     * Delete SCO by ID.
      */
     public function deleteById(int $id): bool
     {
@@ -77,11 +82,11 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Implementation of AbstractRepository::create()
+     * Implementation of AbstractRepository::create().
      */
     public function create(array $data = []): Model
     {
-        $sco = new \OnixSystemsPHP\HyperfScorm\Model\ScormSco();
+        $sco = new ScormSco();
         $sco->fill($data);
         $sco->save();
 
@@ -89,11 +94,11 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Create SCO
+     * Create SCO.
      */
     public function createSco(array $data): ScormSco
     {
-        $sco = new \OnixSystemsPHP\HyperfScorm\Model\ScormSco();
+        $sco = new ScormSco();
         $sco->fill($data);
         $sco->save();
 
@@ -113,7 +118,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Find SCOs with launch URLs
+     * Find SCOs with launch URLs.
      */
     public function findLaunchableScos(int $packageId): array
     {
@@ -125,7 +130,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Find first SCO for package (default launch SCO)
+     * Find first SCO for package (default launch SCO).
      */
     public function findFirstSco(int $packageId): ?ScormSco
     {
@@ -135,12 +140,12 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Update SCO launch URL
+     * Update SCO launch URL.
      */
     public function updateLaunchUrl(int $id, string $launchUrl): bool
     {
         $sco = $this->findById($id);
-        if (!$sco) {
+        if (! $sco) {
             return false;
         }
 
@@ -151,7 +156,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Find SCOs by title pattern
+     * Find SCOs by title pattern.
      */
     public function findByTitlePattern(int $packageId, string $pattern): array
     {
@@ -163,7 +168,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Count SCOs for package
+     * Count SCOs for package.
      */
     public function countByPackage(int $packageId): int
     {
@@ -171,7 +176,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Get SCO statistics for package
+     * Get SCO statistics for package.
      */
     public function getPackageStatistics(int $packageId): array
     {
@@ -193,13 +198,13 @@ class ScormScoRepository extends AbstractRepository
             'launchable_scos' => $launchableScos,
             'scos_with_prerequisites' => $scosWithPrerequisites,
             'scos_with_mastery_score' => $scosWithMasteryScore,
-            'launchable_percentage' => $totalScos > 0 ?
-                round(($launchableScos / $totalScos) * 100, 2) : 0,
+            'launchable_percentage' => $totalScos > 0
+                ? round(($launchableScos / $totalScos) * 100, 2) : 0,
         ];
     }
 
     /**
-     * Delete all SCOs for package
+     * Delete all SCOs for package.
      */
     public function deleteByPackage(int $packageId): bool
     {
@@ -207,12 +212,12 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Update SCO parameters
+     * Update SCO parameters.
      */
     public function updateParameters(int $id, array $parameters): bool
     {
         $sco = $this->findById($id);
-        if (!$sco) {
+        if (! $sco) {
             return false;
         }
 
@@ -223,7 +228,7 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Find SCOs that have mastery score set
+     * Find SCOs that have mastery score set.
      */
     public function findScosWithMasteryScore(int $packageId): array
     {
@@ -235,12 +240,12 @@ class ScormScoRepository extends AbstractRepository
     }
 
     /**
-     * Update SCO mastery score
+     * Update SCO mastery score.
      */
     public function updateMasteryScore(int $id, ?string $masteryScore): bool
     {
         $sco = $this->findById($id);
-        if (!$sco) {
+        if (! $sco) {
             return false;
         }
 

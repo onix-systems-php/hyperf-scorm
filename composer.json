@@ -15,7 +15,8 @@
   },
   "autoload": {
     "psr-4": {
-      "OnixSystemsPHP\\HyperfScorm\\": "src/"
+      "OnixSystemsPHP\\HyperfScorm\\": "src/",
+      "OnixSystemsPHP\\HyperfScormTest\\": "./test/"
     }
   },
   "authors": [
@@ -26,10 +27,12 @@
   ],
   "require": {
     "php": ">=8.1",
-    "hyperf/framework": "^3.1.42",
+    "hyperf/framework": "^3.1.27",
     "onix-systems-php/hyperf-core": ">=1.2.0",
     "onix-systems-php/hyperf-actions-log": "^1.2",
     "onix-systems-php/hyperf-file-upload": "^1.2",
+    "onix-systems-php/hyperf-policy": "^1.2",
+    "onix-systems-php/hyperf-auth": "^1.2.2",
     "hyperf/database": "^3.1",
     "hyperf/config": "^3.1",
     "hyperf/contract": "^3.1",
@@ -41,17 +44,22 @@
     "friendsofhyperf/helpers": "^3.1.57",
     "zircote/swagger-php": "^4.11.1",
     "hyperf/view": "^3.1",
-    "hyperf/view-engine": "^3.1"
+    "hyperf/view-engine": "^3.1",
+    "ramsey/uuid": "^4.9",
+    "yzen.dev/plain-to-class": "^1",
+    "hyperf/async-queue": "^3.1"
   },
-
 
   "require-dev": {
     "friendsofphp/php-cs-fixer": "^3.0",
     "mockery/mockery": "^1.0",
-    "phpstan/phpstan": "^1.0",
     "phpunit/phpunit": ">=7.0",
     "rector/rector": "^1.0",
-    "swoole/ide-helper": "^4.5|^5.0"
+    "hyperf/devtool": "^3.1",
+    "hyperf/testing": "^3.1",
+    "phpstan/phpstan": "^1.4",
+    "slevomat/coding-standard": "^7.0",
+    "swoole/ide-helper": "^5.0"
   },
 
   "scripts": {
@@ -65,19 +73,19 @@
       "rm -rf runtime/container"
     ],
 
-    "lint": "php -l -d display_errors=0 $1",
-    "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config",
-    "cs-fix": "phpcbf --colors --standard=phpcs.xml ./app ./config",
-    "cs-check": "phpcs --colors --standard=phpcs.xml ./app ./config",
-    "test": ["php test/migrate.php && co-phpunit --prepend  test/bootstrap.php -c phpunit.xml --colors=always"],
-    "test-coverage": ["php test/migrate.php && phpdbg8 -dmemory_limit=1024M -qrr ./vendor/bin/co-phpunit --prepend test/bootstrap.php -c phpunit.xml --colors=always"],
-    "swagger": "php ./bin/hyperf.php swagger:gen -o ./storage/public/documentation/",
-    "check-all": ["@analyse", "@cs-check", "@test", "@swagger"],
+    "analyse": "phpstan analyse --memory-limit 1024M -l 0 ./src",
+    "cs-fix": "php-cs-fixer fix $1",
+    "test": ["php ./vendor/bin/co-phpunit --prepend  test/bootstrap.php -c phpunit.xml --colors=always"],
 
     "views-cache": "php ./bin/hyperf.php gen:view-engine-cache",
     "migrate": "php ./bin/hyperf.php migrate",
 
     "start": ["Composer\\Config::disableProcessTimeout", "php ./bin/hyperf.php start"],
     "watch": ["Composer\\Config::disableProcessTimeout", "php ./bin/hyperf.php server:watch"]
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
   }
 }

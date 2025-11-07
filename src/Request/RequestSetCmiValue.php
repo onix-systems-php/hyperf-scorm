@@ -1,14 +1,18 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Request;
-
 
 use Hyperf\Validation\Request\FormRequest;
 
 /**
- * Request validation for setting CMI value
+ * Request validation for setting CMI value.
  */
 class RequestSetCmiValue extends FormRequest
 {

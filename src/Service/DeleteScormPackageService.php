@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
@@ -17,8 +23,7 @@ class DeleteScormPackageService
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private EventDispatcherInterface $eventDispatcher,
-    ) {
-    }
+    ) {}
 
     #[Transactional(attempts: 1)]
     public function run(int $packageId): void

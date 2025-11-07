@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Request;
 
@@ -76,26 +82,24 @@ class RequestCommitScorm extends FormRequest
             'student_name' => ['required', 'string', 'max:255'],
 
             'session' => ['array'],
-//            'session.id' => ['required', 'string', 'max:255'],
+            //            'session.id' => ['required', 'string', 'max:255'],
             'session.total_time' => ['nullable', 'integer', 'min:0'],
             'session.suspend_data' => ['nullable', 'string'],
             'session.launch_data' => ['nullable', 'string'],
             'session.comments' => ['nullable', 'string'],
             'session.comments_from_lms' => ['nullable', 'string'],
 
-
             'lesson' => ['array'],
-            'lesson.status' => ['required', 'string', 'in:incomplete,completed,passed,failed,browsed,not_attempted'],//todo create enum for statuses
-            'lesson.mode' => ['nullable', 'string', 'in:normal,browse,review'],//todo create enum for modes
-            'lesson.exit' => ['nullable', 'string'],//todo create enum for exit modes
+            'lesson.status' => ['required', 'string', 'in:incomplete,completed,passed,failed,browsed,not_attempted'], // todo create enum for statuses
+            'lesson.mode' => ['nullable', 'string', 'in:normal,browse,review'], // todo create enum for modes
+            'lesson.exit' => ['nullable', 'string'], // todo create enum for exit modes
             'lesson.location' => ['nullable', 'string', 'max:255'],
             'lesson.entry' => ['nullable', 'string', 'in:ab-initio,resume'],
             'lesson.credit' => ['nullable', 'string', 'in:credit,no-credit'],
 
-
             'score' => ['nullable', 'integer', 'min:0'],
             'scorePercentage' => ['nullable', 'integer', 'min:0', 'max:100'],
-//            'sessionTime' => ['nullable', 'integer', 'min:0'],
+            //            'sessionTime' => ['nullable', 'integer', 'min:0'],
             'interactions' => ['array'],
             'interactions.*.id' => ['required', 'string', 'max:255'],
             'interactions.*.type' => ['required', 'string', 'max:50'],

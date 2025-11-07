@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\DTO;
 
@@ -7,17 +13,19 @@ use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
 /**
  * DTO for SCORM Sharable Content Object (SCO)
- * Represents a single content object with all necessary data for playback
+ * Represents a single content object with all necessary data for playback.
  */
 class ScoDTO extends AbstractDTO
 {
-
     public string $identifier;
-    public string $title;
-    public string $launch_url;
-    public ?float $mastery_score;
-    public ?int $max_time_seconds = 0;
 
+    public string $title;
+
+    public string $launch_url;
+
+    public ?float $mastery_score;
+
+    public ?int $max_time_seconds = 0;
 
     public function hasMasteryRequirements(): bool
     {
@@ -25,7 +33,7 @@ class ScoDTO extends AbstractDTO
     }
 
     /**
-     * Check if this SCO has time constraints
+     * Check if this SCO has time constraints.
      */
     public function hasTimeLimit(): bool
     {
@@ -33,7 +41,7 @@ class ScoDTO extends AbstractDTO
     }
 
     /**
-     * Get mastery score as percentage (0-100)
+     * Get mastery score as percentage (0-100).
      */
     public function getMasteryScorePercentage(): ?int
     {
@@ -41,11 +49,11 @@ class ScoDTO extends AbstractDTO
             return null;
         }
 
-        return (int)round($this->mastery_score * 100);
+        return (int) round($this->mastery_score * 100);
     }
 
     /**
-     * Get array representation suitable for ScormSco model creation
+     * Get array representation suitable for ScormSco model creation.
      */
     public function toArray(): array
     {

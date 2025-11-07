@@ -1,13 +1,18 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Request;
 
 use Hyperf\Validation\Request\FormRequest;
 
 /**
- * Request validation for uploading SCORM package
+ * Request validation for uploading SCORM package.
  */
 class RequestUploadScormPackage extends FormRequest
 {
@@ -21,13 +26,9 @@ class RequestUploadScormPackage extends FormRequest
         return [
             'file' => [
                 'required',
-//                'file',
-//                'mimetypes:application/zip,application/x-zip-compressed',
-//                'max:102400', // 100MB in KB
             ],
             'title' => ['required', 'string', 'min:5', 'max:255'],
             'description' => ['string', 'max:1000'],
         ];
     }
-
 }

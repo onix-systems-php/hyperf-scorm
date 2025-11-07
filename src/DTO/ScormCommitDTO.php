@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\DTO;
 
@@ -34,12 +40,12 @@ class ScormCommitDTO extends AbstractDTO
 
     public function getCompletedTimestamp(): ?string
     {
-        if (!$this->completed_at) {
+        if (! $this->completed_at) {
             return null;
         }
 
         $date = \DateTime::createFromFormat(\DateTime::ATOM, $this->completed_at);
-        if (!$date) {
+        if (! $date) {
             $date = new \DateTime($this->completed_at);
         }
 

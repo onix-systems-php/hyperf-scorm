@@ -1,12 +1,16 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
 use Carbon\Carbon;
 use Hyperf\Database\Model\Relations\BelongsTo;
-use Hyperf\Database\Model\Relations\HasMany;
 use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
 
 /**
@@ -14,12 +18,12 @@ use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
  * @property int $package_id
  * @property string $identifier
  * @property string $title
- * @property string|null $launch_url
- * @property array|null $prerequisites
- * @property array|null $parameters
- * @property string|null $masteryScore
- * @property string|null $maxTimeAllowed
- * @property string|null $timeLimitAction
+ * @property null|string $launch_url
+ * @property null|array $prerequisites
+ * @property null|array $parameters
+ * @property null|string $masteryScore
+ * @property null|string $maxTimeAllowed
+ * @property null|string $timeLimitAction
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */

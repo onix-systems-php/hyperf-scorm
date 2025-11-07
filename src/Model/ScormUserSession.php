@@ -1,16 +1,21 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
+use App\User\Model\User;
 use Carbon\Carbon;
 use Hyperf\Database\Model\Collection;
 use Hyperf\Database\Model\Relations\BelongsTo;
 use Hyperf\Database\Model\Relations\HasMany;
 use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
 use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
-use App\User\Model\User;
 
 /**
  * @property int $id
@@ -57,7 +62,7 @@ use App\User\Model\User;
  */
 class ScormUserSession extends AbstractModel
 {
-//    use SoftDeletes;
+    //    use SoftDeletes;
 
     protected ?string $table = 'scorm_user_sessions';
 

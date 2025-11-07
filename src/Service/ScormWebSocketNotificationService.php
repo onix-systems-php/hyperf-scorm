@@ -1,43 +1,55 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
+use Hyperf\Contract\ConfigInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
-use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use Psr\Log\LoggerInterface;
-use Throwable;
 
-/**
- * WebSocket notification service for SCORM file upload progress
- * Sends real-time updates during file upload process
- */
+use function Hyperf\Config\config;
+
 class ScormWebSocketNotificationService
 {
     private const CHANNEL_PREFIX = 'scorm_notifications:';
+
     private const USER_CHANNEL_PREFIX = 'scorm_user:';
+
+    private readonly array $stageMessages;
 
     public function __construct(
         private readonly Redis $redis,
         private readonly Sender $sender,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly ConfigInterface $config,
+        private readonly WebSocketConnectionService $connectionRegistry,
     ) {
+        $this->stageMessages = $this->config->get('scorm.messages.stage_details', [
+            'initializing' => 'Preparing SCORM package...',
+            'extracting' => 'Extracting files from package...',
+            'processing' => 'Processing SCORM manifest...',
+            'uploading' => 'Uploading content to storage...',
+            'completed' => 'Package processing completed',
+            'failed' => 'Processing failed',
+        ]);
     }
 
-    /**
-     * Subscribe to SCORM processing updates
-     */
     public function subscribeToUpdates(int $userId, int $fd): void
     {
         $channel = self::USER_CHANNEL_PREFIX . $userId;
 
         try {
             // Store user connection mapping
-            $this->redis->sadd("ws_connections:{$userId}", (string)$fd);
-            $this->redis->expire("ws_connections:{$userId}", 86400); // 24 hours
-
-        } catch (Throwable $e) {
+            $this->redis->sadd("ws_connections:{$userId}", (string) $fd);
+            $this->redis->expire("ws_connections:{$userId}", config('scorm.redis.ttl.websocket', 86400));
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to subscribe user to SCORM notifications', [
                 'user_id' => $userId,
                 'fd' => $fd,
@@ -46,15 +58,11 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Unsubscribe from SCORM processing updates
-     */
     public function unsubscribeFromUpdates(int $userId, int $fd): void
     {
         try {
-            $this->redis->srem("ws_connections:{$userId}", (string)$fd);
-
-        } catch (Throwable $e) {
+            $this->redis->srem("ws_connections:{$userId}", (string) $fd);
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to unsubscribe user from SCORM notifications', [
                 'user_id' => $userId,
                 'fd' => $fd,
@@ -63,14 +71,10 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Send progress update to WebSocket connections subscribed to this job
-     * Uses ScormProgressWebSocketController to get connections by job_id
-     */
     public function sendUploadProgressUpdate(int $userId, string $jobId, array $progressData): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 $this->logger->debug('No WebSocket connections for job', [
@@ -86,7 +90,7 @@ class ScormWebSocketNotificationService
                     'job_id' => $jobId,
                     'status' => $progressData['status'] ?? 'processing',
                     'stage' => $progressData['stage'] ?? 'processing',
-                    'progress' => (int)($progressData['progress'] ?? 0),
+                    'progress' => (int) ($progressData['progress'] ?? 0),
                     'package_id' => $progressData['package_id'] ?? null,
                     'error' => $progressData['error'] ?? null,
                 ],
@@ -96,8 +100,8 @@ class ScormWebSocketNotificationService
             foreach ($connections as $fd) {
                 try {
                     $this->sender->push($fd, $message);
-                    $sentCount++;
-                } catch (Throwable $e) {
+                    ++$sentCount;
+                } catch (\Throwable $e) {
                     $this->logger->warning('Failed to push to WebSocket connection', [
                         'fd' => $fd,
                         'job_id' => $jobId,
@@ -114,8 +118,7 @@ class ScormWebSocketNotificationService
                 'progress' => $progressData['progress'] ?? 0,
                 'stage' => $progressData['stage'] ?? 'unknown',
             ]);
-
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to send SCORM upload progress update via WebSocket', [
                 'user_id' => $userId,
                 'job_id' => $jobId,
@@ -124,19 +127,13 @@ class ScormWebSocketNotificationService
         }
     }
 
-
-    /**
-     * Send completion notification via WebSocket
-     * Note: Progress updates already handle completion status,
-     * this method is kept for compatibility but may not be needed
-     */
     public function sendCompletionNotification(int $userId, string $jobId, array $result): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
-                return; // No active connections
+                return;
             }
 
             $message = json_encode([
@@ -155,8 +152,8 @@ class ScormWebSocketNotificationService
             foreach ($connections as $fd) {
                 try {
                     $this->sender->push($fd, $message);
-                    $sentCount++;
-                } catch (Throwable $e) {
+                    ++$sentCount;
+                } catch (\Throwable $e) {
                     $this->logger->warning('Failed to push completion to WebSocket', [
                         'fd' => $fd,
                         'job_id' => $jobId,
@@ -172,8 +169,7 @@ class ScormWebSocketNotificationService
                 'connections' => count($connections),
                 'sent' => $sentCount,
             ]);
-
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to send SCORM completion notification via WebSocket', [
                 'user_id' => $userId,
                 'job_id' => $jobId,
@@ -182,13 +178,10 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Send error notification via WebSocket
-     */
     public function sendErrorNotification(int $userId, string $jobId, string $error): void
     {
         try {
-            $connections = ScormProgressWebSocketController::getSubscribedFds($jobId);
+            $connections = $this->connectionRegistry->getSubscribedFds($jobId);
 
             if (empty($connections)) {
                 return; // No active connections
@@ -210,8 +203,8 @@ class ScormWebSocketNotificationService
             foreach ($connections as $fd) {
                 try {
                     $this->sender->push($fd, $message);
-                    $sentCount++;
-                } catch (Throwable $e) {
+                    ++$sentCount;
+                } catch (\Throwable $e) {
                     $this->logger->warning('Failed to push error to WebSocket', [
                         'fd' => $fd,
                         'job_id' => $jobId,
@@ -227,8 +220,7 @@ class ScormWebSocketNotificationService
                 'connections' => count($connections),
                 'sent' => $sentCount,
             ]);
-
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to send SCORM error notification via WebSocket', [
                 'user_id' => $userId,
                 'job_id' => $jobId,
@@ -237,14 +229,11 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Get user's active WebSocket connections count
-     */
     public function getUserConnectionsCount(int $userId): int
     {
         try {
             return $this->redis->scard("ws_connections:{$userId}");
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to get user WebSocket connections count', [
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
@@ -253,13 +242,10 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Clean up dead connections for all users
-     */
     public function cleanupDeadConnections(): int
     {
         try {
-            $pattern = "ws_connections:*";
+            $pattern = 'ws_connections:*';
             $keys = $this->redis->keys($pattern);
             $cleanedCount = 0;
 
@@ -269,11 +255,11 @@ class ScormWebSocketNotificationService
                 foreach ($connections as $fd) {
                     try {
                         // Try to send a ping to test connection
-                        $this->sender->push((int)$fd, json_encode(['type' => 'ping']));
-                    } catch (Throwable $e) {
+                        $this->sender->push((int) $fd, json_encode(['type' => 'ping']));
+                    } catch (\Throwable $e) {
                         // Connection is dead, remove it
                         $this->redis->srem($key, $fd);
-                        $cleanedCount++;
+                        ++$cleanedCount;
                     }
                 }
 
@@ -290,8 +276,7 @@ class ScormWebSocketNotificationService
             }
 
             return $cleanedCount;
-
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to cleanup dead WebSocket connections', [
                 'error' => $e->getMessage(),
             ]);
@@ -299,9 +284,6 @@ class ScormWebSocketNotificationService
         }
     }
 
-    /**
-     * Calculate processed bytes based on progress data
-     */
     private function calculateProcessedBytes(array $progressData): ?int
     {
         $fileSize = $progressData['file_size'] ?? null;
@@ -311,22 +293,11 @@ class ScormWebSocketNotificationService
             return null;
         }
 
-        return (int)($fileSize * ($progress / 100));
+        return (int) ($fileSize * $progress / 100);
     }
 
-    /**
-     * Get default stage details for better UX
-     */
     private function getDefaultStageDetails(string $stage): string
     {
-        return match ($stage) {
-            'initializing' => 'Preparing SCORM package...',
-            'extracting' => 'Extracting files from package...',
-            'processing' => 'Processing SCORM manifest...',
-            'uploading' => 'Uploading content to storage...',
-            'completed' => 'Package processing completed',
-            'failed' => 'Processing failed',
-            default => 'Processing...',
-        };
+        return $this->stageMessages[$stage] ?? 'Processing...';
     }
 }
