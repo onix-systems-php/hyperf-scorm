@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm;
 
@@ -9,7 +15,6 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
-
             ],
             'commands' => [],
             'annotations' => [
@@ -21,7 +26,7 @@ class ConfigProvider
             ],
             'view' => [
                 'namespaces' => [
-                    'OnixSystemsPHP\\HyperfScorm' => __DIR__ . '/../storage/view',
+                    'OnixSystemsPHP\HyperfScorm' => __DIR__ . '/../storage/view',
                     'scorm_public' => __DIR__ . '/../storage/public',
                 ],
             ],

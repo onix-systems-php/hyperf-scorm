@@ -18,9 +18,10 @@ class ScormApiController extends AbstractController
     public function __construct(
         private readonly SessionManager $sessionManager
     ) {
+
     }
 
-    #[OA\Get(//@SONAR_STOP@
+    #[OA\Get(// @SONAR_STOP@
         path: '/v1/api/scorm/{packageId}/initialize',
         operationId: 'initializeScormSession',
         summary: 'Initialize SCORM session',
@@ -51,17 +52,17 @@ class ScormApiController extends AbstractController
             new OA\Response(ref: '#/components/responses/404', response: 404),
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
-    )]//@SONAR_START@
+    )] // @SONAR_START@
     public function initialize(
         InitializeScormService $initializeScormService,
         int $packageId,
     ): ResourceScormInitialize {
-    //        $userId = $this->sessionManager?->user()->getId() ?? null;
+        //        $userId = $this->sessionManager?->user()->getId() ?? null;
         $userId = 1;
         return ResourceScormInitialize::make($initializeScormService->run($packageId, $userId));
     }
 
-    #[OA\Post(//@SONAR_STOP@
+    #[OA\Post(// @SONAR_STOP@
         path: '/v1/api/scorm/{packageId}/commit/{sessionToken}',
         operationId: 'commitScormProgress',
         summary: 'Commit SCORM progress',
@@ -96,7 +97,7 @@ class ScormApiController extends AbstractController
             new OA\Response(ref: '#/components/responses/422', response: 422),
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
-    )]//@SONAR_START@
+    )] // @SONAR_START@
     public function commit(
         RequestCommitScorm $request,
         ScormCommitService $service,

@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Resource;
 
@@ -39,7 +45,6 @@ class ResourceScormCommit extends AbstractResource
      * @method __construct(array $resource)
      * @property array $resource
      */
-
     public function toArray(): array
     {
         return [
@@ -59,13 +64,13 @@ class ResourceScormCommit extends AbstractResource
     }
 
     /**
-     * Get success message based on lesson status
+     * Get success message based on lesson status.
      */
     private function getMessage(): string
     {
         $status = $this->resource['lesson_status'];
 
-        return match($status) {
+        return match ($status) {
             'completed' => 'Lesson completed successfully',
             'passed' => 'Lesson completed and passed',
             'failed' => 'Lesson completed but failed',
@@ -76,7 +81,7 @@ class ResourceScormCommit extends AbstractResource
     }
 
     /**
-     * Get summary statistics
+     * Get summary statistics.
      */
     private function getSummary(): array
     {
@@ -94,7 +99,7 @@ class ResourceScormCommit extends AbstractResource
     }
 
     /**
-     * Estimate correct interactions based on score percentage
+     * Estimate correct interactions based on score percentage.
      */
     private function estimateCorrectInteractions(): int
     {
@@ -105,11 +110,11 @@ class ResourceScormCommit extends AbstractResource
             return 0;
         }
 
-        return (int)round(($scorePercentage / 100) * $interactionsCount);
+        return (int) round(($scorePercentage / 100) * $interactionsCount);
     }
 
     /**
-     * Format session time in human-readable format
+     * Format session time in human-readable format.
      */
     private function formatSessionTime(int $seconds): string
     {
@@ -139,14 +144,14 @@ class ResourceScormCommit extends AbstractResource
     }
 
     /**
-     * Get completion percentage based on status and score
+     * Get completion percentage based on status and score.
      */
     private function getCompletionPercentage(): int
     {
         $status = $this->resource['lesson_status'];
         $scorePercentage = $this->resource['score_percentage'] ?? 0;
 
-        return match($status) {
+        return match ($status) {
             'completed', 'passed', 'failed' => 100,
             'incomplete', 'browsed' => max(25, $scorePercentage), // At least 25% for attempted
             default => 0

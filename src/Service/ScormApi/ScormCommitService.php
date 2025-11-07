@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
@@ -9,6 +15,7 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
+
 use function Hyperf\Collection\collect;
 use function Hyperf\Support\now;
 
@@ -19,8 +26,7 @@ class ScormCommitService
 
     public function __construct(
         private readonly ScormUserSessionRepository $sessionRepository,
-    ) {
-    }
+    ) {}
 
     #[Transactional(attempts: 1)]
     public function run($packageId, ScormCommitDTO $scormCommitDTO): array
@@ -31,7 +37,7 @@ class ScormCommitService
         $this->updateSessionSummary($session, $scormCommitDTO);
         $this->createInteractions($session, $scormCommitDTO->interactions);
 
-        //todo should  return dto not array
+        // todo should  return dto not array
         return [
             'session_id' => $session->id,
             'student_id' => $scormCommitDTO->student_id,
@@ -39,8 +45,8 @@ class ScormCommitService
             'lesson_status' => $scormCommitDTO->lesson->status,
             'current_location' => $scormCommitDTO->lesson->location,
             'exit_mode' => $scormCommitDTO->lesson->exit,
-//            'entry' => $compactData->lesson->entry,
-//            'credit' => $compactData->lesson->credit,
+            //            'entry' => $compactData->lesson->entry,
+            //            'credit' => $compactData->lesson->credit,
             'score' => $scormCommitDTO->score,
             'score_percentage' => $scormCommitDTO->score_percentage,
             'interactions_count' => $scormCommitDTO->getInteractionsCount(),
@@ -56,7 +62,6 @@ class ScormCommitService
 
     private function updateSessionSummary($session, ScormCommitDTO $scormCommitDTO): void
     {
-
         $updateData = [
             'last_activity_at' => now(),
             'student_name' => $scormCommitDTO->student_name,
@@ -84,12 +89,11 @@ class ScormCommitService
             'processed_at' => now()->toISOString(),
         ];
 
-        if ($scormCommitDTO->isCompleted() && !$session->completed_at) {
+        if ($scormCommitDTO->isCompleted() && ! $session->completed_at) {
             $updateData['completed_at'] = $scormCommitDTO->getCompletedTimestamp()
                 ? new \DateTime($scormCommitDTO->getCompletedTimestamp())
                 : now();
         }
-
 
         $session = $this->sessionRepository->update($session, $updateData);
         $this->sessionRepository->save($session);
@@ -99,9 +103,8 @@ class ScormCommitService
     {
         $existingIds = $session->interactions->pluck('interaction_id')->toArray();
         $data = collect($interactions)
-            ->filter(fn(ScormCommitInteractionDTO $interaction) => !in_array($interaction->id, $existingIds))
-            ->map(function (ScormCommitInteractionDTO $interaction) use ($session) {
-
+            ->filter(fn (ScormCommitInteractionDTO $interaction) => ! in_array($interaction->id, $existingIds))
+            ->map(function (ScormCommitInteractionDTO $interaction) {
                 return [
                     'interaction_id' => $interaction->id,
                     'type' => $interaction->type ?? 'choice',
@@ -116,7 +119,6 @@ class ScormCommitService
                     'created_at' => now(),
                 ];
             })->toArray();
-
 
         $this->sessionRepository->createMany($session, $data, 'interactions');
     }

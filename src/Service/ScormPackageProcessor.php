@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
+
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\DbConnection\Annotation\Transactional;
@@ -11,8 +17,8 @@ use OnixSystemsPHP\HyperfScorm\DTO\ProgressContext;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
+use OnixSystemsPHP\HyperfScorm\ValueObject\ScormFile;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Throwable;
 use function Hyperf\Config\config;
 
 #[Service]
@@ -21,6 +27,7 @@ class ScormPackageProcessor
     public const ACTION = 'upload_scorm_package';
 
     private const ALLOWED_EXTENSIONS = ['zip'];
+
     private const ALLOWED_MIME_TYPES = [
         'application/zip',
         'application/x-zip-compressed',
@@ -54,7 +61,14 @@ class ScormPackageProcessor
                 'stage_details' => 'Extracting and processing SCORM content...',
             ]);
 
-            $processedPackage = $this->fileProcessor->run($dto->file);
+            $scormFile = ScormFile::fromArray([
+                'storage' => 'scorm-queue',
+                'path' => $dto->file->getPath(),
+                'full_path' => $dto->file->getPathname(),
+                'extract_dir' => $progressContext->jobId,
+            ]);
+
+            $processedPackage = $this->fileProcessor->run($scormFile);
 
             $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
@@ -68,17 +82,17 @@ class ScormPackageProcessor
                 'description' => $dto->description,
                 'scorm_version' => $processedPackage->manifestData->version,
                 'content_path' => $processedPackage->contentPath,
+                'domain' => $processedPackage->domain,
+                'launch_url' => $processedPackage->launch_url,
                 'original_filename' => $dto->file->getClientFilename(),
                 'file_size' => $dto->file->getSize(),
-                'file_hash' => hash_file('sha256', $dto->file->getRealPath()),
+                'file_hash' => hash_file('sha256', (string)$dto->file->getSize()),
                 'manifest_data' => $processedPackage->manifestData,
                 'is_active' => true,
             ]);
 
             $this->scormPackageRepository->save($package);
             $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, $package->toArray()));
-
-            $processedPackage->cleanup();
 
             $this->progressTracker->track($progressContext, [
                 'status' => 'completed',
@@ -89,8 +103,8 @@ class ScormPackageProcessor
             ]);
 
             return $package;
-        } catch (Throwable $error) {
-            if (!$progressContext->isRetryable) {
+        } catch (\Throwable $error) {
+            if (! $progressContext->isRetryable) {
                 $this->progressTracker->track($progressContext, [
                     'status' => 'failed',
                     'progress' => 0,
@@ -108,12 +122,12 @@ class ScormPackageProcessor
     private function validateUploadedFile(UploadedFile $file): void
     {
         if ($file->getError() !== UPLOAD_ERR_OK) {
-            throw new \InvalidArgumentException("File upload error: " . $file->getError());
+            throw new \InvalidArgumentException('File upload error: ' . $file->getError());
         }
 
-        if (!in_array($file->getExtension(), self::ALLOWED_EXTENSIONS)) {
+        if (! in_array($file->getExtension(), self::ALLOWED_EXTENSIONS)) {
             throw new \InvalidArgumentException(
-                "Invalid file extension. Allowed: " . implode(', ', self::ALLOWED_EXTENSIONS)
+                'Invalid file extension. Allowed: ' . implode(', ', self::ALLOWED_EXTENSIONS)
             );
         }
 
@@ -124,9 +138,9 @@ class ScormPackageProcessor
             );
         }
 
-        if (!in_array($file->getMimeType(), self::ALLOWED_MIME_TYPES)) {
+        if (! in_array($file->getMimeType(), self::ALLOWED_MIME_TYPES)) {
             throw new \InvalidArgumentException(
-                "Invalid file type. Expected ZIP file, got: " . $file->getMimeType()
+                'Invalid file type. Expected ZIP file, got: ' . $file->getMimeType()
             );
         }
     }

@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
@@ -13,7 +19,7 @@ use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Service for creating SCORM packages
+ * Service for creating SCORM packages.
  */
 #[Service]
 class CreateScormPackageService
@@ -23,8 +29,7 @@ class CreateScormPackageService
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private EventDispatcherInterface $eventDispatcher,
-    ) {
-    }
+    ) {}
 
     #[Transactional(attempts: 1)]
     public function run(CreateScormPackageDTO $dto): ScormPackage
@@ -55,7 +60,7 @@ class CreateScormPackageService
             throw new \InvalidArgumentException('Package identifier is required');
         }
 
-        if (!in_array($dto->version, ScormVersionEnum::values())) {
+        if (! in_array($dto->version, ScormVersionEnum::values())) {
             throw new \InvalidArgumentException('Invalid SCORM version');
         }
     }

@@ -1,6 +1,11 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
@@ -29,9 +34,9 @@ class ScormInteraction extends Model
     ];
 
     protected array $casts = [
-        'learner_response' => 'array',//todo create Cast
-        'correct_response' => 'array', //todo create Cast
-        'objectives' => 'array', //todo create Cast
+        'learner_response' => 'array', // todo create Cast
+        'correct_response' => 'array', // todo create Cast
+        'objectives' => 'array', // todo create Cast
         'interaction_timestamp' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

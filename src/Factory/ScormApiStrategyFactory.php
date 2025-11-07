@@ -1,22 +1,25 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Factory;
 
 use OnixSystemsPHP\HyperfScorm\Enum\ScormVersionEnum;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\Scorm2004ApiStrategy;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\ScormApiStrategyInterface;
-use OnixSystemsPHP\HyperfScorm\Strategy\Scorm12ApiStrategy;
 
 /**
- * Factory for creating SCORM API strategies based on version
+ * Factory for creating SCORM API strategies based on version.
  */
 class ScormApiStrategyFactory
 {
-
     /**
-     * Create appropriate strategy for SCORM version
+     * Create appropriate strategy for SCORM version.
      */
     public function createForVersion(string $version): ScormApiStrategyInterface
     {
@@ -31,7 +34,7 @@ class ScormApiStrategyFactory
     }
 
     /**
-     * Get all supported versions
+     * Get all supported versions.
      */
     public function getSupportedVersions(): array
     {
@@ -39,7 +42,7 @@ class ScormApiStrategyFactory
     }
 
     /**
-     * Check if version is supported
+     * Check if version is supported.
      */
     public function isVersionSupported(string $version): bool
     {

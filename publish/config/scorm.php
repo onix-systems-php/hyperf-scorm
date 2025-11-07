@@ -1,7 +1,11 @@
 <?php
 
 declare(strict_types=1);
-
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 use function Hyperf\Support\env;
 
 return [
@@ -19,7 +23,6 @@ return [
             'public_url' => env('SCORM_LOCAL_PUBLIC_URL', 'http://localhost/public'),
             'path' => env('SCORM_LOCAL_PATH', BASE_PATH . '/storage/scorm'),
         ],
-
     ],
 
     'upload' => [
@@ -35,10 +38,6 @@ return [
     'tracking' => [
         'store_detailed_logs' => env('SCORM_DETAILED_LOGS', true),
         'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30), // seconds
-//        'max_suspend_data_length' => [
-//            '1.2' => 4096,   // SCORM 1.2 limit
-//            '2004' => 64000, // SCORM 2004 limit
-//        ],
     ],
 
     'cache' => [
@@ -47,7 +46,6 @@ return [
 
     'performance' => [
         'max_memory_usage' => env('SCORM_MAX_MEMORY_USAGE', 512 * 1024 * 1024), // 512MB
-//        'chunk_size' => env('SCORM_CHUNK_SIZE', 8 * 1024 * 1024), // 8MB chunks for memory-efficient processing
         'memory_warning_threshold' => 0.8, // 80% - trigger warnings
         'memory_temp_file_threshold' => 0.7, // 70% - switch to temp file strategy
         'temp_cleanup_ttl' => env('SCORM_TEMP_CLEANUP_TTL', 86400), // 24 hours
@@ -56,7 +54,7 @@ return [
     ],
 
     'processing' => [
-        'async_threshold_bytes' => env('SCORM_ASYNC_THRESHOLD', 25 ) * 1024 * 1024, // 25MB - files larger than this will be processed asynchronously
+        'async_threshold_bytes' => env('SCORM_ASYNC_THRESHOLD', 25) * 1024 * 1024, // 25MB - files larger than this will be processed asynchronously
         'memory_check_interval_extraction' => 100, // Check memory every N files during extraction
     ],
 
@@ -67,9 +65,9 @@ return [
 
     'redis' => [
         'ttl' => [
-            'job_status' => (int)env('SCORM_REDIS_TTL_JOB_STATUS', 3600), // 1 hour
-            'job_result' => (int)env('SCORM_REDIS_TTL_JOB_RESULT', 86400), // 24 hours
-            'websocket' => (int)env('SCORM_REDIS_TTL_WEBSOCKET', 86400), // 24 hours
+            'job_status' => (int) env('SCORM_REDIS_TTL_JOB_STATUS', 3600), // 1 hour
+            'job_result' => (int) env('SCORM_REDIS_TTL_JOB_RESULT', 86400), // 24 hours
+            'websocket' => (int) env('SCORM_REDIS_TTL_WEBSOCKET', 86400), // 24 hours
         ],
     ],
 

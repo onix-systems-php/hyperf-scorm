@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
@@ -12,7 +18,7 @@ use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class ScormPlayerController extends AbstractController
 {
-    #[OA\Get(//@SONAR_STOP@
+    #[OA\Get(// @SONAR_STOP@
         path: '/v1/api/scorm/player/{packageId}/launch/{sessionToken?}',
         operationId: 'launchScormPlayer',
         summary: 'Launch SCORM player',
@@ -47,7 +53,7 @@ class ScormPlayerController extends AbstractController
             new OA\Response(ref: '#/components/responses/404', response: 404),
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
-    )]//@SONAR_START@
+    )] // @SONAR_START@
     public function launch(
         ScormPlayerService $scormPlayerService,
         ResponseInterface $response,
@@ -56,6 +62,6 @@ class ScormPlayerController extends AbstractController
         $playerData = $scormPlayerService->run($packageId);
 
         return $response->withHeader('Content-Type', 'text/html')
-                       ->withBody(new SwooleStream($playerData->playerHtml));
+            ->withBody(new SwooleStream($playerData->playerHtml));
     }
 }

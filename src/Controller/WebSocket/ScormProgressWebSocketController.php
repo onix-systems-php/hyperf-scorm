@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Controller\WebSocket;
 
@@ -14,20 +20,8 @@ use Psr\Log\LoggerInterface;
 class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInterface, OnCloseInterface
 {
     private WebSocketConnectionService $connectionRegistry;
-    private LoggerInterface $logger;
 
-    /**
-     * Initialize dependencies lazily using ApplicationContext
-     * Note: WebSocket controllers cannot use constructor injection in Hyperf
-     */
-    private function initializeDependencies(): void
-    {
-        if (!isset($this->connectionRegistry)) {
-            $container = ApplicationContext::getContainer();
-            $this->connectionRegistry = $container->get(WebSocketConnectionService::class);
-            $this->logger = $container->get(LoggerInterface::class);
-        }
-    }
+    private LoggerInterface $logger;
 
     public function onMessage($server, $frame): void
     {
@@ -40,12 +34,12 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
 
         $data = json_decode($frame->data, true);
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return; // Invalid JSON, ignore silently
         }
 
         if (isset($data['action']) && $data['action'] === 'subscribe' && isset($data['job_id'])) {
-            if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $data['job_id'])) {
+            if (! preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $data['job_id'])) {
                 $server->push($frame->fd, json_encode([
                     'type' => 'error',
                     'message' => 'Invalid job_id format. Expected UUID.',
@@ -77,7 +71,7 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
             'query_string' => $queryString,
         ]);
 
-        if ($jobId && !preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $jobId)) {
+        if ($jobId && ! preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i', $jobId)) {
             $this->logger->warning('[WS Debug] Invalid job_id format', [
                 'fd' => $request->fd,
                 'job_id' => $jobId,
@@ -152,5 +146,17 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
 
         return $registry->getSubscribedFds($jobId);
     }
-}
 
+    /**
+     * Initialize dependencies lazily using ApplicationContext
+     * Note: WebSocket controllers cannot use constructor injection in Hyperf.
+     */
+    private function initializeDependencies(): void
+    {
+        if (! isset($this->connectionRegistry)) {
+            $container = ApplicationContext::getContainer();
+            $this->connectionRegistry = $container->get(WebSocketConnectionService::class);
+            $this->logger = $container->get(LoggerInterface::class);
+        }
+    }
+}

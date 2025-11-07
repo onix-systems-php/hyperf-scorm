@@ -1,17 +1,28 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
 use Hyperf\Database\Model\Model;
-use Carbon\Carbon;
 
 /**
- * SCORM Activity Model
+ * SCORM Activity Model.
  */
 class ScormActivity extends Model
 {
+    // Activity types
+    public const TYPE_QUESTION_ANSWER = 'question_answer';
+
+    public const TYPE_LESSON_COMPLETE = 'lesson_complete';
+
+    public const TYPE_LOCATION_CHANGE = 'location_change';
+
     protected ?string $table = 'scorm_activities';
 
     protected array $fillable = [
@@ -30,13 +41,8 @@ class ScormActivity extends Model
         'updated_at' => 'datetime',
     ];
 
-    // Activity types
-    public const TYPE_QUESTION_ANSWER = 'question_answer';
-    public const TYPE_LESSON_COMPLETE = 'lesson_complete';
-    public const TYPE_LOCATION_CHANGE = 'location_change';
-
     /**
-     * Get the session associated with this activity
+     * Get the session associated with this activity.
      */
     public function session()
     {
@@ -44,7 +50,7 @@ class ScormActivity extends Model
     }
 
     /**
-     * Get the package associated with this activity
+     * Get the package associated with this activity.
      */
     public function package()
     {
@@ -52,7 +58,7 @@ class ScormActivity extends Model
     }
 
     /**
-     * Get the user associated with this activity
+     * Get the user associated with this activity.
      */
     public function user()
     {

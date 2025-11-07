@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
@@ -16,8 +22,7 @@ class LaunchScormService
         public readonly ScormPackageRepository $scormPackageRepository,
         public readonly ScormUserSessionRepository $scormUserSessionRepository,
         public readonly ScormPlayerService $scormPlayerService,
-    ) {
-    }
+    ) {}
 
     public function run(int $packageId): string
     {

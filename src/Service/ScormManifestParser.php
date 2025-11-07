@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
@@ -12,7 +18,7 @@ class ScormManifestParser
 {
     public function parse(string $manifestPath): ScormManifestDTO
     {
-        if (!file_exists($manifestPath)) {
+        if (! file_exists($manifestPath)) {
             throw new ScormParsingException("Manifest file not found: {$manifestPath}");
         }
 
@@ -20,7 +26,7 @@ class ScormManifestParser
         $this->validateRequiredElements($xml);
         $version = $this->detectScormVersion($xml);
 
-        return  ScormManifestDTO::make([
+        return ScormManifestDTO::make([
             'title' => $this->getManifestTitle($xml),
             'version' => $version,
             'scos' => $this->parseScos($xml),
@@ -38,7 +44,7 @@ class ScormManifestParser
             $errors = libxml_get_errors();
             $errorMessage = 'XML parsing errors: ' . implode(
                 ', ',
-                array_map(static fn(object $error): string => trim($error->message), $errors)
+                array_map(static fn (object $error): string => trim($error->message), $errors)
             );
             libxml_clear_errors();
             throw new ScormParsingException($errorMessage);
@@ -50,11 +56,11 @@ class ScormManifestParser
 
     private function validateRequiredElements(\SimpleXMLElement $xml): void
     {
-        if (!isset($xml->metadata->schema)) {
+        if (! isset($xml->metadata->schema)) {
             throw new ScormParsingException('Required element <schema> is missing from manifest metadata');
         }
 
-        $schema = trim((string)$xml->metadata->schema);
+        $schema = trim((string) $xml->metadata->schema);
         if (empty($schema)) {
             throw new ScormParsingException('Required element <schema> is empty in manifest metadata');
         }
@@ -90,15 +96,15 @@ class ScormManifestParser
         }
 
         throw new ScormParsingException(
-            "Unknown SCORM version in schemaversion: '{$schemaVersion}'. " .
-            "Expected: '2004 3rd Edition', 'CAM 1.3' (SCORM 2004), 'CAM 1.2' or '1.2' (SCORM 1.2)"
+            "Unknown SCORM version in schemaversion: '{$schemaVersion}'. "
+            . "Expected: '2004 3rd Edition', 'CAM 1.3' (SCORM 2004), 'CAM 1.2' or '1.2' (SCORM 1.2)"
         );
     }
 
     private function getSchemaVersion(\SimpleXMLElement $xml): ?string
     {
         if (isset($xml->metadata->schemaversion)) {
-            return trim((string)$xml->metadata->schemaversion);
+            return trim((string) $xml->metadata->schemaversion);
         }
 
         return null;
@@ -106,7 +112,7 @@ class ScormManifestParser
 
     private function getManifestIdentifier(\SimpleXMLElement $xml): string
     {
-        $identifier = (string)$xml['identifier'] ?? '';
+        $identifier = (string) $xml['identifier'] ?? '';
 
         if (empty($identifier)) {
             throw new ScormParsingException('Manifest identifier not found');
@@ -118,15 +124,15 @@ class ScormManifestParser
     private function getManifestTitle(\SimpleXMLElement $xml): string
     {
         if (isset($xml->organizations->organization->title)) {
-            return (string)$xml->organizations->organization->title;
+            return (string) $xml->organizations->organization->title;
         }
 
         if (isset($xml->organizations->organization['title'])) {
-            return (string)$xml->organizations->organization['title'];
+            return (string) $xml->organizations->organization['title'];
         }
 
         if (isset($xml->metadata->title)) {
-            return (string)$xml->metadata->title;
+            return (string) $xml->metadata->title;
         }
 
         return 'Untitled SCORM Package';
@@ -151,23 +157,22 @@ class ScormManifestParser
         return $metadata;
     }
 
-
     private function parseLOMMetadata(\SimpleXMLElement $lom): array
     {
         $metadata = [];
 
         if (isset($lom->general)) {
             $metadata['general'] = [
-                'title' => isset($lom->general->title->string) ? (string)$lom->general->title->string : null,
-                'description' => isset($lom->general->description->string) ? (string)$lom->general->description->string : null,
+                'title' => isset($lom->general->title->string) ? (string) $lom->general->title->string : null,
+                'description' => isset($lom->general->description->string) ? (string) $lom->general->description->string : null,
                 'keywords' => [],
-                'language' => isset($lom->general->language) ? (string)$lom->general->language : null,
+                'language' => isset($lom->general->language) ? (string) $lom->general->language : null,
             ];
 
             if (isset($lom->general->keyword)) {
                 foreach ($lom->general->keyword as $keyword) {
                     if (isset($keyword->string)) {
-                        $metadata['general']['keywords'][] = (string)$keyword->string;
+                        $metadata['general']['keywords'][] = (string) $keyword->string;
                     }
                 }
             }
@@ -184,10 +189,10 @@ class ScormManifestParser
         if (isset($xml->organizations->organization->{'adlseq:sequencing'})) {
             $sequencing = $xml->organizations->organization->{'adlseq:sequencing'};
             $metadata['sequencing'] = [
-                'choice' => (string)$sequencing['choice'] === 'true',
-                'choiceExit' => (string)$sequencing['choiceExit'] === 'true',
-                'flow' => (string)$sequencing['flow'] === 'true',
-                'forwardOnly' => (string)$sequencing['forwardOnly'] === 'true',
+                'choice' => (string) $sequencing['choice'] === 'true',
+                'choiceExit' => (string) $sequencing['choiceExit'] === 'true',
+                'flow' => (string) $sequencing['flow'] === 'true',
+                'forwardOnly' => (string) $sequencing['forwardOnly'] === 'true',
             ];
         }
 
@@ -222,12 +227,12 @@ class ScormManifestParser
 
         if (isset($xml->resources->resource)) {
             foreach ($xml->resources->resource as $resource) {
-                $identifier = (string)$resource['identifier'];
+                $identifier = (string) $resource['identifier'];
                 $resourcesMap[$identifier] = [
-                    'href' => (string)$resource['href'],
-                    'type' => (string)$resource['type'],
-                    'scorm_type' => (string)($resource['adlcp:scormtype'] ?? ''),
-                    'base' => (string)($resource['xml:base'] ?? ''),
+                    'href' => (string) $resource['href'],
+                    'type' => (string) $resource['type'],
+                    'scorm_type' => (string) ($resource['adlcp:scormtype'] ?? ''),
+                    'base' => (string) ($resource['xml:base'] ?? ''),
                 ];
             }
         }
@@ -241,17 +246,17 @@ class ScormManifestParser
 
         if (isset($parent->item)) {
             foreach ($parent->item as $item) {
-                $identifierref = (string)($item['identifierref'] ?? '');
+                $identifierref = (string) ($item['identifierref'] ?? '');
 
-                if (!empty($identifierref) && isset($resourcesMap[$identifierref])) {
+                if (! empty($identifierref) && isset($resourcesMap[$identifierref])) {
                     $resource = $resourcesMap[$identifierref];
 
                     $scos[] = ScoDTO::make([
-                        'identifier' =>  $identifierref,
-                        'title' =>  (string)($item->title ?? 'Untitled SCO'),
-                        'launch_url' =>  $this->buildLaunchUrl($resource, $item),
-                        'mastery_score' =>  isset($item['adlcp:masteryscore'])
-                            ? (float)$item['adlcp:masteryscore']
+                        'identifier' => $identifierref,
+                        'title' => (string) ($item->title ?? 'Untitled SCO'),
+                        'launch_url' => $this->buildLaunchUrl($resource, $item),
+                        'mastery_score' => isset($item['adlcp:masteryscore'])
+                            ? (float) $item['adlcp:masteryscore']
                             : null,
                     ]);
                 }
@@ -267,7 +272,7 @@ class ScormManifestParser
 
     private function extractDescription(\SimpleXMLElement $xml): ?string
     {
-        if (!isset($xml->metadata->lom->general->description->string)) {
+        if (! isset($xml->metadata->lom->general->description->string)) {
             return null;
         }
 
@@ -275,17 +280,17 @@ class ScormManifestParser
     }
 
     /**
-     * Build complete launch URL from resource and item data
+     * Build complete launch URL from resource and item data.
      */
     private function buildLaunchUrl(array $resource, \SimpleXMLElement $item): string
     {
         $href = $resource['href'];
         $base = $resource['base'];
-        $parameters = (string)($item['parameters'] ?? '');
+        $parameters = (string) ($item['parameters'] ?? '');
 
         $launchUrl = $base ? rtrim($base, '/') . '/' . ltrim($href, '/') : $href;
 
-        if (!empty($parameters)) {
+        if (! empty($parameters)) {
             $separator = strpos($launchUrl, '?') !== false ? '&' : '?';
             $launchUrl .= $separator . $parameters;
         }

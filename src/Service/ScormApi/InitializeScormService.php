@@ -1,14 +1,20 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
-use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
+
 use function Hyperf\Support\now;
 
 #[Service]
@@ -20,8 +26,7 @@ class InitializeScormService
         public readonly ScormPackageRepository $scormPackageRepository,
         public readonly ScormUserSessionRepository $scormUserSessionRepository,
         public readonly ScormPlayerService $scormPlayerService,
-    ) {
-    }
+    ) {}
 
     public function run(int $packageId, int $userId): ScormUserSession
     {

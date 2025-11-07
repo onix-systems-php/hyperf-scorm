@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\DTO;
 
@@ -7,16 +13,18 @@ use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
 /**
- * DTO for parsed SCORM manifest data
+ * DTO for parsed SCORM manifest data.
  */
 class ScormManifestDTO extends AbstractDTO
 {
     public string $title;
+
     public string $version;
+
     #[ConvertArray(ScoDTO::class)]
     public array $scos;
-    public ?string $description;
 
+    public ?string $description;
 
     public function getPrimarySco(): ?ScoDTO
     {
@@ -42,7 +50,7 @@ class ScormManifestDTO extends AbstractDTO
 
     public function hasScos(): bool
     {
-        return !empty($this->scos);
+        return ! empty($this->scos);
     }
 
     public function getScoCount(): int
@@ -57,7 +65,7 @@ class ScormManifestDTO extends AbstractDTO
             'version' => $this->version,
             'version_label' => $this->version,
             'description' => $this->description,
-            'scos' => array_map(fn($sco) => $sco->toArray(), $this->scos),
+            'scos' => array_map(fn ($sco) => $sco->toArray(), $this->scos),
             'primary_launch_url' => $this->getPrimaryLaunchUrl(),
             'sco_count' => $this->getScoCount(),
         ];

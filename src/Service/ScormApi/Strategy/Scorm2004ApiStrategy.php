@@ -1,10 +1,16 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy;
 
 /**
- * SCORM 2004 API Strategy - handles SCORM 2004 specific tracking and API
+ * SCORM 2004 API Strategy - handles SCORM 2004 specific tracking and API.
  */
 class Scorm2004ApiStrategy implements ScormApiStrategyInterface
 {
@@ -179,14 +185,14 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
     {
         $dataModel = $this->getCmiDataModel();
 
-        if (!isset($dataModel[$element])) {
+        if (! isset($dataModel[$element])) {
             return false;
         }
 
         $elementDef = $dataModel[$element];
 
         // Check if element is writable
-        if (isset($elementDef['writable']) && !$elementDef['writable']) {
+        if (isset($elementDef['writable']) && ! $elementDef['writable']) {
             return false;
         }
 
@@ -196,16 +202,15 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
                 if (isset($elementDef['max_length']) && strlen($value) > $elementDef['max_length']) {
                     return false;
                 }
-                if (isset($elementDef['values']) && !in_array($value, $elementDef['values'])) {
+                if (isset($elementDef['values']) && ! in_array($value, $elementDef['values'])) {
                     return false;
                 }
                 break;
-
             case 'decimal':
-                if (!is_numeric($value)) {
+                if (! is_numeric($value)) {
                     return false;
                 }
-                $numValue = (float)$value;
+                $numValue = (float) $value;
                 if (isset($elementDef['range'])) {
                     [$min, $max] = $elementDef['range'];
                     if ($numValue < $min || $numValue > $max) {
@@ -213,23 +218,20 @@ class Scorm2004ApiStrategy implements ScormApiStrategyInterface
                     }
                 }
                 break;
-
             case 'integer':
-                if (!ctype_digit($value)) {
+                if (! ctype_digit($value)) {
                     return false;
                 }
                 break;
-
             case 'timeinterval':
                 // SCORM 2004 time format: PT[n]H[n]M[n]S or PT[n].[n]S
-                if (!preg_match('/^PT(\d+H)?(\d+M)?(\d+(\.\d+)?S)?$/', $value)) {
+                if (! preg_match('/^PT(\d+H)?(\d+M)?(\d+(\.\d+)?S)?$/', $value)) {
                     return false;
                 }
                 break;
-
             case 'datetime':
                 // ISO 8601 format
-                if (!preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/', $value)) {
+                if (! preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{3})?Z?$/', $value)) {
                     return false;
                 }
                 break;

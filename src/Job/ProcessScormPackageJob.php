@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Job;
 
@@ -11,10 +17,9 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfScorm\Service\ScormPackageProcessor;
 use Psr\Log\LoggerInterface;
-use Throwable;
 
 /**
- * Asynchronous job for processing SCORM packages
+ * Asynchronous job for processing SCORM packages.
  *
  * Responsibilities:
  * - Create UploadedFile from temp path
@@ -27,8 +32,6 @@ use Throwable;
  */
 class ProcessScormPackageJob extends Job
 {
-    public const QUEUE_NAME = 'scorm-processing';
-
     public function __construct(
         private readonly string $jobId,
         private readonly string $tempFilePath,
@@ -36,8 +39,7 @@ class ProcessScormPackageJob extends Job
         private readonly int $fileSize,
         private readonly int $userId,
         private readonly array $metadata = []
-    ) {
-    }
+    ) {}
 
     public function handle(): void
     {
@@ -53,8 +55,6 @@ class ProcessScormPackageJob extends Job
                 'original_filename' => $this->originalFilename,
             ]);
 
-            $uploadedFile = $this->createUploadedFileFromPath();
-
             $progressContext = ProgressContext::make([
                 'jobId' => $this->jobId,
                 'userId' => $this->userId,
@@ -62,6 +62,7 @@ class ProcessScormPackageJob extends Job
                 'isRetryable' => true, // Job can retry (attempts 1-2 of 3)
             ]);
 
+            $uploadedFile = $this->createUploadedFileFromPath();
             $scormPackage = $packageProcessor->process(
                 ScormUploadDTO::make([
                     'file' => $uploadedFile,
@@ -76,8 +77,7 @@ class ProcessScormPackageJob extends Job
                 'title' => $scormPackage->title,
                 'memory_peak' => memory_get_peak_usage(true),
             ]);
-
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $logger->warning('SCORM processing attempt failed (may retry)', [
                 'job_id' => $this->jobId,
                 'user_id' => $this->userId,
@@ -91,7 +91,7 @@ class ProcessScormPackageJob extends Job
 
     private function createUploadedFileFromPath(): UploadedFile
     {
-        if (!file_exists($this->tempFilePath)) {
+        if (! file_exists($this->tempFilePath)) {
             throw new ScormParsingException("Uploaded file not found: {$this->tempFilePath}");
         }
 

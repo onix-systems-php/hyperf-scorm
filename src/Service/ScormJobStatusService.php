@@ -1,32 +1,40 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfCore\Service\Service;
+
 use function Hyperf\Config\config;
 
 /**
  * Service for managing SCORM job statuses in Redis
- * Provides centralized status tracking for async SCORM processing jobs
+ * Provides centralized status tracking for async SCORM processing jobs.
  */
 #[Service]
 class ScormJobStatusService
 {
     private const JOB_STATUS_PREFIX = 'scorm:job:';
+
     private const PROGRESS_PREFIX = 'scorm_progress:';
+
     private const RESULT_PREFIX = 'scorm_result:';
 
     public function __construct(
         private readonly Redis $redis,
-    ) {
-    }
+    ) {}
 
     /**
-     * Initialize job status when job is queued
+     * Initialize job status when job is queued.
      */
-    public function initializeJob(string $jobId, array $data): void
+    public function initializeJob(string $jobId, array $data): void // notice same methods initializeJob and  updateProgress refactor to method progress
     {
         $key = self::JOB_STATUS_PREFIX . $jobId;
         $ttl = config('scorm.redis.ttl.job_status', 3600);
@@ -34,7 +42,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Update job progress during processing
+     * Update job progress during processing.
      */
     public function updateProgress(string $jobId, array $data): void
     {
@@ -44,7 +52,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Set final job result
+     * Set final job result.
      */
     public function setResult(string $jobId, array $data, ?int $ttl = null): void
     {
@@ -54,7 +62,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Get job status
+     * Get job status.
      */
     public function getStatus(string $jobId): ?array
     {
@@ -64,7 +72,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Get job progress
+     * Get job progress.
      */
     public function getProgress(string $jobId): ?array
     {
@@ -74,7 +82,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Get job result
+     * Get job result.
      */
     public function getResult(string $jobId): ?array
     {
@@ -84,7 +92,7 @@ class ScormJobStatusService
     }
 
     /**
-     * Delete job status and progress data
+     * Delete job status and progress data.
      */
     public function deleteJob(string $jobId): void
     {

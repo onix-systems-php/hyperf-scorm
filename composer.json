@@ -72,14 +72,9 @@
       "rm -rf runtime/container"
     ],
 
-    "lint": "php -l -d display_errors=0 $1",
-    "analyse": "phpstan analyse --memory-limit 300M -l 0 -c phpstan.neon ./app ./config",
-    "cs-fix": "phpcbf --colors --standard=phpcs.xml ./app ./config",
-    "cs-check": "phpcs --colors --standard=phpcs.xml ./app ./config",
+    "analyse": "phpstan analyse --memory-limit 1024M -l 0 ./src",
+    "cs-fix": "php-cs-fixer fix $1",
     "test": ["php ./vendor/bin/co-phpunit --prepend  test/bootstrap.php -c phpunit.xml --colors=always"],
-    "test-coverage": ["php test/migrate.php && phpdbg8 -dmemory_limit=1024M -qrr ./vendor/bin/co-phpunit --prepend test/bootstrap.php -c phpunit.xml --colors=always"],
-    "swagger": "php ./bin/hyperf.php swagger:gen -o ./storage/public/documentation/",
-    "check-all": ["@analyse", "@cs-check", "@test", "@swagger"],
 
     "views-cache": "php ./bin/hyperf.php gen:view-engine-cache",
     "migrate": "php ./bin/hyperf.php migrate",

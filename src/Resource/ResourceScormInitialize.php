@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Resource;
 
@@ -76,28 +82,27 @@ class ResourceScormInitialize extends AbstractResource
             ],
             'score' => [
                 'raw' => $this->resource->score_raw,
-                'scaled' =>  $this->resource->score_scaled,
+                'scaled' => $this->resource->score_scaled,
             ],
             //           'score_percentage' =>  $this->resource->score_percentage ?? 0, //todo calculate if null
             'session' => [
-               'id' => $this->resource->id,
-               'session_time' =>  $this->resource->session_time,
-               'total_time' =>  $this->resource->total_time,
-               'suspend_data' =>  $this->resource->suspend_data ?? [],
-               'session_time_seconds' =>  $this->resource->session_time_seconds,
+                'id' => $this->resource->id,
+                'session_time' => $this->resource->session_time,
+                'total_time' => $this->resource->total_time,
+                'suspend_data' => $this->resource->suspend_data ?? [],
+                'session_time_seconds' => $this->resource->session_time_seconds,
             ],
             'lesson' => [
-               'status' =>  $this->resource->lesson_status,
-               'location' =>  $this->resource->lesson_location,
-               'exit' =>  $this->resource->exit_mode,
-                'mode' =>  $this->resource->lesson_mode,
-                'entry' =>  $this->resource->lesson_entry,
-                'credit' =>  $this->resource->lesson_credit,
+                'status' => $this->resource->lesson_status,
+                'location' => $this->resource->lesson_location,
+                'exit' => $this->resource->exit_mode,
+                'mode' => $this->resource->lesson_mode,
+                'entry' => $this->resource->lesson_entry,
+                'credit' => $this->resource->lesson_credit,
             ],
             //            'interactions' =>  $this->resource->interactions ?? [],//todo need this data or not? check can you go back in scorm
             'interactions' => [],
-            'completed_at' =>  $this->resource->completed_at,
-
+            'completed_at' => $this->resource->completed_at,
         ];
     }
 }

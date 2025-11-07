@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
@@ -13,20 +19,20 @@ use Ramsey\Uuid\Uuid;
 #[Service]
 class ScormAsyncQueueService
 {
+    public const QUEUE_NAME = 'scorm-processing';
+
     private const TIME_PER_MB = 2;
 
     public function __construct(
         private readonly DriverFactory $driverFactory,
         private readonly ScormTempFileService $tempFileService,
         private readonly ScormJobStatusService $jobStatusService,
-    ) {
-    }
+    ) {}
 
     public function run(ScormUploadDTO $dto): ScormAsyncJobDTO
     {
         $jobId = Uuid::uuid4()->toString();
-
-        $tempPath = $this->tempFileService->saveTempFile($dto->file);
+        $uploadedFile = $this->tempFileService->saveTempFile($dto->file, $jobId);
 
         $this->jobStatusService->initializeJob($jobId, [
             'job_id' => $jobId,
@@ -38,10 +44,10 @@ class ScormAsyncQueueService
             'created_at' => time(),
         ]);
 
-        $driver = $this->driverFactory->get('scorm-processing');
+        $driver = $this->driverFactory->get(self::QUEUE_NAME);
         $driver->push(new ProcessScormPackageJob(
             $jobId,
-            $tempPath,
+            $uploadedFile,
             $dto->file->getClientFilename(),
             $dto->file->getSize(),
             1, // FIXME: Get actual user ID from authentication context - requires UserContextService implementation
@@ -58,12 +64,6 @@ class ScormAsyncQueueService
             'stage' => 'queued',
             'estimated_time' => $this->estimateProcessingTime($dto->file->getSize()),
         ]);
-    }
-
-    private function estimateProcessingTime(int $fileSize): int
-    {
-        $megabytes = $fileSize / (1024 * 1024);
-        return (int)($megabytes * self::TIME_PER_MB);
     }
 
     public function cancelJob(string $jobId): bool
@@ -96,5 +96,11 @@ class ScormAsyncQueueService
     public function getJobResult(string $jobId): ?array
     {
         return $this->jobStatusService->getResult($jobId);
+    }
+
+    private function estimateProcessingTime(int $fileSize): int
+    {
+        $megabytes = $fileSize / (1024 * 1024);
+        return (int) ($megabytes * self::TIME_PER_MB);
     }
 }

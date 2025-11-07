@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Service;
 
@@ -7,7 +13,6 @@ use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Contract\ProgressTrackerInterface;
 use OnixSystemsPHP\HyperfScorm\DTO\ProgressContext;
 use Psr\Log\LoggerInterface;
-use Throwable;
 
 #[Service]
 class ScormProgressTracker implements ProgressTrackerInterface
@@ -16,8 +21,7 @@ class ScormProgressTracker implements ProgressTrackerInterface
         private readonly ScormJobStatusService $jobStatusService,
         private readonly ScormWebSocketNotificationService $webSocketService,
         private readonly LoggerInterface $logger
-    ) {
-    }
+    ) {}
 
     public function track(ProgressContext $context, array $progressData): void
     {
@@ -36,7 +40,7 @@ class ScormProgressTracker implements ProgressTrackerInterface
                 'progress' => $progressData['progress'] ?? null,
                 'stage' => $progressData['stage'] ?? null,
             ]);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('Failed to update Redis progress', [
                 'job_id' => $context->jobId,
                 'error' => $e->getMessage(),
@@ -59,7 +63,7 @@ class ScormProgressTracker implements ProgressTrackerInterface
                 'user_id' => $context->userId,
                 'stage' => $progressData['stage'] ?? null,
             ]);
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->warning('Failed to send WebSocket notification', [
                 'job_id' => $context->jobId,
                 'user_id' => $context->userId,

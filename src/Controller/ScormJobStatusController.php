@@ -1,5 +1,11 @@
 <?php
+
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
@@ -15,8 +21,7 @@ class ScormJobStatusController extends AbstractController
 {
     public function __construct(
         private readonly ScormJobStatusService $jobStatusService,
-    ) {
-    }
+    ) {}
 
     #[OA\Get(
         path: '/v1/scorm/jobs/{jobId}/status',
@@ -103,7 +108,7 @@ class ScormJobStatusController extends AbstractController
     {
         $jobIds = $request->input('job_ids', []);
 
-        if (empty($jobIds) || !is_array($jobIds)) {
+        if (empty($jobIds) || ! is_array($jobIds)) {
             throw new \InvalidArgumentException('job_ids array is required');
         }
 

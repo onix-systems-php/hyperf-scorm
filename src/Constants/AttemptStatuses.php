@@ -1,19 +1,29 @@
 <?php
 
 declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 
 namespace OnixSystemsPHP\HyperfScorm\Constants;
 
 /**
- * SCORM attempt status constants
+ * SCORM attempt status constants.
  */
 final class AttemptStatuses
 {
     public const NOT_ATTEMPTED = 'not_attempted';
+
     public const INCOMPLETE = 'incomplete';
+
     public const COMPLETED = 'completed';
+
     public const PASSED = 'passed';
+
     public const FAILED = 'failed';
+
     public const BROWSED = 'browsed';
 
     public const ALL = [

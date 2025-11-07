@@ -1,6 +1,11 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
+/**
+ * This file is part of the extension library for Hyperf.
+ *
+ * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
+ */
 use Hyperf\Database\Migrations\Migration;
 use Hyperf\Database\Schema\Blueprint;
 use Hyperf\Database\Schema\Schema;
@@ -20,6 +25,8 @@ class CreateScormPackagesTable extends Migration
             $table->string('version')->default(ScormVersionEnum::SCORM_12->value);
             $table->string('identifier')->unique()->nullable();
             $table->string('content_path');
+            $table->string('domain');
+            $table->string('launch_url');
             $table->json('manifest_data');
             $table->string('scorm_version');
             $table->boolean('is_active')->default(true);
