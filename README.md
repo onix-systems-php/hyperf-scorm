@@ -104,27 +104,35 @@ All settings in `config/autoload/scorm.php` can be overridden via environment va
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| **Storage** |||
-| `SCORM_S3_BUCKET` | `scorm-content` | S3 bucket name |
-| `SCORM_S3_REGION` | `us-east-1` | AWS region |
-| `SCORM_S3_PUBLIC_URL` | - | CDN URL for S3 content |
-| `SCORM_LOCAL_PATH` | `storage/public/scorm` | Local filesystem path |
-| `SCORM_LOCAL_PUBLIC_URL` | `http://localhost/public/scorm` | Public URL for local storage |
-| **Upload & Processing** |||
-| `SCORM_MAX_FILE_SIZE` | `100` | Max upload size (MB) |
-| **Player** |||
-| `SCORM_API_ENDPOINT` | `/v1/api/scorm` | API endpoint path |
-| `SCORM_API_TIMEOUT` | `30000` | API timeout (ms) |
-| `SCORM_DEBUG` | `false` | Debug mode |
-| `SCORM_AUTO_COMMIT_INTERVAL` | `30` | Auto-commit interval (seconds) |
-| **Redis** |||
-| `SCORM_REDIS_TTL_JOB_STATUS` | `3600` | Job status TTL (seconds) |
-| `SCORM_REDIS_TTL_JOB_RESULT` | `86400` | Job result TTL (seconds) |
-| `SCORM_REDIS_TTL_WEBSOCKET` | `86400` | WebSocket TTL (seconds) |
-| **Cache** |||
-| `SCORM_CACHE_TTL` | `3600` | Cache TTL (seconds) |
+| Variable | Default | Unit | Description |
+|----------|---------|------|-------------|
+| **Storage Configuration** ||||
+| `SCORM_STORAGE_DRIVER` | `local` | - | Storage driver: `s3` or `local` |
+| `SCORM_MAX_FILE_SIZE` | `600` | MB | Maximum SCORM package upload size |
+| **Local Storage (when driver=local)** ||||
+| `SCORM_LOCAL_PATH` | `storage/public/scorm` | - | Local filesystem path for SCORM content |
+| `SCORM_LOCAL_PUBLIC_URL` | `http://localhost/public/scorm` | - | Public URL for local storage access |
+| **S3 Storage (when driver=s3)** ||||
+| `SCORM_S3_KEY` | - | - | AWS access key ID (required for S3) |
+| `SCORM_S3_SECRET` | - | - | AWS secret access key (required for S3) |
+| `SCORM_S3_REGION` | `us-east-1` | - | AWS region for S3 bucket |
+| `SCORM_S3_BUCKET` | `scorm-content` | - | S3 bucket name for SCORM content |
+| `SCORM_S3_ENDPOINT` | - | - | Custom S3 endpoint (for S3-compatible services) |
+| `SCORM_S3_PATH_STYLE` | `false` | - | Use path-style endpoint (true for MinIO/custom S3) |
+| `SCORM_S3_DOMAIN` | - | - | Custom domain for S3 public URLs (CDN) |
+| **API & Player Configuration** ||||
+| `SCORM_API_ENDPOINT` | `/v1/api/scorm` | - | Base API endpoint path for SCORM player |
+| `SCORM_API_TIMEOUT` | `30000` | ms | API request timeout in milliseconds |
+| `SCORM_DEBUG` | `false` | - | Enable debug mode (verbose logging) |
+| `SCORM_AUTO_COMMIT_INTERVAL` | `30` | sec | Auto-commit interval for CMI data |
+| **WebSocket Configuration** ||||
+| `SCORM_WS_NAME` | `socket-io` | - | WebSocket server name identifier |
+| **Cache Configuration** ||||
+| `SCORM_CACHE_TTL` | `3600` | sec | Cache time-to-live for SCORM data |
+| **Redis TTL Configuration** ||||
+| `SCORM_REDIS_TTL_JOB_STATUS` | `3600` | sec | Job status cache TTL (1 hour) |
+| `SCORM_REDIS_TTL_JOB_RESULT` | `86400` | sec | Job result cache TTL (24 hours) |
+| `SCORM_REDIS_TTL_WEBSOCKET` | `86400` | sec | WebSocket connection data TTL (24 hours) |
 
 ## WebSocket Server Setup
 

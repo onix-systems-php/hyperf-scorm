@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,15 +12,15 @@ use function Hyperf\Support\env;
 return [
     'storage' => [
         'default' => env('SCORM_STORAGE_DRIVER', 's3'),
-        's3' => [
-            'public_url' => env('SCORM_S3_PUBLIC_URL', env('AWS_URL')),
-            'bucket' => env('SCORM_S3_BUCKET', env('AWS_BUCKET', 'scorm-content')),
-            'region' => env('SCORM_S3_REGION', env('AWS_DEFAULT_REGION', 'us-east-1')),
-        ],
-
         'local' => [
-            'public_url' => env('SCORM_LOCAL_PUBLIC_URL', 'http://localhost/public'),
-            'path' => env('SCORM_LOCAL_PATH', BASE_PATH . '/storage/scorm'),
+            'domain' => env('DOMAIN_API', null),
+            'public_path_prefix' => DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads',
+            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'uploads',
+        ],
+        's3' => [
+            'domain' => env('SCORM_S3_DOMAIN'),
+            'public_path_prefix' => DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'scorm-packages',
+            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'scorm-packages',
         ],
     ],
 
@@ -47,9 +48,9 @@ return [
 
     'redis' => [
         'ttl' => [
-            'job_status' => (int) env('SCORM_REDIS_TTL_JOB_STATUS', 3600), // 1 hour
-            'job_result' => (int) env('SCORM_REDIS_TTL_JOB_RESULT', 86400), // 24 hours
-            'websocket' => (int) env('SCORM_REDIS_TTL_WEBSOCKET', 86400), // 24 hours
+            'job_status' => (int)env('SCORM_REDIS_TTL_JOB_STATUS', 3600), // 1 hour
+            'job_result' => (int)env('SCORM_REDIS_TTL_JOB_RESULT', 86400), // 24 hours
+            'websocket' => (int)env('SCORM_REDIS_TTL_WEBSOCKET', 86400), // 24 hours
         ],
     ],
 ];

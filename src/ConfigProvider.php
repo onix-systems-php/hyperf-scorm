@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -37,7 +37,7 @@ class ConfigProvider
                 \OnixSystemsPHP\HyperfScorm\Process\UploadQueueConsumer::class ,
             ],
             'file' => [
-                'storage'=> [
+                'storage' => [
                     'scormS3' => [
                         'driver' => \Hyperf\Filesystem\Adapter\S3AdapterFactory::class,
                         'credentials' => [
@@ -55,7 +55,7 @@ class ConfigProvider
                     'temp-queue' => [
                         'driver' => \Hyperf\Filesystem\Adapter\LocalAdapterFactory::class,
                         'root' => BASE_PATH . '/runtime/scorm-queue-tmp',
-                    ]
+                    ],
                 ],
 
             ],
