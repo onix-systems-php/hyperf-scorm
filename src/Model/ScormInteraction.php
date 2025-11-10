@@ -44,6 +44,6 @@ class ScormInteraction extends Model
 
     public function session(): BelongsTo
     {
-        return $this->belongsTo(ScormUserSession::class, 'session_id');
+        return $this->belongsTo(ScormSession::class, 'session_id');
     }
 }

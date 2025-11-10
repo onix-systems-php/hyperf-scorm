@@ -60,11 +60,9 @@ use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
  * @property ?ScormPackage $package
  * @property User $user
  */
-class ScormUserSession extends AbstractModel
+class ScormSession extends AbstractModel
 {
-    //    use SoftDeletes;
-
-    protected ?string $table = 'scorm_user_sessions';
+    protected ?string $table = 'scorm_sessions';
 
     protected array $fillable = [
         'package_id',

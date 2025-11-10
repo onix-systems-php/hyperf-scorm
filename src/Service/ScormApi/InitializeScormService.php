@@ -11,7 +11,7 @@ namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
-use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
+use OnixSystemsPHP\HyperfScorm\Model\ScormSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
 
@@ -28,7 +28,7 @@ class InitializeScormService
         public readonly ScormPlayerService $scormPlayerService,
     ) {}
 
-    public function run(int $packageId, int $userId): ScormUserSession
+    public function run(int $packageId, int $userId): ScormSession
     {
         $session = $this->scormUserSessionRepository->findByProjectAndUser($packageId, $userId)
             ?? $this->createSession($packageId, $userId);
@@ -38,7 +38,7 @@ class InitializeScormService
         return $session;
     }
 
-    private function createSession(int $packageId, int $userId): ScormUserSession
+    private function createSession(int $packageId, int $userId): ScormSession
     {
         $session = $this->scormUserSessionRepository->create([
             'package_id' => $packageId,

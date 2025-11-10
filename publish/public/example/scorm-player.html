@@ -955,21 +955,17 @@
 
                         const result = await response.json();
 
-                        // Проверяем async vs sync upload по флагу is_async
                         if (result.data?.is_async) {
-                            // Асинхронная загрузка - запускаем WebSocket tracking
                             console.log('[SCORM Upload] Async upload detected, job ID:', result.data.job_id);
                             isAsyncUpload.value = true;
                             asyncJobId.value = result.data.job_id;
                             uploadProgress.value = result.data.progress || 0;
                             asyncUploadStage.value = result.data.stage || 'queued';
 
-                            // Создаем WebSocket клиент если еще не создан
                             if (!uploadClient) {
                                 uploadClient = new ScormUploadClient(API_BASE_URL);
                             }
 
-                            // Запускаем WebSocket tracking с callbacks
                             uploadClient.trackJob(result.data.job_id, {
                                 onProgress: (data) => {
                                     console.log('[SCORM Upload] Progress:', data.progress, '%', data.stage);
@@ -996,7 +992,6 @@
                             });
 
                         } else {
-                            // Синхронная загрузка - уже завершена
                             console.log('[SCORM Upload] Sync upload completed');
                             uploadedPackage.value = result.data;
                             uploadSuccess.value = true;

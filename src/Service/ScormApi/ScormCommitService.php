@@ -13,7 +13,7 @@ use Hyperf\DbConnection\Annotation\Transactional;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
-use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
+use OnixSystemsPHP\HyperfScorm\Model\ScormSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
 
 use function Hyperf\Collection\collect;
@@ -99,7 +99,7 @@ class ScormCommitService
         $this->sessionRepository->save($session);
     }
 
-    private function createInteractions(ScormUserSession $session, array $interactions): void
+    private function createInteractions(ScormSession $session, array $interactions): void
     {
         $existingIds = $session->interactions->pluck('interaction_id')->toArray();
         $data = collect($interactions)

@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Resource;
 
 use OnixSystemsPHP\HyperfCore\Resource\AbstractResource;
-use OnixSystemsPHP\HyperfScorm\Model\ScormUserSession;
+use OnixSystemsPHP\HyperfScorm\Model\ScormSession;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
@@ -67,8 +67,8 @@ use OpenApi\Attributes as OA;
     ]
 )]
 /**
- * @method __construct(ScormUserSession $resource)
- * @property ScormUserSession $resource
+ * @method __construct(ScormSession $resource)
+ * @property ScormSession $resource
  */
 class ResourceScormInitialize extends AbstractResource
 {
