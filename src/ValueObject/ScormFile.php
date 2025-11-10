@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,7 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\ValueObject;
 
 use OnixSystemsPHP\HyperfCore\Constants\ErrorCode;
 use OnixSystemsPHP\HyperfCore\Exception\BusinessException;
-
 use function Hyperf\Collection\collect;
 use function Hyperf\Translation\__;
 
