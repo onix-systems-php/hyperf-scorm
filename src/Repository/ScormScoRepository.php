@@ -13,9 +13,6 @@ use Hyperf\Database\Model\Model;
 use OnixSystemsPHP\HyperfCore\Repository\AbstractRepository;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSco;
 
-/**
- * SCORM SCO Repository implementation.
- */
 class ScormScoRepository extends AbstractRepository
 {
     protected string $modelClass = ScormSco::class;
@@ -52,18 +49,12 @@ class ScormScoRepository extends AbstractRepository
         return $model->save();
     }
 
-    /**
-     * Save SCO.
-     */
     public function saveSco(ScormSco $sco): ScormSco
     {
         $sco->save();
         return $sco;
     }
 
-    /**
-     * Implementation of AbstractRepository::delete().
-     */
     public function delete(Model $model): bool
     {
         if (! $model instanceof ScormSco) {
@@ -72,18 +63,12 @@ class ScormScoRepository extends AbstractRepository
         return $model->delete();
     }
 
-    /**
-     * Delete SCO by ID.
-     */
     public function deleteById(int $id): bool
     {
         $sco = $this->findById($id);
         return $sco ? $sco->delete() : false;
     }
 
-    /**
-     * Implementation of AbstractRepository::create().
-     */
     public function create(array $data = []): Model
     {
         $sco = new ScormSco();
@@ -93,9 +78,6 @@ class ScormScoRepository extends AbstractRepository
         return $sco;
     }
 
-    /**
-     * Create SCO.
-     */
     public function createSco(array $data): ScormSco
     {
         $sco = new ScormSco();
@@ -117,9 +99,6 @@ class ScormScoRepository extends AbstractRepository
         return $createdScos;
     }
 
-    /**
-     * Find SCOs with launch URLs.
-     */
     public function findLaunchableScos(int $packageId): array
     {
         return $this->query()->where('package_id', $packageId)
@@ -129,9 +108,6 @@ class ScormScoRepository extends AbstractRepository
             ->toArray();
     }
 
-    /**
-     * Find first SCO for package (default launch SCO).
-     */
     public function findFirstSco(int $packageId): ?ScormSco
     {
         return $this->query()->where('package_id', $packageId)
@@ -139,9 +115,6 @@ class ScormScoRepository extends AbstractRepository
             ->first();
     }
 
-    /**
-     * Update SCO launch URL.
-     */
     public function updateLaunchUrl(int $id, string $launchUrl): bool
     {
         $sco = $this->findById($id);
@@ -155,9 +128,6 @@ class ScormScoRepository extends AbstractRepository
         return true;
     }
 
-    /**
-     * Find SCOs by title pattern.
-     */
     public function findByTitlePattern(int $packageId, string $pattern): array
     {
         return $this->query()->where('package_id', $packageId)
@@ -167,17 +137,11 @@ class ScormScoRepository extends AbstractRepository
             ->toArray();
     }
 
-    /**
-     * Count SCOs for package.
-     */
     public function countByPackage(int $packageId): int
     {
         return $this->query()->where('package_id', $packageId)->count();
     }
 
-    /**
-     * Get SCO statistics for package.
-     */
     public function getPackageStatistics(int $packageId): array
     {
         $totalScos = $this->countByPackage($packageId);
@@ -203,17 +167,11 @@ class ScormScoRepository extends AbstractRepository
         ];
     }
 
-    /**
-     * Delete all SCOs for package.
-     */
     public function deleteByPackage(int $packageId): bool
     {
         return $this->query()->where('package_id', $packageId)->delete() > 0;
     }
 
-    /**
-     * Update SCO parameters.
-     */
     public function updateParameters(int $id, array $parameters): bool
     {
         $sco = $this->findById($id);
@@ -227,9 +185,6 @@ class ScormScoRepository extends AbstractRepository
         return true;
     }
 
-    /**
-     * Find SCOs that have mastery score set.
-     */
     public function findScosWithMasteryScore(int $packageId): array
     {
         return $this->query()->where('package_id', $packageId)
@@ -239,9 +194,6 @@ class ScormScoRepository extends AbstractRepository
             ->toArray();
     }
 
-    /**
-     * Update SCO mastery score.
-     */
     public function updateMasteryScore(int $id, ?string $masteryScore): bool
     {
         $sco = $this->findById($id);

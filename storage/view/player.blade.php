@@ -209,23 +209,6 @@
                     // Save final data
                     saveDataToServer();
 
-                    // Terminate session on server
-                    // if (user.sessionToken) {
-                    //     fetch(apiEndpoint + '/session/' + user.sessionToken + '/terminate', {
-                    //         method: 'POST',
-                    //         headers: {
-                    //             'Content-Type': 'application/json',
-                    //             'X-Requested-With': 'XMLHttpRequest'
-                    //         },
-                    //         body: JSON.stringify({
-                    //             action: 'terminate',
-                    //             parameter: parameter
-                    //         })
-                    //     }).catch(function(error) {
-                    //         console.error('Failed to terminate session:', error);
-                    //     });
-                    // }
-
                     terminated = true;
                     lastError = "0";
 

@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -13,13 +13,10 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Redis\Redis;
 use Hyperf\WebSocketServer\Sender;
 use Psr\Log\LoggerInterface;
-
 use function Hyperf\Config\config;
 
 class ScormWebSocketNotificationService
 {
-    private const CHANNEL_PREFIX = 'scorm_notifications:';
-
     private const USER_CHANNEL_PREFIX = 'scorm_user:';
 
     private readonly array $stageMessages;
@@ -47,7 +44,7 @@ class ScormWebSocketNotificationService
 
         try {
             // Store user connection mapping
-            $this->redis->sadd("ws_connections:{$userId}", (string) $fd);
+            $this->redis->sadd("ws_connections:{$userId}", (string)$fd);
             $this->redis->expire("ws_connections:{$userId}", config('scorm.redis.ttl.websocket', 86400));
         } catch (\Throwable $e) {
             $this->logger->error('Failed to subscribe user to SCORM notifications', [
@@ -61,7 +58,7 @@ class ScormWebSocketNotificationService
     public function unsubscribeFromUpdates(int $userId, int $fd): void
     {
         try {
-            $this->redis->srem("ws_connections:{$userId}", (string) $fd);
+            $this->redis->srem("ws_connections:{$userId}", (string)$fd);
         } catch (\Throwable $e) {
             $this->logger->error('Failed to unsubscribe user from SCORM notifications', [
                 'user_id' => $userId,
@@ -90,7 +87,7 @@ class ScormWebSocketNotificationService
                     'job_id' => $jobId,
                     'status' => $progressData['status'] ?? 'processing',
                     'stage' => $progressData['stage'] ?? 'processing',
-                    'progress' => (int) ($progressData['progress'] ?? 0),
+                    'progress' => (int)($progressData['progress'] ?? 0),
                     'package_id' => $progressData['package_id'] ?? null,
                     'error' => $progressData['error'] ?? null,
                 ],
@@ -255,7 +252,7 @@ class ScormWebSocketNotificationService
                 foreach ($connections as $fd) {
                     try {
                         // Try to send a ping to test connection
-                        $this->sender->push((int) $fd, json_encode(['type' => 'ping']));
+                        $this->sender->push((int)$fd, json_encode(['type' => 'ping']));
                     } catch (\Throwable $e) {
                         // Connection is dead, remove it
                         $this->redis->srem($key, $fd);
@@ -293,7 +290,7 @@ class ScormWebSocketNotificationService
             return null;
         }
 
-        return (int) ($fileSize * $progress / 100);
+        return (int)($fileSize * $progress / 100);
     }
 
     private function getDefaultStageDetails(string $stage): string
