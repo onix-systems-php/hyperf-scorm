@@ -34,28 +34,6 @@ class ScormTempFileService
         return $tempPath;
     }
 
-    public function cleanup(string $path, ?string $jobId = null): void
-    {
-        try {
-            if (file_exists($path) && str_contains($path, '/tmp/')) {
-                unlink($path);
-
-                if ($jobId) {
-                    $this->logger->info('Temporary file cleaned up', [
-                        'job_id' => $jobId,
-                        'temp_path' => $path,
-                    ]);
-                }
-            }
-        } catch (\Throwable $e) {
-            $this->logger->warning('Failed to cleanup temporary file', [
-                'job_id' => $jobId,
-                'temp_path' => $path,
-                'error' => $e->getMessage(),
-            ]);
-        }
-    }
-
     public function getTempDir($folder): string
     {
         return self::TEMP_DIR . DIRECTORY_SEPARATOR . $folder;

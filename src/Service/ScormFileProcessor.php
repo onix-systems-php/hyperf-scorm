@@ -13,16 +13,12 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\Filesystem\FilesystemFactory;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\Filesystem;
-use OnixSystemsPHP\HyperfCore\Constants\ErrorCode;
-use OnixSystemsPHP\HyperfCore\Exception\BusinessException;
 use OnixSystemsPHP\HyperfScorm\DTO\ProcessedScormPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfScorm\ValueObject\ScormFile;
-use function Hyperf\Translation\__;
 
 class ScormFileProcessor
 {
-    private const MANIFEST_FILENAME = 'imsmanifest.xml';
     private const TEMP_QUEUE = 'temp-queue';
 
     private $localFilesystem;
@@ -38,15 +34,8 @@ class ScormFileProcessor
     public function run(ScormFile $scormFile): ProcessedScormPackageDTO
     {
         try {
-            if (! $scormFile->isValid() || ! $scormFile->extract()) {
-                throw new BusinessException(
-                    ErrorCode::VALIDATION_ERROR,
-                    __('exceptions.file.scorn_package_issue')
-                );
-            }
-
-            $manifestPath = $scormFile->getExtractPath() . DIRECTORY_SEPARATOR . self::MANIFEST_FILENAME;
-            $manifestDto = $this->manifestParser->parse($manifestPath);
+            $scormFile->extract();
+            $manifestDto = $this->manifestParser->parse($scormFile->getManifestPath());
             $storage = $this->config->get('scorm.storage.default');
             [$path, $publicPath, $domain] = $this->getStoragePath($scormFile, $storage);
             $this->uploadDirectory($scormFile->getExtractDir(), $storage, $path);
