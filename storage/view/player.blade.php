@@ -9,7 +9,7 @@
             apiEndpoint: '{{ $apiEndpoint }}',
             timeout: {{ \Hyperf\Config\config('scorm.player.timeout', 30000) }},
             debug: {{ \Hyperf\Config\config('scorm.player.debug', true) ? 'true' : 'false' }},
-            autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }} * 1000
+            autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }}
         };
 
         window.packageId = '{{ $package->id }}';
@@ -37,7 +37,8 @@
                 name: "Guest",
                 session_token:  null
             };
-            var debug = config.debug || false; //notice for test
+
+            var debug = config.debug || false;
 
             // SCORM data storage - initialize with proper defaults
             var data = {
@@ -133,13 +134,14 @@
                         parameter: parameter
                     }));
 
-                    if (xhr.status === 200) {
+                    if ([200, 201].includes(xhr.status)) {
                         var result = JSON.parse(xhr.responseText);
-                        user = result.data.student;
+                        Object.assign(user, result.data.student);
                         var denormalizedData = window.scormNormalizer.denormalize(result.data);
                         Object.assign(data, denormalizedData);
                         debugLog('Session data loaded from server synchronously');
                     }
+
                 } catch (e) {
                     debugLog('Failed to load data from server synchronously: ' + e.message);
                 }

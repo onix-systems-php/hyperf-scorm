@@ -35,7 +35,7 @@ return [
     ],
 
     'tracking' => [
-        'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30), // seconds
+        'auto_commit_interval' => env('SCORM_AUTO_COMMIT_INTERVAL', 30) * 1000, // seconds
     ],
 
     'cache' => [

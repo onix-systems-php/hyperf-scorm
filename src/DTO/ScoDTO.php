@@ -32,17 +32,11 @@ class ScoDTO extends AbstractDTO
         return $this->mastery_score !== null && $this->mastery_score > 0;
     }
 
-    /**
-     * Check if this SCO has time constraints.
-     */
     public function hasTimeLimit(): bool
     {
         return $this->max_time_seconds !== null && $this->max_time_seconds > 0;
     }
 
-    /**
-     * Get mastery score as percentage (0-100).
-     */
     public function getMasteryScorePercentage(): ?int
     {
         if ($this->mastery_score === null) {
@@ -52,9 +46,6 @@ class ScoDTO extends AbstractDTO
         return (int) round($this->mastery_score * 100);
     }
 
-    /**
-     * Get array representation suitable for ScormSco model creation.
-     */
     public function toArray(): array
     {
         return [
