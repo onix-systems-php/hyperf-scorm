@@ -17,9 +17,6 @@ enum ScormVersionEnum: string
     case SCORM_12 = '1.2';
     case SCORM_2004 = '2004';
 
-    /**
-     * Get normalized version from various input formats.
-     */
     public static function fromString(string $version): self
     {
         $versionMappings = [
@@ -40,9 +37,6 @@ enum ScormVersionEnum: string
         );
     }
 
-    /**
-     * Get all possible input formats for this version.
-     */
     public function getInputFormats(): array
     {
         return match ($this) {
@@ -51,9 +45,6 @@ enum ScormVersionEnum: string
         };
     }
 
-    /**
-     * Get human-readable label.
-     */
     public function getLabel(): string
     {
         return match ($this) {
@@ -62,17 +53,11 @@ enum ScormVersionEnum: string
         };
     }
 
-    /**
-     * Get all valid enum values as strings.
-     */
     public static function values(): array
     {
         return array_map(fn ($case) => $case->value, self::cases());
     }
 
-    /**
-     * Get all possible input formats.
-     */
     public static function getAllInputFormats(): array
     {
         $formats = [];

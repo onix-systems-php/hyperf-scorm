@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -18,12 +18,12 @@ use OnixSystemsPHP\HyperfCore\Exception\BusinessException;
 use OnixSystemsPHP\HyperfScorm\DTO\ProcessedScormPackageDTO;
 use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfScorm\ValueObject\ScormFile;
-
 use function Hyperf\Translation\__;
 
 class ScormFileProcessor
 {
     private const MANIFEST_FILENAME = 'imsmanifest.xml';
+    private const TEMP_QUEUE = 'temp-queue';
 
     private $localFilesystem;
 
@@ -32,7 +32,7 @@ class ScormFileProcessor
         private readonly FilesystemFactory $filesystemFactory,
         private readonly ConfigInterface $config,
     ) {
-        $this->localFilesystem = $this->filesystemFactory->get('temp-queue');
+        $this->localFilesystem = $this->filesystemFactory->get(self::TEMP_QUEUE);
     }
 
     public function run(ScormFile $scormFile): ProcessedScormPackageDTO
@@ -126,6 +126,6 @@ class ScormFileProcessor
 
     private function getLaunchUrl(string $domain, string $publicPath, string $launch_path): string
     {
-        return  $domain.$publicPath. DIRECTORY_SEPARATOR . $launch_path;
+        return $domain . $publicPath . DIRECTORY_SEPARATOR . $launch_path;
     }
 }

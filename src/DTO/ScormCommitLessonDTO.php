@@ -13,15 +13,15 @@ use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
 class ScormCommitLessonDTO extends AbstractDTO
 {
-    public string $credit; // todo create field in db
+    public string $credit;
 
-    public ?string $entry = null; // todo create field in db
+    public ?string $entry = null;
 
-    public string $exit = 'suspend'; // todo in db exit mode
+    public string $exit = 'suspend';
 
     public ?string $location = null;
 
-    public string $mode = 'normal'; // todo in db exit mode
+    public string $mode = 'normal';
 
     public string $status = 'completed';
 }

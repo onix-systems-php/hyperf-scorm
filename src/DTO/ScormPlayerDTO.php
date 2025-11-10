@@ -26,7 +26,5 @@ class ScormPlayerDTO extends AbstractDTO
 
     public array $apiConfiguration;
 
-    //    public array $sessionData;
-
     public string $playerHtml;
 }

@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -60,7 +60,7 @@ class ScormManifestParser
             throw new ScormParsingException('Required element <schema> is missing from manifest metadata');
         }
 
-        $schema = trim((string) $xml->metadata->schema);
+        $schema = trim((string)$xml->metadata->schema);
         if (empty($schema)) {
             throw new ScormParsingException('Required element <schema> is empty in manifest metadata');
         }
@@ -104,7 +104,7 @@ class ScormManifestParser
     private function getSchemaVersion(\SimpleXMLElement $xml): ?string
     {
         if (isset($xml->metadata->schemaversion)) {
-            return trim((string) $xml->metadata->schemaversion);
+            return trim((string)$xml->metadata->schemaversion);
         }
 
         return null;
@@ -112,7 +112,7 @@ class ScormManifestParser
 
     private function getManifestIdentifier(\SimpleXMLElement $xml): string
     {
-        $identifier = (string) $xml['identifier'] ?? '';
+        $identifier = (string)$xml['identifier'] ?? '';
 
         if (empty($identifier)) {
             throw new ScormParsingException('Manifest identifier not found');
@@ -124,15 +124,15 @@ class ScormManifestParser
     private function getManifestTitle(\SimpleXMLElement $xml): string
     {
         if (isset($xml->organizations->organization->title)) {
-            return (string) $xml->organizations->organization->title;
+            return (string)$xml->organizations->organization->title;
         }
 
         if (isset($xml->organizations->organization['title'])) {
-            return (string) $xml->organizations->organization['title'];
+            return (string)$xml->organizations->organization['title'];
         }
 
         if (isset($xml->metadata->title)) {
-            return (string) $xml->metadata->title;
+            return (string)$xml->metadata->title;
         }
 
         return 'Untitled SCORM Package';
@@ -163,16 +163,16 @@ class ScormManifestParser
 
         if (isset($lom->general)) {
             $metadata['general'] = [
-                'title' => isset($lom->general->title->string) ? (string) $lom->general->title->string : null,
-                'description' => isset($lom->general->description->string) ? (string) $lom->general->description->string : null,
+                'title' => isset($lom->general->title->string) ? (string)$lom->general->title->string : null,
+                'description' => isset($lom->general->description->string) ? (string)$lom->general->description->string : null,
                 'keywords' => [],
-                'language' => isset($lom->general->language) ? (string) $lom->general->language : null,
+                'language' => isset($lom->general->language) ? (string)$lom->general->language : null,
             ];
 
             if (isset($lom->general->keyword)) {
                 foreach ($lom->general->keyword as $keyword) {
                     if (isset($keyword->string)) {
-                        $metadata['general']['keywords'][] = (string) $keyword->string;
+                        $metadata['general']['keywords'][] = (string)$keyword->string;
                     }
                 }
             }

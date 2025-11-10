@@ -47,7 +47,7 @@ class ScormPackageProcessor
         try {
             $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
-                'progress' => 10,
+                'progress' => 35,
                 'stage' => 'validating',
                 'stage_details' => 'Validating SCORM package...',
             ]);
@@ -56,7 +56,7 @@ class ScormPackageProcessor
 
             $this->progressTracker->track($progressContext, [
                 'status' => 'processing',
-                'progress' => 35,
+                'progress' => 55,
                 'stage' => 'processing',
                 'stage_details' => 'Extracting and processing SCORM content...',
             ]);

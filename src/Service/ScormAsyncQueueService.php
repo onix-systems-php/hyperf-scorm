@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -27,7 +27,8 @@ class ScormAsyncQueueService
         private readonly DriverFactory $driverFactory,
         private readonly ScormTempFileService $tempFileService,
         private readonly ScormJobStatusService $jobStatusService,
-    ) {}
+    ) {
+    }
 
     public function run(ScormUploadDTO $dto): ScormAsyncJobDTO
     {
@@ -101,6 +102,6 @@ class ScormAsyncQueueService
     private function estimateProcessingTime(int $fileSize): int
     {
         $megabytes = $fileSize / (1024 * 1024);
-        return (int) ($megabytes * self::TIME_PER_MB);
+        return (int)($megabytes * self::TIME_PER_MB);
     }
 }
