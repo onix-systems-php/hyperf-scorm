@@ -1,632 +1,657 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCORM Manager</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCORM Manager</title>
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        .manager-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
+    .manager-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
 
-        .manager-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 25px;
-        }
+    .manager-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+    }
 
-        .package-card {
-            background: white;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
+    .package-card {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
 
-        .package-card:hover {
-            border-color: #667eea;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
-            transform: translateY(-2px);
-        }
+    .package-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+      transform: translateY(-2px);
+    }
 
-        .version-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
+    .version-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
 
-        .file-size-badge {
-            background: #e9ecef;
-            color: #495057;
-            padding: 4px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-        }
+    .file-size-badge {
+      background: #e9ecef;
+      color: #495057;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 12px;
+    }
 
-        .player-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
+    .player-container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
 
-        .player-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-        }
+    .player-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+    }
 
-        .scorm-frame-container {
-            position: relative;
-            width: 100%;
-            height: 80vh;
-            background: #f8f9fa;
-        }
+    .scorm-frame-container {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      background: #f8f9fa;
+    }
 
-        .scorm-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
+    .scorm-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
 
-        .fullscreen-mode .scorm-frame-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999;
-        }
+    .fullscreen-mode .scorm-frame-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+    }
 
-        .control-btn {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 8px 16px;
-            margin: 5px;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
+    .control-btn {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin: 5px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
 
-        .control-btn:hover {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
+    .control-btn:hover {
+      background: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
 
-        .loader {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
+    .loader {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6c757d;
-        }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
 
-        .search-box {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            padding: 12px 20px;
-            transition: all 0.3s;
-        }
+    .search-box {
+      border-radius: 10px;
+      border: 2px solid #e9ecef;
+      padding: 12px 20px;
+      transition: all 0.3s;
+    }
 
-        .search-box:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
-        }
+    .search-box:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
 
-        .btn-action {
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
+    .btn-action {
+      padding: 6px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
 
-        .btn-launch {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-        }
+    .btn-launch {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+    }
 
-        .btn-launch:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            color: white;
-        }
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
 
-        .btn-delete {
-            background: #dc3545;
-            border: none;
-            color: white;
-        }
+    .btn-delete {
+      background: #dc3545;
+      border: none;
+      color: white;
+    }
 
-        .btn-delete:hover {
-            background: #c82333;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-            color: white;
-        }
+    .btn-delete:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+      color: white;
+    }
 
-        .progress {
-            height: 25px;
-            border-radius: 10px;
-        }
+    .progress {
+      height: 25px;
+      border-radius: 10px;
+    }
 
-        .progress-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
+    .progress-bar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
 
-        /* Modal Styles */
-        .modal-content {
-            border: none;
-            border-radius: 15px;
-        }
+    /* Modal Styles */
+    .modal-content {
+      border: none;
+      border-radius: 15px;
+    }
 
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px 15px 0 0;
-        }
+    .modal-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 15px 15px 0 0;
+    }
 
-        .drop-zone {
-            border: 3px dashed #667eea;
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-        }
+    .drop-zone {
+      border: 3px dashed #667eea;
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
 
-        .drop-zone:hover, .drop-zone.drag-over {
-            border-color: #764ba2;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            transform: scale(1.02);
-        }
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: #764ba2;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      transform: scale(1.02);
+    }
 
-        .drop-zone-icon {
-            font-size: 60px;
-            color: #667eea;
-            margin-bottom: 20px;
-        }
+    .drop-zone-icon {
+      font-size: 60px;
+      color: #667eea;
+      margin-bottom: 20px;
+    }
 
-        .file-preview {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border-radius: 12px;
-            border: 2px solid #667eea;
-        }
+    .file-preview {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 12px;
+      border: 2px solid #667eea;
+    }
 
-        .file-icon {
-            font-size: 50px;
-            color: #667eea;
-        }
+    .file-icon {
+      font-size: 50px;
+      color: #667eea;
+    }
 
-        .info-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 20px;
-            margin: 0 5px;
-            font-size: 13px;
-        }
+    .info-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 20px;
+      margin: 0 5px;
+      font-size: 13px;
+    }
 
-        .btn-add-scorm {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
+    .btn-add-scorm {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
 
-        .btn-add-scorm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-            color: white;
-        }
+    .btn-add-scorm:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+      color: white;
+    }
 
-        .success-card {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-        }
-    </style>
+    .success-card {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <div id="app">
-        <!-- Package Manager View -->
-        <div v-if="!playerActive" class="container py-5">
-            <div class="manager-container">
-                <!-- Header -->
-                <div class="manager-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h2 class="mb-1">
-                                <i class="bi bi-box-seam"></i>
-                                SCORM Manager
-                            </h2>
-                            <p class="mb-0 opacity-75">Upload, manage and launch SCORM packages</p>
-                        </div>
-                        <div class="text-end">
-                            <div class="h4 mb-0">{{ packages.length }}</div>
-                            <small class="opacity-75">Packages</small>
-                        </div>
-                    </div>
-                </div>
+<div id="app">
+  <!-- Package Manager View -->
+  <div v-if="!playerActive" class="container py-5">
+    <div class="manager-container">
+      <!-- Header -->
+      <div class="manager-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h2 class="mb-1">
+              <i class="bi bi-box-seam"></i>
+              SCORM Manager
+            </h2>
+            <p class="mb-0 opacity-75">Upload, manage and launch SCORM packages</p>
+          </div>
+          <div class="text-end">
+            <!-- Authentication UI -->
+            <div v-if="!isAuthenticated" class="mb-2">
+              <button
+                class="btn btn-outline-light"
+                @click="openAuthModal"
+              >
+                <i class="bi bi-key"></i>
+                Login
+              </button>
+            </div>
+            <div v-else class="mb-2">
+              <div class="d-flex align-items-center gap-2 mb-1 justify-content-end">
+                <span class="small opacity-75">
+                  <i class="bi bi-person-check-fill"></i>
+                  {{ userEmail }}
+                </span>
+                <button
+                  class="btn btn-outline-light btn-sm"
+                  @click="logout"
+                  title="Logout"
+                >
+                  <i class="bi bi-box-arrow-right"></i>
+                </button>
+              </div>
+            </div>
+            <div class="h4 mb-0">{{ packages.length }}</div>
+            <small class="opacity-75">Packages</small>
+          </div>
+        </div>
+      </div>
 
-                <div class="p-4">
-                    <!-- Add SCORM Button -->
-                    <div class="mb-4 text-center">
-                        <button
-                            class="btn btn-add-scorm btn-lg"
-                            @click="openUploadModal"
-                        >
-                            <i class="bi bi-plus-circle-fill"></i>
-                            Add SCORM File
-                        </button>
-                    </div>
+      <div class="p-4">
+        <!-- Add SCORM Button -->
+        <div class="mb-4 text-center">
+          <button
+            class="btn btn-add-scorm btn-lg"
+            @click="openUploadModal"
+          >
+            <i class="bi bi-plus-circle-fill"></i>
+            Add SCORM File
+          </button>
+        </div>
 
-                    <!-- Search Box -->
-                    <div class="mb-4">
-                        <div class="input-group">
+        <!-- Search Box -->
+        <div class="mb-4">
+          <div class="input-group">
                             <span class="input-group-text bg-white">
                                 <i class="bi bi-search"></i>
                             </span>
-                            <input
-                                v-model="searchQuery"
-                                @input="performSearch"
-                                type="text"
-                                class="form-control search-box border-start-0"
-                                placeholder="Search packages by title..."
-                            >
-                            <span v-if="isSearching" class="input-group-text bg-white">
+            <input
+              v-model="searchQuery"
+              @input="performSearch"
+              type="text"
+              class="form-control search-box border-start-0"
+              placeholder="Search packages by title..."
+            >
+            <span v-if="isSearching" class="input-group-text bg-white">
                                 <span class="spinner-border spinner-border-sm" role="status"></span>
                             </span>
-                        </div>
-                        <div v-if="searchQuery" class="form-text">
-                            Found {{ totalPackages }} package(s)
-                        </div>
-                    </div>
+          </div>
+          <div v-if="searchQuery" class="form-text">
+            Found {{ totalPackages }} package(s)
+          </div>
+        </div>
 
-                    <!-- Loading State -->
-                    <div v-if="isLoadingPackages" class="text-center py-5">
-                        <div class="loader mx-auto"></div>
-                        <p class="mt-3 text-muted">Loading SCORM packages...</p>
-                    </div>
+        <!-- Loading State -->
+        <div v-if="isLoadingPackages" class="text-center py-5">
+          <div class="loader mx-auto"></div>
+          <p class="mt-3 text-muted">Loading SCORM packages...</p>
+        </div>
 
-                    <!-- Error State -->
-                    <div v-else-if="errorMessage" class="alert alert-danger" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
-                        {{ errorMessage }}
-                        <button type="button" class="btn btn-sm btn-outline-danger ms-3" @click="loadPackages">
-                            <i class="bi bi-arrow-clockwise"></i> Retry
-                        </button>
-                    </div>
+        <!-- Error State -->
+        <div v-else-if="errorMessage" class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          {{ errorMessage }}
+          <button type="button" class="btn btn-sm btn-outline-danger ms-3" @click="loadPackages">
+            <i class="bi bi-arrow-clockwise"></i> Retry
+          </button>
+        </div>
 
-                    <!-- Package List -->
-                    <div v-else-if="filteredPackages.length > 0" class="packages-list">
-                        <div
-                            v-for="pkg in filteredPackages"
-                            :key="pkg.id"
-                            class="package-card"
-                        >
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <h5 class="mb-0 me-3">
-                                            <i class="bi bi-box text-primary"></i>
-                                            {{ pkg.manifest_data?.title || pkg.title }}
-                                        </h5>
-                                        <span class="version-badge">
+        <!-- Package List -->
+        <div v-else-if="filteredPackages.length > 0" class="packages-list">
+          <div
+            v-for="pkg in filteredPackages"
+            :key="pkg.id"
+            class="package-card"
+          >
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center mb-2">
+                  <h5 class="mb-0 me-3">
+                    <i class="bi bi-box text-primary"></i>
+                    {{ pkg.manifest_data?.title || pkg.title }}
+                  </h5>
+                  <span class="version-badge">
                                             SCORM {{ pkg.scorm_version }}
                                         </span>
-                                    </div>
+                </div>
 
-                                    <p v-if="pkg.description" class="text-muted mb-2">
-                                        {{ pkg.description }}
-                                    </p>
+                <p v-if="pkg.description" class="text-muted mb-2">
+                  {{ pkg.description }}
+                </p>
 
-                                    <div class="d-flex align-items-center gap-3 text-muted small">
+                <div class="d-flex align-items-center gap-3 text-muted small">
                                         <span>
                                             <i class="bi bi-hash"></i>
                                             ID: {{ pkg.id }}
                                         </span>
-                                        <span class="file-size-badge">
+                  <span class="file-size-badge">
                                             <i class="bi bi-file-zip"></i>
                                             {{ formatFileSize(pkg.file_size || 0) }}
                                         </span>
-                                        <span>
+                  <span>
                                             <i class="bi bi-calendar"></i>
                                             {{ formatDate(pkg.created_at) }}
                                         </span>
-                                    </div>
+                </div>
 
-                                    <div v-if="pkg.manifest_data?.scos?.length" class="mt-2 small text-muted">
-                                        <i class="bi bi-folder"></i>
-                                        {{ pkg.manifest_data.scos.length }} SCO(s)
-                                    </div>
-                                </div>
+                <div v-if="pkg.manifest_data?.scos?.length" class="mt-2 small text-muted">
+                  <i class="bi bi-folder"></i>
+                  {{ pkg.manifest_data.scos.length }} SCO(s)
+                </div>
+              </div>
 
-                                <div class="d-flex flex-column gap-2 ms-3">
-                                    <button
-                                        class="btn btn-action btn-launch"
-                                        @click="launchPackage(pkg)"
-                                        title="Launch SCORM"
-                                    >
-                                        <i class="bi bi-play-fill"></i>
-                                        Launch
-                                    </button>
-                                    <button
-                                        class="btn btn-action btn-delete"
-                                        @click="deletePackage(pkg)"
-                                        title="Delete Package"
-                                    >
-                                        <i class="bi bi-trash-fill"></i>
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+              <div class="d-flex flex-column gap-2 ms-3">
+                <button
+                  class="btn btn-action btn-launch"
+                  @click="launchPackage(pkg)"
+                  title="Launch SCORM"
+                >
+                  <i class="bi bi-play-fill"></i>
+                  Launch
+                </button>
+                <button
+                  class="btn btn-action btn-delete"
+                  @click="deletePackage(pkg)"
+                  title="Delete Package"
+                >
+                  <i class="bi bi-trash-fill"></i>
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                    <!-- Empty State -->
-                    <div v-else class="empty-state">
-                        <i class="bi bi-inbox display-1"></i>
-                        <h4 class="mt-3">No packages found</h4>
-                        <p class="text-muted">
-                            {{ searchQuery ? 'Try adjusting your search query' : 'Upload your first SCORM package to get started' }}
-                        </p>
-                    </div>
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <i class="bi bi-inbox display-1"></i>
+          <h4 class="mt-3">No packages found</h4>
+          <p class="text-muted">
+            {{ searchQuery ? 'Try adjusting your search query' : 'Upload your first SCORM package to get started' }}
+          </p>
+        </div>
 
-                    <!-- Pagination & Refresh -->
-                    <div v-if="!isLoadingPackages && packages.length > 0" class="text-center mt-4">
-                        <button class="btn btn-outline-primary me-2" @click="loadPackages(currentPage, searchQuery)">
-                            <i class="bi bi-arrow-clockwise"></i>
-                            Refresh
-                        </button>
-                        <span v-if="totalPackages > perPage" class="text-muted">
+        <!-- Pagination & Refresh -->
+        <div v-if="!isLoadingPackages && packages.length > 0" class="text-center mt-4">
+          <button class="btn btn-outline-primary me-2" @click="loadPackages(currentPage, searchQuery)">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+          </button>
+          <span v-if="totalPackages > perPage" class="text-muted">
                             Page {{ currentPage }} of {{ Math.ceil(totalPackages / perPage) }}
                         </span>
-                    </div>
-                </div>
-            </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- SCORM Player View -->
-        <div v-else class="container-fluid p-0">
-            <div class="player-container" :class="{ 'fullscreen-mode': isFullscreen }">
-                <!-- Player Header -->
-                <div class="player-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-0">
-                                <i class="bi bi-play-circle-fill"></i>
-                                {{ currentPackage?.manifest_data?.title || currentPackage?.title }}
-                            </h5>
-                            <small class="opacity-75">
-                                SCORM {{ currentPackage?.scorm_version }} • Package #{{ currentPackage?.id }}
-                            </small>
-                        </div>
-                        <div>
-                            <button
-                                class="control-btn"
-                                @click="toggleFullscreen"
-                                :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'"
-                            >
-                                <i :class="isFullscreen ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen'"></i>
-                            </button>
-                            <button
-                                class="control-btn"
-                                @click="reloadPlayer"
-                                title="Reload"
-                            >
-                                <i class="bi bi-arrow-clockwise"></i>
-                            </button>
-                            <button
-                                class="control-btn text-danger"
-                                @click="closePlayer"
-                                title="Close Player"
-                            >
-                                <i class="bi bi-x-circle"></i>
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Player Content -->
-                <div class="scorm-frame-container">
-                    <div v-if="isLoadingPlayer" class="d-flex justify-content-center align-items-center h-100">
-                        <div class="text-center">
-                            <div class="loader mx-auto"></div>
-                            <p class="mt-3 text-muted">
-                                {{ isSavingProgress ? 'Saving your progress...' : 'Loading SCORM content...' }}
-                            </p>
-                        </div>
-                    </div>
-                    <iframe
-                        v-show="!isLoadingPlayer"
-                        :src="playerUrl"
-                        class="scorm-frame"
-                        @load="onPlayerLoaded"
-                        allowfullscreen
-                    ></iframe>
-                </div>
-            </div>
+  <!-- SCORM Player View -->
+  <div v-else class="container-fluid p-0">
+    <div class="player-container" :class="{ 'fullscreen-mode': isFullscreen }">
+      <!-- Player Header -->
+      <div class="player-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">
+              <i class="bi bi-play-circle-fill"></i>
+              {{ currentPackage?.manifest_data?.title || currentPackage?.title }}
+            </h5>
+            <small class="opacity-75">
+              SCORM {{ currentPackage?.scorm_version }} • Package #{{ currentPackage?.id }}
+            </small>
+          </div>
+          <div>
+            <button
+              class="control-btn"
+              @click="toggleFullscreen"
+              :title="isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'"
+            >
+              <i :class="isFullscreen ? 'bi bi-fullscreen-exit' : 'bi bi-arrows-fullscreen'"></i>
+            </button>
+            <button
+              class="control-btn"
+              @click="reloadPlayer"
+              title="Reload"
+            >
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
+            <button
+              class="control-btn text-danger"
+              @click="closePlayer"
+              title="Close Player"
+            >
+              <i class="bi bi-x-circle"></i>
+              Close
+            </button>
+          </div>
         </div>
+      </div>
 
-        <!-- Upload Modal -->
-        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="uploadModalLabel">
-                            <i class="bi bi-cloud-upload"></i>
-                            Upload SCORM Package
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" @click="closeUploadModal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
-                        <!-- Error Alert -->
-                        <div v-if="uploadError" class="alert alert-danger d-flex align-items-center mb-4" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                            <div class="flex-grow-1">
-                                <strong>Error!</strong> {{ uploadError }}
-                            </div>
-                            <button type="button" class="btn-close" @click="uploadError = null"></button>
-                        </div>
+      <!-- Player Content -->
+      <div class="scorm-frame-container">
+        <div v-if="isLoadingPlayer" class="d-flex justify-content-center align-items-center h-100">
+          <div class="text-center">
+            <div class="loader mx-auto"></div>
+            <p class="mt-3 text-muted">
+              {{ isSavingProgress ? 'Saving your progress...' : 'Loading SCORM content...' }}
+            </p>
+          </div>
+        </div>
+        <iframe
+          v-show="!isLoadingPlayer"
+          :src="playerUrl"
+          class="scorm-frame"
+          @load="onPlayerLoaded"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </div>
 
-                        <form @submit.prevent="uploadPackage" v-if="!uploadSuccess">
-                            <!-- File Drop Zone -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">
-                                    <i class="bi bi-file-earmark-zip"></i>
-                                    SCORM Package File *
-                                </label>
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="uploadModalLabel">
+            <i class="bi bi-cloud-upload"></i>
+            Upload SCORM Package
+          </h5>
+          <button type="button" class="btn-close btn-close-white" @click="closeUploadModal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Error Alert -->
+          <div v-if="uploadError" class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div class="flex-grow-1">
+              <strong>Error!</strong> {{ uploadError }}
+            </div>
+            <button type="button" class="btn-close" @click="uploadError = null"></button>
+          </div>
 
-                                <div
-                                    v-if="!selectedFile"
-                                    class="drop-zone"
-                                    :class="{ 'drag-over': isDragging }"
-                                    @drop="handleDrop"
-                                    @dragover.prevent="isDragging = true"
-                                    @dragleave.prevent="isDragging = false"
-                                    @dragenter.prevent
-                                    @click="$refs.modalFileInput.click()"
-                                >
-                                    <div class="drop-zone-icon">
-                                        <i class="bi bi-cloud-arrow-up"></i>
-                                    </div>
-                                    <h5 class="mb-3">Drag & Drop your SCORM package here</h5>
-                                    <p class="text-muted mb-3">or click to browse</p>
-                                    <div class="mt-3">
+          <form @submit.prevent="uploadPackage" v-if="!uploadSuccess">
+            <!-- File Drop Zone -->
+            <div class="mb-4">
+              <label class="form-label fw-bold">
+                <i class="bi bi-file-earmark-zip"></i>
+                SCORM Package File *
+              </label>
+
+              <div
+                v-if="!selectedFile"
+                class="drop-zone"
+                :class="{ 'drag-over': isDragging }"
+                @drop="handleDrop"
+                @dragover.prevent="isDragging = true"
+                @dragleave.prevent="isDragging = false"
+                @dragenter.prevent
+                @click="$refs.modalFileInput.click()"
+              >
+                <div class="drop-zone-icon">
+                  <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <h5 class="mb-3">Drag & Drop your SCORM package here</h5>
+                <p class="text-muted mb-3">or click to browse</p>
+                <div class="mt-3">
                                         <span class="info-badge">
                                             <i class="bi bi-info-circle"></i>
                                             Only ZIP files
                                         </span>
-                                        <span class="info-badge">
+                  <span class="info-badge">
                                             <i class="bi bi-hdd"></i>
                                             Max 500MB
                                         </span>
-                                        <span class="info-badge">
+                  <span class="info-badge">
                                             <i class="bi bi-shield-check"></i>
                                             SCORM 1.2 & 2004
                                         </span>
-                                    </div>
-                                </div>
+                </div>
+              </div>
 
-                                <!-- File Preview -->
-                                <div v-else class="file-preview">
-                                    <div class="d-flex align-items-center flex-grow-1">
-                                        <div class="file-icon me-3">
-                                            <i class="bi bi-file-earmark-zip-fill"></i>
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">{{ selectedFile.name }}</h6>
-                                            <p class="mb-0 text-muted small">{{ formatFileSize(selectedFile.size) }}</p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        class="btn btn-light"
-                                        @click="removeFile"
-                                        :disabled="uploadInProgress"
-                                    >
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                </div>
+              <!-- File Preview -->
+              <div v-else class="file-preview">
+                <div class="d-flex align-items-center flex-grow-1">
+                  <div class="file-icon me-3">
+                    <i class="bi bi-file-earmark-zip-fill"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-1">{{ selectedFile.name }}</h6>
+                    <p class="mb-0 text-muted small">{{ formatFileSize(selectedFile.size) }}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-light"
+                  @click="removeFile"
+                  :disabled="uploadInProgress"
+                >
+                  <i class="bi bi-x-circle"></i>
+                </button>
+              </div>
 
-                                <input
-                                    ref="modalFileInput"
-                                    type="file"
-                                    accept=".zip"
-                                    @change="handleFileSelect"
-                                    style="display: none"
-                                >
-                            </div>
+              <input
+                ref="modalFileInput"
+                type="file"
+                accept=".zip"
+                @change="handleFileSelect"
+                style="display: none"
+              >
+            </div>
 
-                            <!-- Title Input -->
-                            <div class="mb-4">
-                                <label for="modalTitle" class="form-label fw-bold">
-                                    <i class="bi bi-card-heading"></i>
-                                    Package Title *
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-lg"
-                                    id="modalTitle"
-                                    v-model="uploadForm.title"
-                                    placeholder="Enter a descriptive title for your SCORM package"
-                                    required
-                                    minlength="5"
-                                    maxlength="255"
-                                    :disabled="uploadInProgress"
-                                >
-                                <div class="form-text">
-                                    Minimum 5 characters, maximum 255 characters
-                                </div>
-                            </div>
+            <!-- Title Input -->
+            <div class="mb-4">
+              <label for="modalTitle" class="form-label fw-bold">
+                <i class="bi bi-card-heading"></i>
+                Package Title *
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="modalTitle"
+                v-model="uploadForm.title"
+                placeholder="Enter a descriptive title for your SCORM package"
+                required
+                minlength="5"
+                maxlength="255"
+                :disabled="uploadInProgress"
+              >
+              <div class="form-text">
+                Minimum 5 characters, maximum 255 characters
+              </div>
+            </div>
 
-                            <!-- Description Input -->
-                            <div class="mb-4">
-                                <label for="modalDescription" class="form-label fw-bold">
-                                    <i class="bi bi-card-text"></i>
-                                    Description (optional)
-                                </label>
-                                <textarea
-                                    class="form-control"
-                                    id="modalDescription"
-                                    v-model="uploadForm.description"
-                                    rows="3"
-                                    placeholder="Provide a detailed description of the SCORM package content"
-                                    maxlength="1000"
-                                    :disabled="uploadInProgress"
-                                ></textarea>
-                                <div class="form-text">
-                                    Maximum 1000 characters
-                                </div>
-                            </div>
+            <!-- Description Input -->
+            <div class="mb-4">
+              <label for="modalDescription" class="form-label fw-bold">
+                <i class="bi bi-card-text"></i>
+                Description (optional)
+              </label>
+              <textarea
+                class="form-control"
+                id="modalDescription"
+                v-model="uploadForm.description"
+                rows="3"
+                placeholder="Provide a detailed description of the SCORM package content"
+                maxlength="1000"
+                :disabled="uploadInProgress"
+              ></textarea>
+              <div class="form-text">
+                Maximum 1000 characters
+              </div>
+            </div>
 
-                            <!-- Upload Progress -->
-                            <div v-if="uploadInProgress" class="mb-4">
-                                <div class="d-flex justify-content-between mb-2">
+            <!-- Upload Progress -->
+            <div v-if="uploadInProgress" class="mb-4">
+              <div class="d-flex justify-content-between mb-2">
                                     <span class="fw-bold">
                                         <template v-if="isAsyncUpload">
                                             {{ getStageLabel(asyncUploadStage) }}
@@ -635,664 +660,1011 @@
                                             Uploading...
                                         </template>
                                     </span>
-                                    <span class="text-muted">{{ uploadProgress }}%</span>
-                                </div>
-                                <div class="progress" style="height: 25px;">
-                                    <div
-                                        class="progress-bar progress-bar-striped progress-bar-animated"
-                                        :class="{
+                <span class="text-muted">{{ uploadProgress }}%</span>
+              </div>
+              <div class="progress" style="height: 25px;">
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  :class="{
                                             'bg-success': uploadProgress === 100,
                                             'bg-primary': uploadProgress < 100
                                         }"
-                                        role="progressbar"
-                                        :style="{ width: uploadProgress + '%' }"
-                                        :aria-valuenow="uploadProgress"
-                                        aria-valuemin="0"
-                                        aria-valuemax="100"
-                                    >
-                                        {{ uploadProgress }}%
-                                    </div>
-                                </div>
+                  role="progressbar"
+                  :style="{ width: uploadProgress + '%' }"
+                  :aria-valuenow="uploadProgress"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  {{ uploadProgress }}%
+                </div>
+              </div>
 
-                                <!-- Async job info -->
-                                <div v-if="isAsyncUpload && asyncJobId" class="mt-2">
-                                    <small class="text-muted">
-                                        <i class="bi bi-hourglass-split"></i>
-                                        Job ID: {{ asyncJobId }}
-                                    </small>
-                                </div>
-                            </div>
+              <!-- Async job info -->
+              <div v-if="isAsyncUpload && asyncJobId" class="mt-2">
+                <small class="text-muted">
+                  <i class="bi bi-hourglass-split"></i>
+                  Job ID: {{ asyncJobId }}
+                </small>
+              </div>
+            </div>
 
-                            <!-- Submit Button -->
-                            <div class="d-grid">
-                                <button
-                                    type="submit"
-                                    class="btn btn-add-scorm btn-lg"
-                                    :disabled="!selectedFile || uploadInProgress || uploadForm.title.length < 5"
-                                >
+            <!-- Submit Button -->
+            <div class="d-grid">
+              <button
+                type="submit"
+                class="btn btn-add-scorm btn-lg"
+                :disabled="!selectedFile || uploadInProgress || uploadForm.title.length < 5"
+              >
                                     <span v-if="!uploadInProgress">
                                         <i class="bi bi-upload"></i>
                                         Upload SCORM Package
                                     </span>
-                                    <span v-else>
+                <span v-else>
                                         <span class="spinner-border spinner-border-sm me-2"></span>
                                         Uploading...
                                     </span>
-                                </button>
-                            </div>
-                        </form>
-
-                        <!-- Success Message -->
-                        <div v-if="uploadSuccess" class="success-card">
-                            <div class="text-center">
-                                <div style="font-size: 80px; margin-bottom: 20px;">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <h3 class="mb-3">Upload Successful!</h3>
-                                <p class="mb-4">Your SCORM package has been uploaded and processed successfully.</p>
-
-                                <div class="bg-white bg-opacity-25 rounded p-3 mb-4 text-start">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-2">
-                                            <strong>Package ID:</strong><br>
-                                            <span>{{ uploadedPackage?.id }}</span>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <strong>Title:</strong><br>
-                                            <span>{{ uploadedPackage?.title }}</span>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <strong>SCORM Version:</strong><br>
-                                            <span>{{ uploadedPackage?.scorm_version }}</span>
-                                        </div>
-                                        <div class="col-md-6 mb-2">
-                                            <strong>Uploaded:</strong><br>
-                                            <span>{{ formatDate(uploadedPackage?.created_at) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button
-                                        class="btn btn-light btn-lg"
-                                        @click="launchUploadedPackage"
-                                    >
-                                        <i class="bi bi-play-circle-fill"></i>
-                                        Launch SCORM Player
-                                    </button>
-                                    <button
-                                        class="btn btn-outline-light btn-lg"
-                                        @click="resetUploadForm"
-                                    >
-                                        <i class="bi bi-plus-circle"></i>
-                                        Upload Another Package
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              </button>
             </div>
+          </form>
+
+          <!-- Success Message -->
+          <div v-if="uploadSuccess" class="success-card">
+            <div class="text-center">
+              <div style="font-size: 80px; margin-bottom: 20px;">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+              <h3 class="mb-3">Upload Successful!</h3>
+              <p class="mb-4">Your SCORM package has been uploaded and processed successfully.</p>
+
+              <div class="bg-white bg-opacity-25 rounded p-3 mb-4 text-start">
+                <div class="row">
+                  <div class="col-md-6 mb-2">
+                    <strong>Package ID:</strong><br>
+                    <span>{{ uploadedPackage?.id }}</span>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <strong>Title:</strong><br>
+                    <span>{{ uploadedPackage?.title }}</span>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <strong>SCORM Version:</strong><br>
+                    <span>{{ uploadedPackage?.scorm_version }}</span>
+                  </div>
+                  <div class="col-md-6 mb-2">
+                    <strong>Uploaded:</strong><br>
+                    <span>{{ formatDate(uploadedPackage?.created_at) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button
+                  class="btn btn-light btn-lg"
+                  @click="launchUploadedPackage"
+                >
+                  <i class="bi bi-play-circle-fill"></i>
+                  Launch SCORM Player
+                </button>
+                <button
+                  class="btn btn-outline-light btn-lg"
+                  @click="resetUploadForm"
+                >
+                  <i class="bi bi-plus-circle"></i>
+                  Upload Another Package
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Vue.js 3 -->
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
-    <script>
-        const { createApp, ref, computed, onMounted } = Vue;
-
-        createApp({
-            setup() {
-                // State
-                const packages = ref([]);
-                const searchQuery = ref('');
-                const isLoadingPackages = ref(false);
-                const isSearching = ref(false);
-                const isLoadingPlayer = ref(false);
-                const isSavingProgress = ref(false);
-                const errorMessage = ref(null);
-                const playerActive = ref(false);
-                const currentPackage = ref(null);
-                const isFullscreen = ref(false);
-                const totalPackages = ref(0);
-                const currentPage = ref(1);
-                const perPage = ref(20);
-                let searchDebounceTimer = null;
-
-                // Upload state
-                const selectedFile = ref(null);
-                const uploadInProgress = ref(false);
-                const uploadProgress = ref(0);
-                const uploadError = ref(null);
-                const uploadSuccess = ref(false);
-                const uploadedPackage = ref(null);
-                const isDragging = ref(false);
-                const modalFileInput = ref(null);
-                const uploadForm = ref({
-                    title: '',
-                    description: ''
-                });
-                let uploadModal = null;
-
-                // Async upload state (WebSocket tracking)
-                const asyncJobId = ref(null);
-                const asyncUploadStage = ref('');
-                const isAsyncUpload = ref(false);
-                let uploadClient = null; // WebSocket client instance
-
-                // API Configuration
-                const API_BASE_URL = window.location.origin;
-
-                // Computed
-                const filteredPackages = computed(() => {
-                    return packages.value;
-                });
-
-                const playerUrl = computed(() => {
-                    if (!currentPackage.value) return '';
-                    return `${API_BASE_URL}/v1/api/scorm/player/${currentPackage.value.id}/launch`;
-                });
-
-                // Methods
-                const loadPackages = async (page = 1, search = '') => {
-                    isLoadingPackages.value = true;
-                    errorMessage.value = null;
-
-                    try {
-                        // Build query params
-                        const params = new URLSearchParams({
-                            page: page.toString(),
-                            per_page: perPage.value.toString()
-                        });
-
-                        // Add search query if exists
-                        if (search && search.trim()) {
-                            params.append('title', search.trim());
-                        }
-
-                        const response = await fetch(`${API_BASE_URL}/v1/scorm/packages?${params}`);
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const result = await response.json();
-
-                        if (result.data && result.data.list) {
-                            packages.value = result.data.list;
-                            totalPackages.value = result.data.total || 0;
-                            currentPage.value = result.data.page || 1;
-                        } else {
-                            packages.value = [];
-                            totalPackages.value = 0;
-                        }
-                    } catch (error) {
-                        console.error('Failed to load packages:', error);
-                        errorMessage.value = 'Failed to load SCORM packages. Please try again.';
-                    } finally {
-                        isLoadingPackages.value = false;
-                        isSearching.value = false;
-                    }
-                };
-
-                // Debounced search
-                const performSearch = () => {
-                    if (searchDebounceTimer) {
-                        clearTimeout(searchDebounceTimer);
-                    }
-
-                    isSearching.value = true;
-                    searchDebounceTimer = setTimeout(() => {
-                        currentPage.value = 1; // Reset to first page on new search
-                        loadPackages(1, searchQuery.value);
-                    }, 500); // 500ms debounce
-                };
-
-                // Modal methods
-                const openUploadModal = () => {
-                    if (!uploadModal) {
-                        uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
-                    }
-                    uploadModal.show();
-                };
-
-                const closeUploadModal = () => {
-                    if (uploadModal) {
-                        uploadModal.hide();
-                    }
-                };
-
-                const handleFileSelect = (event) => {
-                    const file = event.target.files[0];
-                    if (file) {
-                        validateAndSetFile(file);
-                    }
-                };
-
-                const handleDrop = (event) => {
-                    event.preventDefault();
-                    isDragging.value = false;
-                    const file = event.dataTransfer.files[0];
-                    if (file) {
-                        validateAndSetFile(file);
-                    }
-                };
-
-                const validateAndSetFile = (file) => {
-                    uploadError.value = null;
-
-                    if (!file.name.toLowerCase().endsWith('.zip')) {
-                        uploadError.value = 'Only ZIP files are allowed';
-                        return;
-                    }
-
-                    const maxSize = 500 * 1024 * 1024; // 500MB
-                    if (file.size > maxSize) {
-                        uploadError.value = 'File size exceeds 500MB limit';
-                        return;
-                    }
-
-                    selectedFile.value = file;
-                };
-
-                const removeFile = () => {
-                    selectedFile.value = null;
-                };
-
-                const resetUploadForm = () => {
-                    selectedFile.value = null;
-                    uploadForm.value.title = '';
-                    uploadForm.value.description = '';
-                    uploadSuccess.value = false;
-                    uploadedPackage.value = null;
-                    uploadError.value = null;
-                    uploadProgress.value = 0;
-                    isAsyncUpload.value = false;
-                    asyncJobId.value = null;
-                    asyncUploadStage.value = '';
-
-                    // Cancel WebSocket tracking if active
-                    if (uploadClient) {
-                        uploadClient.cancel();
-                    }
-                };
-
-                const uploadPackage = async () => {
-                    if (!selectedFile.value || uploadForm.value.title.length < 5) {
-                        uploadError.value = 'Please select a file and enter a title (min 5 characters)';
-                        return;
-                    }
-
-                    uploadInProgress.value = true;
-                    uploadProgress.value = 0;
-                    uploadError.value = null;
-                    isAsyncUpload.value = false;
-                    asyncJobId.value = null;
-                    asyncUploadStage.value = '';
-
-                    try {
-                        const formData = new FormData();
-                        formData.append('file', selectedFile.value);
-                        formData.append('title', uploadForm.value.title);
-                        if (uploadForm.value.description) {
-                            formData.append('description', uploadForm.value.description);
-                        }
-
-                        const response = await fetch(`${API_BASE_URL}/v1/scorm/packages/upload`, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`Upload failed: ${response.statusText}`);
-                        }
-
-                        const result = await response.json();
-
-                        if (result.data?.is_async) {
-                            console.log('[SCORM Upload] Async upload detected, job ID:', result.data.job_id);
-                            isAsyncUpload.value = true;
-                            asyncJobId.value = result.data.job_id;
-                            uploadProgress.value = result.data.progress || 0;
-                            asyncUploadStage.value = result.data.stage || 'queued';
-
-                            if (!uploadClient) {
-                                uploadClient = new ScormUploadClient(API_BASE_URL);
-                            }
-
-                            uploadClient.trackJob(result.data.job_id, {
-                                onProgress: (data) => {
-                                    console.log('[SCORM Upload] Progress:', data.progress, '%', data.stage);
-                                    uploadProgress.value = data.progress;
-                                    asyncUploadStage.value = data.stage;
-                                },
-                                onComplete: (data) => {
-                                    console.log('[SCORM Upload] Completed! Package ID:', data.package_id);
-                                    uploadProgress.value = 100;
-                                    uploadSuccess.value = true;
-                                    uploadInProgress.value = false;
-                                    uploadedPackage.value = { id: data.package_id };
-
-                                    // Refresh packages list
-                                    loadPackages(currentPage.value, searchQuery.value);
-
-                                    console.log(`[SCORM Upload] Package "${uploadForm.value.title}" uploaded successfully!`);
-                                },
-                                onError: (error) => {
-                                    console.error('[SCORM Upload] Failed:', error);
-                                    uploadError.value = `Upload failed: ${error}`;
-                                    uploadInProgress.value = false;
-                                }
-                            });
-
-                        } else {
-                            console.log('[SCORM Upload] Sync upload completed');
-                            uploadedPackage.value = result.data;
-                            uploadSuccess.value = true;
-                            uploadInProgress.value = false;
-                            uploadProgress.value = 100;
-
-                            // Refresh packages list
-                            loadPackages(currentPage.value, searchQuery.value);
-
-                            console.log(`[SCORM Upload] Package "${uploadForm.value.title}" uploaded successfully!`);
-                        }
-
-                    } catch (error) {
-                        console.error('[SCORM Upload] Error:', error);
-                        uploadError.value = 'Upload failed: ' + error.message;
-                        uploadInProgress.value = false;
-                    }
-                };
-
-                const launchUploadedPackage = () => {
-                    if (uploadedPackage.value) {
-                        closeUploadModal();
-                        resetUploadForm();
-                        launchPackage(uploadedPackage.value);
-                    }
-                };
-
-                const launchPackage = (pkg) => {
-                    currentPackage.value = pkg;
-                    isLoadingPlayer.value = true;
-                    playerActive.value = true;
-                };
-
-                const deletePackage = async (pkg) => {
-                    const packageTitle = pkg.manifest_data?.title || pkg.title;
-
-                    if (!confirm(`Are you sure you want to delete "${packageTitle}"?\n\nThis action cannot be undone.`)) {
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/v1/scorm/packages/${pkg.id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        });
-
-                        if (!response.ok) {
-                            if (response.status === 404) {
-                                throw new Error('Package not found');
-                            } else if (response.status === 403) {
-                                throw new Error('You do not have permission to delete this package');
-                            } else {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-                        }
-
-                        // Reload packages list after successful deletion
-                        await loadPackages(currentPage.value, searchQuery.value);
-
-                        console.log(`[SCORM Upload] Package "${packageTitle}" deleted successfully!`);
-                    } catch (error) {
-                        console.error('Failed to delete package:', error);
-                        alert(`Failed to delete package: ${error.message}`);
-                    }
-                };
-
-                const onPlayerLoaded = () => {
-                    isLoadingPlayer.value = false;
-                };
-
-                const closePlayer = async () => {
-                    if (!confirm('Are you sure you want to close the player? Your progress will be saved.')) {
-                        return;
-                    }
-
-                    isLoadingPlayer.value = true;
-                    isSavingProgress.value = true;
-
-                    try {
-                        const iframe = document.querySelector('.scorm-frame');
-                        if (iframe && iframe.contentWindow) {
-                            // Try to call SCORM Finish/Terminate to save final state
-                            try {
-                                // SCORM 1.2
-                                if (iframe.contentWindow.API && iframe.contentWindow.API.LMSFinish) {
-                                    console.log('Calling LMSFinish...');
-                                    iframe.contentWindow.API.LMSFinish('');
-                                }
-                                // SCORM 2004
-                                if (iframe.contentWindow.API_1484_11 && iframe.contentWindow.API_1484_11.Terminate) {
-                                    console.log('Calling Terminate...');
-                                    iframe.contentWindow.API_1484_11.Terminate('');
-                                }
-                            } catch (error) {
-                                console.warn('Error calling SCORM Finish/Terminate:', error);
-                            }
-
-                            // Wait a moment for any triggered commits
-                            await new Promise(resolve => setTimeout(resolve, 500));
-
-                            // Check if there are pending SCORM commits
-                            if (iframe.contentWindow.hasScormPendingCommits &&
-                                iframe.contentWindow.hasScormPendingCommits()) {
-
-                                console.log('Waiting for SCORM commits to complete...');
-
-                                // Wait for all pending commits with timeout (10 seconds)
-                                const waitPromise = iframe.contentWindow.waitForScormCommits();
-                                const timeoutPromise = new Promise((_, reject) =>
-                                    setTimeout(() => reject(new Error('Timeout')), 10000)
-                                );
-
-                                try {
-                                    await Promise.race([waitPromise, timeoutPromise]);
-                                    console.log('All SCORM commits completed successfully');
-                                } catch (error) {
-                                    console.warn('Timeout waiting for commits, using sync fallback:', error);
-                                    // Use synchronous fallback if async failed
-                                    if (iframe.contentWindow.forceScormCommitSync) {
-                                        const syncResult = iframe.contentWindow.forceScormCommitSync();
-                                        console.log('Synchronous commit result:', syncResult);
-                                    }
-                                }
-                            } else {
-                                // No pending commits, but force one final sync save to be safe
-                                console.log('No pending commits, doing final sync save...');
-                                if (iframe.contentWindow.forceScormCommitSync) {
-                                    iframe.contentWindow.forceScormCommitSync();
-                                }
-                            }
-
-                            // Additional delay to ensure keepalive requests are sent
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        }
-                    } catch (error) {
-                        console.error('Error during player close:', error);
-                    } finally {
-                        // Close the player
-                        playerActive.value = false;
-                        currentPackage.value = null;
-                        isFullscreen.value = false;
-                        isLoadingPlayer.value = false;
-                        isSavingProgress.value = false;
-
-                        // Reload packages list to refresh any changes
-                        loadPackages(currentPage.value, searchQuery.value);
-                    }
-                };
-
-                const reloadPlayer = () => {
-                    if (confirm('Reload the player? Your current progress will be refreshed.')) {
-                        isLoadingPlayer.value = true;
-                        const iframe = document.querySelector('.scorm-frame');
-                        if (iframe) {
-                            iframe.src = iframe.src;
-                        }
-                    }
-                };
-
-                const toggleFullscreen = () => {
-                    isFullscreen.value = !isFullscreen.value;
-
-                    if (isFullscreen.value) {
-                        const container = document.querySelector('.player-container');
-                        if (container.requestFullscreen) {
-                            container.requestFullscreen();
-                        } else if (container.webkitRequestFullscreen) {
-                            container.webkitRequestFullscreen();
-                        } else if (container.msRequestFullscreen) {
-                            container.msRequestFullscreen();
-                        }
-                    } else {
-                        if (document.exitFullscreen) {
-                            document.exitFullscreen();
-                        } else if (document.webkitExitFullscreen) {
-                            document.webkitExitFullscreen();
-                        } else if (document.msExitFullscreen) {
-                            document.msExitFullscreen();
-                        }
-                    }
-                };
-
-                const formatDate = (dateString) => {
-                    const date = new Date(dateString);
-                    return date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
-                };
-
-                const formatFileSize = (bytes) => {
-                    if (bytes === 0) return '0 Bytes';
-                    const k = 1024;
-                    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                    const i = Math.floor(Math.log(bytes) / Math.log(k));
-                    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-                };
-
-                // Listen for fullscreen changes
-                document.addEventListener('fullscreenchange', () => {
-                    if (!document.fullscreenElement) {
-                        isFullscreen.value = false;
-                    }
-                });
-
-                // Get stage label for async upload progress
-                const getStageLabel = (stage) => {
-                    if (typeof ScormUploadClient !== 'undefined') {
-                        return ScormUploadClient.getStageLabel(stage);
-                    }
-                    // Fallback if ScormUploadClient not loaded
-                    const labels = {
-                        queued: 'Queued...',
-                        validating: 'Validating file...',
-                        uploading: 'Uploading to storage...',
-                        extracting: 'Extracting package...',
-                        parsing: 'Parsing manifest...',
-                        saving: 'Saving to database...',
-                        cleanup: 'Cleaning up...',
-                        completed: 'Completed',
-                        failed: 'Failed',
-                        processing: 'Processing...',
-                    };
-                    return labels[stage] || stage;
-                };
-
-                // Prevent page unload if there are pending SCORM commits
-                window.addEventListener('beforeunload', (event) => {
-                    const iframe = document.querySelector('.scorm-frame');
-                    if (iframe && iframe.contentWindow &&
-                        iframe.contentWindow.hasScormPendingCommits &&
-                        iframe.contentWindow.hasScormPendingCommits()) {
-
-                        event.preventDefault();
-                        event.returnValue = 'You have unsaved SCORM progress. Are you sure you want to leave?';
-                        return event.returnValue;
-                    }
-                });
-
-                // Initialize
-                onMounted(() => {
-                    loadPackages();
-                });
-
-                return {
-                    packages,
-                    searchQuery,
-                    isLoadingPackages,
-                    isSearching,
-                    isLoadingPlayer,
-                    isSavingProgress,
-                    errorMessage,
-                    playerActive,
-                    currentPackage,
-                    isFullscreen,
-                    totalPackages,
-                    currentPage,
-                    perPage,
-                    selectedFile,
-                    uploadInProgress,
-                    uploadProgress,
-                    uploadError,
-                    uploadSuccess,
-                    uploadedPackage,
-                    isDragging,
-                    modalFileInput,
-                    uploadForm,
-                    asyncJobId,
-                    asyncUploadStage,
-                    isAsyncUpload,
-                    filteredPackages,
-                    playerUrl,
-                    loadPackages,
-                    performSearch,
-                    openUploadModal,
-                    closeUploadModal,
-                    handleFileSelect,
-                    handleDrop,
-                    removeFile,
-                    resetUploadForm,
-                    uploadPackage,
-                    launchUploadedPackage,
-                    launchPackage,
-                    deletePackage,
-                    onPlayerLoaded,
-                    closePlayer,
-                    reloadPlayer,
-                    toggleFullscreen,
-                    formatDate,
-                    formatFileSize,
-                    getStageLabel
-                };
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="authModalLabel">
+            <i class="bi bi-key"></i>
+            Login to SCORM Manager
+          </h5>
+          <button type="button" class="btn-close btn-close-white" @click="closeAuthModal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Error Alert -->
+          <div v-if="authError" class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div class="flex-grow-1">
+              <strong>Error!</strong> {{ authError }}
+            </div>
+            <button type="button" class="btn-close" @click="authError = null"></button>
+          </div>
+
+          <form @submit.prevent="performLogin">
+            <!-- Email Input -->
+            <div class="mb-3">
+              <label for="authEmail" class="form-label fw-bold">
+                <i class="bi bi-envelope"></i>
+                Email Address *
+              </label>
+              <input
+                type="email"
+                class="form-control form-control-lg"
+                id="authEmail"
+                v-model="authForm.email"
+                placeholder="your.email@example.com"
+                required
+                autocomplete="username"
+                :disabled="authInProgress"
+              >
+            </div>
+
+            <!-- Password Input -->
+            <div class="mb-4">
+              <label for="authPassword" class="form-label fw-bold">
+                <i class="bi bi-lock"></i>
+                Password *
+              </label>
+              <div class="input-group">
+                <input
+                  :type="showPassword ? 'text' : 'password'"
+                  class="form-control form-control-lg"
+                  id="authPassword"
+                  v-model="authForm.password"
+                  placeholder="Enter your password"
+                  required
+                  minlength="6"
+                  autocomplete="current-password"
+                  :disabled="authInProgress"
+                >
+                <button
+                  class="btn btn-outline-secondary"
+                  type="button"
+                  @click="showPassword = !showPassword"
+                  :disabled="authInProgress"
+                >
+                  <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid">
+              <button
+                type="submit"
+                class="btn btn-add-scorm btn-lg"
+                :disabled="authInProgress || authForm.email.length === 0 || authForm.password.length < 6"
+              >
+                <span v-if="!authInProgress">
+                  <i class="bi bi-box-arrow-in-right"></i>
+                  Login
+                </span>
+                <span v-else>
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Authenticating...
+                </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Vue.js 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<script>
+  const { createApp, ref, computed, onMounted } = Vue;
+
+  createApp({
+    setup() {
+      // State
+      const packages = ref([]);
+      const searchQuery = ref('');
+      const isLoadingPackages = ref(false);
+      const isSearching = ref(false);
+      const isLoadingPlayer = ref(false);
+      const isSavingProgress = ref(false);
+      const errorMessage = ref(null);
+      const playerActive = ref(false);
+      const currentPackage = ref(null);
+      const isFullscreen = ref(false);
+      const totalPackages = ref(0);
+      const currentPage = ref(1);
+      const perPage = ref(20);
+      let searchDebounceTimer = null;
+
+      // Upload state
+      const selectedFile = ref(null);
+      const uploadInProgress = ref(false);
+      const uploadProgress = ref(0);
+      const uploadError = ref(null);
+      const uploadSuccess = ref(false);
+      const uploadedPackage = ref(null);
+      const isDragging = ref(false);
+      const modalFileInput = ref(null);
+      const uploadForm = ref({
+        title: '',
+        description: ''
+      });
+      let uploadModal = null;
+
+      // Async upload state (WebSocket tracking)
+      const asyncJobId = ref(null);
+      const asyncUploadStage = ref('');
+      const isAsyncUpload = ref(false);
+      let uploadClient = null; // WebSocket client instance
+
+      // Authentication state
+      const isAuthenticated = ref(false);
+      const userEmail = ref(null);
+      const authForm = ref({
+        email: '',
+        password: ''
+      });
+      const authInProgress = ref(false);
+      const authError = ref(null);
+      const showPassword = ref(false);
+      let authModal = null;
+
+      // API Configuration
+      const API_BASE_URL = window.location.origin;
+
+      // Computed
+      const filteredPackages = computed(() => {
+        return packages.value;
+      });
+
+      const playerUrl = computed(() => {
+        if (!currentPackage.value) return '';
+        return `${API_BASE_URL}/v1/scorm/player/${currentPackage.value.id}/launch`;
+      });
+
+      // Authentication Methods
+      const openAuthModal = () => {
+        if (!authModal) {
+          authModal = new bootstrap.Modal(document.getElementById('authModal'));
+        }
+        authError.value = null;
+        authModal.show();
+      };
+
+      const closeAuthModal = () => {
+        if (authModal) {
+          authModal.hide();
+        }
+      };
+
+      const performLogin = async () => {
+        authInProgress.value = true;
+        authError.value = null;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/v1/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              login: authForm.value.email,
+              password: authForm.value.password,
+              app: 'admin'
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => null);
+            throw new Error(
+              errorData?.message ||
+              `Login failed: ${response.statusText}`
+            );
+          }
+
+          const result = await response.json();
+
+          if (result.data?.access_token && result.data?.refresh_token) {
+            // Save tokens
+            localStorage.setItem('scorm_access_token', result.data.access_token);
+            localStorage.setItem('scorm_refresh_token', result.data.refresh_token);
+            localStorage.setItem('scorm_token_timestamp', new Date().toISOString());
+            localStorage.setItem('scorm_user_email', authForm.value.email);
+            sessionStorage.setItem('scorm_session_active', 'true');
+
+            // Update state
+            isAuthenticated.value = true;
+            userEmail.value = authForm.value.email;
+
+            // Clear form
+            authForm.value.email = '';
+            authForm.value.password = '';
+
+            // Close modal
+            closeAuthModal();
+
+            // Reload packages with authentication
+            await loadPackages();
+
+            console.log('[SCORM Auth] Login successful');
+          } else {
+            throw new Error('Invalid response format from server');
+          }
+
+        } catch (error) {
+          console.error('[SCORM Auth] Login error:', error);
+          authError.value = error.message || 'Login failed. Please try again.';
+        } finally {
+          authInProgress.value = false;
+        }
+      };
+
+      const logout = () => {
+        if (confirm('Are you sure you want to logout?')) {
+          // Clear tokens
+          localStorage.removeItem('scorm_access_token');
+          localStorage.removeItem('scorm_refresh_token');
+          localStorage.removeItem('scorm_token_timestamp');
+          localStorage.removeItem('scorm_user_email');
+          sessionStorage.removeItem('scorm_session_active');
+
+          // Update state
+          isAuthenticated.value = false;
+          userEmail.value = null;
+
+          // Clear packages
+          packages.value = [];
+          totalPackages.value = 0;
+
+          console.log('[SCORM Auth] Logout successful');
+        }
+      };
+
+      const getAuthHeaders = () => {
+        const token = localStorage.getItem('scorm_access_token');
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+      };
+
+      const refreshToken = async () => {
+        const accessToken = localStorage.getItem('scorm_access_token');
+        const refreshToken = localStorage.getItem('scorm_refresh_token');
+
+        if (!refreshToken) {
+          console.log('[SCORM Auth] No refresh token available');
+          return false;
+        }
+
+        try {
+          console.log('[SCORM Auth] Attempting token refresh...');
+
+          const response = await fetch(`${API_BASE_URL}/v1/auth/refresh`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            })
+          });
+
+          if (!response.ok) {
+            console.log('[SCORM Auth] Token refresh failed:', response.status);
+            return false;
+          }
+
+          const result = await response.json();
+
+          if (result.data?.access_token && result.data?.refresh_token) {
+            // Update tokens
+            localStorage.setItem('scorm_access_token', result.data.access_token);
+            localStorage.setItem('scorm_refresh_token', result.data.refresh_token);
+            localStorage.setItem('scorm_token_timestamp', new Date().toISOString());
+
+            console.log('[SCORM Auth] Token refreshed successfully');
+            return true;
+          }
+
+          return false;
+        } catch (error) {
+          console.error('[SCORM Auth] Token refresh error:', error);
+          return false;
+        }
+      };
+
+      const handleAuthenticationError = async () => {
+        console.log('[SCORM Auth] Authentication error detected, attempting refresh...');
+
+        const refreshed = await refreshToken();
+
+        if (!refreshed) {
+          // Refresh failed, logout user
+          localStorage.removeItem('scorm_access_token');
+          localStorage.removeItem('scorm_refresh_token');
+          localStorage.removeItem('scorm_token_timestamp');
+          localStorage.removeItem('scorm_user_email');
+          sessionStorage.removeItem('scorm_session_active');
+
+          isAuthenticated.value = false;
+          userEmail.value = null;
+          packages.value = [];
+          totalPackages.value = 0;
+
+          console.log('[SCORM Auth] Session expired. Please login again.');
+          openAuthModal();
+
+          return false;
+        }
+
+        return true;
+      };
+
+      // Methods
+      const loadPackages = async (page = 1, search = '') => {
+        isLoadingPackages.value = true;
+        errorMessage.value = null;
+
+        try {
+          // Build query params
+          const params = new URLSearchParams({
+            page: page.toString(),
+            per_page: perPage.value.toString()
+          });
+
+          // Add search query if exists
+          if (search && search.trim()) {
+            params.append('title', search.trim());
+          }
+
+          const response = await fetch(`${API_BASE_URL}/v1/scorm/packages?${params}`, {
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              ...getAuthHeaders()
             }
-        }).mount('#app');
-    </script>
+          });
 
-    <!-- SCORM Upload WebSocket Client -->
-    <script src="./js/scorm-upload-ws-client.js"></script>
+          // Handle 401 - token expired
+          if (response.status === 401) {
+            const refreshed = await handleAuthenticationError();
+            if (refreshed) {
+              // Retry request with new token
+              return loadPackages(page, search);
+            }
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.data && result.data.list) {
+            packages.value = result.data.list;
+            totalPackages.value = result.data.total || 0;
+            currentPage.value = result.data.page || 1;
+          } else {
+            packages.value = [];
+            totalPackages.value = 0;
+          }
+        } catch (error) {
+          console.error('Failed to load packages:', error);
+          errorMessage.value = 'Failed to load SCORM packages. Please try again.';
+        } finally {
+          isLoadingPackages.value = false;
+          isSearching.value = false;
+        }
+      };
+
+      // Debounced search
+      const performSearch = () => {
+        if (searchDebounceTimer) {
+          clearTimeout(searchDebounceTimer);
+        }
+
+        isSearching.value = true;
+        searchDebounceTimer = setTimeout(() => {
+          currentPage.value = 1; // Reset to first page on new search
+          loadPackages(1, searchQuery.value);
+        }, 500); // 500ms debounce
+      };
+
+      // Modal methods
+      const openUploadModal = () => {
+        if (!uploadModal) {
+          uploadModal = new bootstrap.Modal(document.getElementById('uploadModal'));
+        }
+        uploadModal.show();
+      };
+
+      const closeUploadModal = () => {
+        if (uploadModal) {
+          uploadModal.hide();
+        }
+      };
+
+      const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          validateAndSetFile(file);
+        }
+      };
+
+      const handleDrop = (event) => {
+        event.preventDefault();
+        isDragging.value = false;
+        const file = event.dataTransfer.files[0];
+        if (file) {
+          validateAndSetFile(file);
+        }
+      };
+
+      const validateAndSetFile = (file) => {
+        uploadError.value = null;
+
+        if (!file.name.toLowerCase().endsWith('.zip')) {
+          uploadError.value = 'Only ZIP files are allowed';
+          return;
+        }
+
+        const maxSize = 500 * 1024 * 1024; // 500MB
+        if (file.size > maxSize) {
+          uploadError.value = 'File size exceeds 500MB limit';
+          return;
+        }
+
+        selectedFile.value = file;
+      };
+
+      const removeFile = () => {
+        selectedFile.value = null;
+      };
+
+      const resetUploadForm = () => {
+        selectedFile.value = null;
+        uploadForm.value.title = '';
+        uploadForm.value.description = '';
+        uploadSuccess.value = false;
+        uploadedPackage.value = null;
+        uploadError.value = null;
+        uploadProgress.value = 0;
+        isAsyncUpload.value = false;
+        asyncJobId.value = null;
+        asyncUploadStage.value = '';
+
+        // Cancel WebSocket tracking if active
+        if (uploadClient) {
+          uploadClient.cancel();
+        }
+      };
+
+      const uploadPackage = async () => {
+        if (!selectedFile.value || uploadForm.value.title.length < 5) {
+          uploadError.value = 'Please select a file and enter a title (min 5 characters)';
+          return;
+        }
+
+        uploadInProgress.value = true;
+        uploadProgress.value = 0;
+        uploadError.value = null;
+        isAsyncUpload.value = false;
+        asyncJobId.value = null;
+        asyncUploadStage.value = '';
+
+        try {
+          const formData = new FormData();
+          formData.append('file', selectedFile.value);
+          formData.append('title', uploadForm.value.title);
+          if (uploadForm.value.description) {
+            formData.append('description', uploadForm.value.description);
+          }
+
+          const response = await fetch(`${API_BASE_URL}/v1/scorm/packages/upload`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              ...getAuthHeaders()
+            }
+          });
+
+          // Handle 401 - token expired
+          if (response.status === 401) {
+            const refreshed = await handleAuthenticationError();
+            if (refreshed) {
+              // Retry upload with new token
+              uploadInProgress.value = false;
+              return uploadPackage();
+            }
+            uploadInProgress.value = false;
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.statusText}`);
+          }
+
+          const result = await response.json();
+
+          // Проверяем async vs sync upload по флагу is_async
+          if (result.data?.is_async) {
+            // Асинхронная загрузка - запускаем WebSocket tracking
+            console.log('[SCORM Upload] Async upload detected, job ID:', result.data.job_id);
+            isAsyncUpload.value = true;
+            asyncJobId.value = result.data.job_id;
+            uploadProgress.value = result.data.progress || 0;
+            asyncUploadStage.value = result.data.stage || 'queued';
+
+            // Создаем WebSocket клиент если еще не создан
+            if (!uploadClient) {
+              uploadClient = new ScormUploadClient(API_BASE_URL);
+            }
+
+            // Запускаем WebSocket tracking с callbacks
+            uploadClient.trackJob(result.data.job_id, {
+              onProgress: (data) => {
+                console.log('[SCORM Upload] Progress:', data.progress, '%', data.stage);
+                uploadProgress.value = data.progress;
+                asyncUploadStage.value = data.stage;
+              },
+              onComplete: (data) => {
+                console.log('[SCORM Upload] Completed! Package ID:', data.package_id);
+                uploadProgress.value = 100;
+                uploadSuccess.value = true;
+                uploadInProgress.value = false;
+                uploadedPackage.value = { id: data.package_id };
+
+                // Refresh packages list
+                loadPackages(currentPage.value, searchQuery.value);
+
+                alert(`Package "${uploadForm.value.title}" uploaded successfully!`);
+              },
+              onError: (error) => {
+                console.error('[SCORM Upload] Failed:', error);
+                uploadError.value = `Upload failed: ${error}`;
+                uploadInProgress.value = false;
+              }
+            });
+
+          } else {
+            // Синхронная загрузка - уже завершена
+            console.log('[SCORM Upload] Sync upload completed');
+            uploadedPackage.value = result.data;
+            uploadSuccess.value = true;
+            uploadInProgress.value = false;
+            uploadProgress.value = 100;
+
+            // Refresh packages list
+            loadPackages(currentPage.value, searchQuery.value);
+
+            alert(`Package "${uploadForm.value.title}" uploaded successfully!`);
+          }
+
+        } catch (error) {
+          console.error('[SCORM Upload] Error:', error);
+          uploadError.value = 'Upload failed: ' + error.message;
+          uploadInProgress.value = false;
+        }
+      };
+
+      const launchUploadedPackage = () => {
+        if (uploadedPackage.value) {
+          closeUploadModal();
+          resetUploadForm();
+          launchPackage(uploadedPackage.value);
+        }
+      };
+
+      const launchPackage = (pkg) => {
+        currentPackage.value = pkg;
+        isLoadingPlayer.value = true;
+        playerActive.value = true;
+      };
+
+      const deletePackage = async (pkg) => {
+        const packageTitle = pkg.manifest_data?.title || pkg.title;
+
+        if (!confirm(`Are you sure you want to delete "${packageTitle}"?\n\nThis action cannot be undone.`)) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/v1/scorm/packages/${pkg.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+              ...getAuthHeaders()
+            }
+          });
+
+          // Handle 401 - token expired
+          if (response.status === 401) {
+            const refreshed = await handleAuthenticationError();
+            if (refreshed) {
+              // Retry delete with new token
+              return deletePackage(pkg);
+            }
+            return;
+          }
+
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error('Package not found');
+            } else if (response.status === 403) {
+              throw new Error('You do not have permission to delete this package');
+            } else {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+          }
+
+          // Reload packages list after successful deletion
+          await loadPackages(currentPage.value, searchQuery.value);
+
+          // Show success message
+          alert(`Package "${packageTitle}" deleted successfully!`);
+        } catch (error) {
+          console.error('Failed to delete package:', error);
+          alert(`Failed to delete package: ${error.message}`);
+        }
+      };
+
+      const onPlayerLoaded = () => {
+        isLoadingPlayer.value = false;
+      };
+
+      const closePlayer = async () => {
+        if (!confirm('Are you sure you want to close the player? Your progress will be saved.')) {
+          return;
+        }
+
+        isLoadingPlayer.value = true;
+        isSavingProgress.value = true;
+
+        try {
+          const iframe = document.querySelector('.scorm-frame');
+          if (iframe && iframe.contentWindow) {
+            // Try to call SCORM Finish/Terminate to save final state
+            try {
+              // SCORM 1.2
+              if (iframe.contentWindow.API && iframe.contentWindow.API.LMSFinish) {
+                console.log('Calling LMSFinish...');
+                iframe.contentWindow.API.LMSFinish('');
+              }
+              // SCORM 2004
+              if (iframe.contentWindow.API_1484_11 && iframe.contentWindow.API_1484_11.Terminate) {
+                console.log('Calling Terminate...');
+                iframe.contentWindow.API_1484_11.Terminate('');
+              }
+            } catch (error) {
+              console.warn('Error calling SCORM Finish/Terminate:', error);
+            }
+
+            // Wait a moment for any triggered commits
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Check if there are pending SCORM commits
+            if (iframe.contentWindow.hasScormPendingCommits &&
+              iframe.contentWindow.hasScormPendingCommits()) {
+
+              console.log('Waiting for SCORM commits to complete...');
+
+              // Wait for all pending commits with timeout (10 seconds)
+              const waitPromise = iframe.contentWindow.waitForScormCommits();
+              const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout')), 10000)
+              );
+
+              try {
+                await Promise.race([waitPromise, timeoutPromise]);
+                console.log('All SCORM commits completed successfully');
+              } catch (error) {
+                console.warn('Timeout waiting for commits, using sync fallback:', error);
+                // Use synchronous fallback if async failed
+                if (iframe.contentWindow.forceScormCommitSync) {
+                  const syncResult = iframe.contentWindow.forceScormCommitSync();
+                  console.log('Synchronous commit result:', syncResult);
+                }
+              }
+            } else {
+              // No pending commits, but force one final sync save to be safe
+              console.log('No pending commits, doing final sync save...');
+              if (iframe.contentWindow.forceScormCommitSync) {
+                iframe.contentWindow.forceScormCommitSync();
+              }
+            }
+
+            // Additional delay to ensure keepalive requests are sent
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        } catch (error) {
+          console.error('Error during player close:', error);
+        } finally {
+          // Close the player
+          playerActive.value = false;
+          currentPackage.value = null;
+          isFullscreen.value = false;
+          isLoadingPlayer.value = false;
+          isSavingProgress.value = false;
+
+          // Reload packages list to refresh any changes
+          loadPackages(currentPage.value, searchQuery.value);
+        }
+      };
+
+      const reloadPlayer = () => {
+        if (confirm('Reload the player? Your current progress will be refreshed.')) {
+          isLoadingPlayer.value = true;
+          const iframe = document.querySelector('.scorm-frame');
+          if (iframe) {
+            iframe.src = iframe.src;
+          }
+        }
+      };
+
+      const toggleFullscreen = () => {
+        isFullscreen.value = !isFullscreen.value;
+
+        if (isFullscreen.value) {
+          const container = document.querySelector('.player-container');
+          if (container.requestFullscreen) {
+            container.requestFullscreen();
+          } else if (container.webkitRequestFullscreen) {
+            container.webkitRequestFullscreen();
+          } else if (container.msRequestFullscreen) {
+            container.msRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      };
+
+      const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      };
+
+      const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+      };
+
+      // Listen for fullscreen changes
+      document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+          isFullscreen.value = false;
+        }
+      });
+
+      // Get stage label for async upload progress
+      const getStageLabel = (stage) => {
+        if (typeof ScormUploadClient !== 'undefined') {
+          return ScormUploadClient.getStageLabel(stage);
+        }
+        // Fallback if ScormUploadClient not loaded
+        const labels = {
+          queued: 'Queued...',
+          validating: 'Validating file...',
+          uploading: 'Uploading to storage...',
+          extracting: 'Extracting package...',
+          parsing: 'Parsing manifest...',
+          saving: 'Saving to database...',
+          cleanup: 'Cleaning up...',
+          completed: 'Completed',
+          failed: 'Failed',
+          processing: 'Processing...',
+        };
+        return labels[stage] || stage;
+      };
+
+      // Prevent page unload if there are pending SCORM commits
+      window.addEventListener('beforeunload', (event) => {
+        const iframe = document.querySelector('.scorm-frame');
+        if (iframe && iframe.contentWindow &&
+          iframe.contentWindow.hasScormPendingCommits &&
+          iframe.contentWindow.hasScormPendingCommits()) {
+
+          event.preventDefault();
+          event.returnValue = 'You have unsaved SCORM progress. Are you sure you want to leave?';
+          return event.returnValue;
+        }
+      });
+
+      // Initialize
+      onMounted(() => {
+        // Check for existing authentication
+        const token = localStorage.getItem('scorm_access_token');
+        if (token) {
+          isAuthenticated.value = true;
+          userEmail.value = localStorage.getItem('scorm_user_email');
+          loadPackages();
+        } else {
+          console.log('[SCORM Auth] No authentication found. Please login to view packages.');
+        }
+      });
+
+      return {
+        packages,
+        searchQuery,
+        isLoadingPackages,
+        isSearching,
+        isLoadingPlayer,
+        isSavingProgress,
+        errorMessage,
+        playerActive,
+        currentPackage,
+        isFullscreen,
+        totalPackages,
+        currentPage,
+        perPage,
+        selectedFile,
+        uploadInProgress,
+        uploadProgress,
+        uploadError,
+        uploadSuccess,
+        uploadedPackage,
+        isDragging,
+        modalFileInput,
+        uploadForm,
+        asyncJobId,
+        asyncUploadStage,
+        isAsyncUpload,
+        isAuthenticated,
+        userEmail,
+        authForm,
+        authInProgress,
+        authError,
+        showPassword,
+        filteredPackages,
+        playerUrl,
+        loadPackages,
+        performSearch,
+        openUploadModal,
+        closeUploadModal,
+        handleFileSelect,
+        handleDrop,
+        removeFile,
+        resetUploadForm,
+        uploadPackage,
+        launchUploadedPackage,
+        launchPackage,
+        deletePackage,
+        onPlayerLoaded,
+        closePlayer,
+        reloadPlayer,
+        toggleFullscreen,
+        formatDate,
+        formatFileSize,
+        getStageLabel,
+        openAuthModal,
+        closeAuthModal,
+        performLogin,
+        logout,
+        getAuthHeaders
+      };
+    }
+  }).mount('#app');
+</script>
+
+<!-- SCORM Upload WebSocket Client -->
+<script src="./js/scorm-upload-ws-client.js"></script>
 </body>
 </html>

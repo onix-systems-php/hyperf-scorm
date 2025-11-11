@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm;
 
+use OnixSystemsPHP\HyperfScorm\Contract\Gateway\ScormGatewayInterface;
+use OnixSystemsPHP\HyperfScorm\Gateway\ScormGateway;
 use function Hyperf\Support\env;
 
 class ConfigProvider
@@ -17,6 +19,7 @@ class ConfigProvider
     {
         return [
             'dependencies' => [
+                ScormGatewayInterface::class => ScormGateway::class,
             ],
             'commands' => [],
             'annotations' => [
@@ -73,7 +76,7 @@ class ConfigProvider
                     'concurrent' => [
                         'limit' => 3,
                     ],
-                    'max_attempts' => 3,
+                    'max_attempts' => 1,
                 ],
             ],
             'publish' => [
@@ -88,6 +91,12 @@ class ConfigProvider
                     'description' => 'The database migrations for onix-systems-php/hyperf-scorm.',
                     'source' => __DIR__ . '/../publish/migrations/2025_01_31_000001_create_scorm_packages_table.php',
                     'destination' => BASE_PATH . '/migrations/2025_01_31_000001_create_scorm_packages_table.php',
+                ],
+                [
+                    'id' => 'scorm_controller',
+                    'description' => 'Scorm controller for onix-systems-php/hyperf-scorm.',
+                    'source' => __DIR__ . '/../publish/controller/ScormController.php',
+                    'destination' => BASE_PATH . '/app/Scorm/Controller/ScormController.php',
                 ],
                 [
                     'id' => 'scorm_example',

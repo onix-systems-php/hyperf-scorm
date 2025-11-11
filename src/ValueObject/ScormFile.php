@@ -16,13 +16,12 @@ use function Hyperf\Translation\__;
 
 class ScormFile
 {
-    public const MANIFEST_FILENAME = 'manifest.xml';
+    public const MANIFEST_FILENAME = 'imsmanifest.xml';
 
     private const REQUIRED_SCORM_FILES = [self::MANIFEST_FILENAME];
 
     private \ZipArchive $zip;
 
-    private ?string $launchFile;
 
     private function __construct(
         private readonly string $storage,

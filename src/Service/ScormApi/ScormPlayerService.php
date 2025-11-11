@@ -13,12 +13,9 @@ use Hyperf\Contract\ConfigInterface;
 use Hyperf\View\RenderInterface;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
-use OnixSystemsPHP\HyperfScorm\Factory\ScormApiStrategyFactory;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
-use OnixSystemsPHP\HyperfScorm\Service\ScormFileProcessor;
-
+use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\ScormApiStrategyFactory;
 use function Hyperf\Support\make;
 
 /**
@@ -30,11 +27,10 @@ class ScormPlayerService
 {
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly ScormUserSessionRepository $scormUserSessionRepository,
         private readonly ScormApiStrategyFactory $apiStrategyFactory,
-        private readonly ScormFileProcessor $fileProcessor,
         private readonly ConfigInterface $config
-    ) {}
+    ) {
+    }
 
     public function run(int $packageId): ScormPlayerDTO
     {

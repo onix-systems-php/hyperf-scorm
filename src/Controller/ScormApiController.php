@@ -18,7 +18,6 @@ class ScormApiController extends AbstractController
     public function __construct(
         private readonly SessionManager $sessionManager
     ) {
-
     }
 
     #[OA\Get(// @SONAR_STOP@

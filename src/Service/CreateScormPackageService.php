@@ -17,9 +17,6 @@ use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-/**
- * Service for creating SCORM packages.
- */
 #[Service]
 class CreateScormPackageService
 {
