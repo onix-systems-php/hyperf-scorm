@@ -27,10 +27,10 @@ use OnixSystemsPHP\HyperfScorm\Contract\Gateway\ScormGatewayInterface;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
+use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormJobStatus;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
 use OpenApi\Attributes as OA;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
-
 
 #[Controller(prefix: 'v1/scorm')]
 class ScormController extends AbstractController
@@ -144,9 +144,10 @@ class ScormController extends AbstractController
     #[Acl(UserRoles::GROUP_ALL)]//@SONAR_START@//NOTICE you can use your ACL rules//
     public function launch(
         ResponseInterface $response,
-        int $packageId,
-        int $userId
+        int $packageId
     ): PsrResponseInterface {
+        $sessionManager = ApplicationContext::getContainer()->get(SessionManager::class);//Notice Use your SessionManager
+        $userId = $sessionManager->user()->getId();
         $playerData = $this->scormGateway->launch($packageId, $userId);
         return $response->withHeader('Content-Type', 'text/html')
             ->withBody(new SwooleStream($playerData->playerHtml));
@@ -170,5 +171,78 @@ class ScormController extends AbstractController
     {
         $this->scormGateway->destroy($id);
         return ResourceSuccess::make([]);
+    }
+
+    #[OA\Get(
+        path: 'jobs/{jobId}/status',
+        operationId: 'getScormJobStatus',
+        summary: 'Get SCORM processing job status',
+        tags: ['scorm'],
+        parameters: [
+            new OA\Parameter(
+                name: 'jobId',
+                description: 'Job UUID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Job status',
+                content: new OA\JsonContent(
+                    ref: '#/components/schemas/ResourceScormJobStatus'
+                )
+            ),
+            new OA\Response(ref: '#/components/responses/404', response: 404),
+        ],
+    )]
+    #[GetMapping(path: 'jobs/{jobId}/status')]
+    #[Acl([UserRoles::GROUP_ADMINS])]//NOTICE you can use your ACL
+    public function status(string $jobId): ResourceScormJobStatus
+    {
+        $status = $this->scormGateway->statusJob($jobId);
+        return ResourceScormJobStatus::make($status);
+    }
+
+    #[OA\Post(
+        path: 'jobs/{jobId}/cancel',
+        operationId: 'cancelScormJob',
+        summary: 'Cancel SCORM processing job',
+        tags: ['scorm'],
+        parameters: [
+            new OA\Parameter(
+                name: 'jobId',
+                description: 'Job UUID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'string')
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Job cancelled successfully',
+                content: new OA\JsonContent(
+                    properties: [
+                        new OA\Property(property: 'success', type: 'boolean'),
+                        new OA\Property(property: 'message', type: 'string'),
+                        new OA\Property(property: 'job_id', type: 'string'),
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Job cannot be cancelled (already processing or completed)'
+            ),
+            new OA\Response(ref: '#/components/responses/404', response: 404),
+        ],
+    )]
+    #[GetMapping(path: 'jobs/{jobId}/cancel')]
+    #[Acl([UserRoles::GROUP_ADMINS])]//NOTICE you can use your ACL rules
+    public function cancelJob(string $jobId): array
+    {
+        return $this->scormGateway->cancelJob($jobId);
     }
 }

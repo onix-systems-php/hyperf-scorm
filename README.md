@@ -359,6 +359,8 @@ Managed by your published `app/Scorm/Controller/ScormController.php`:
 | GET | `/v1/scorm/packages` | List packages (paginated) | Required |
 | GET | `/v1/scorm/player/{id}/launch` | Launch SCORM player | Required |
 | DELETE | `/v1/scorm/packages/{id}` | Delete package | Required |
+| GET | `/v1/scorm/jobs/{jobId}/status` | Get job status | Required |
+| POST | `/v1/scorm/jobs/{jobId}/cancel` | Cancel job | Required |
 
 **Note:** You control auth/ACL in your published controller.
 
@@ -370,8 +372,6 @@ Internal API routes (auto-registered via `publish/routes.php`):
 |--------|----------|-------------|------|
 | GET | `/v1/api/scorm/{packageId}/users/{userId}/initialize` | Initialize SCORM session | None (internal) |
 | POST | `/v1/api/scorm/{packageId}/commit/{sessionToken}` | Save SCORM data | None (token-based) |
-| GET | `/v1/scorm/jobs/{jobId}/status` | Get job status | None (jobId-based) |
-| POST | `/v1/scorm/jobs/{jobId}/cancel` | Cancel job | None (jobId-based) |
 | WS | `ws://host:9502/scorm-progress?job_id={id}` | Real-time progress | None (jobId-based) |
 
 **Note:** Internal endpoints use session tokens/job IDs for security, not user auth.

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
-use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\Request\RequestCommitScorm;
@@ -15,11 +14,6 @@ use OpenApi\Attributes as OA;
 
 class ScormApiController extends AbstractController
 {
-    public function __construct(
-        private readonly SessionManager $sessionManager
-    ) {
-    }
-
     #[OA\Get(// @SONAR_STOP@
         path: '/v1/api/scorm/{packageId}/initialize',
         operationId: 'initializeScormSession',

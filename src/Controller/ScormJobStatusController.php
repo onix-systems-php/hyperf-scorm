@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
 use Hyperf\HttpServer\Annotation\Controller;
-use Hyperf\HttpServer\Contract\RequestInterface;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormJobStatus;
 use OnixSystemsPHP\HyperfScorm\Service\ScormJobStatusService;
