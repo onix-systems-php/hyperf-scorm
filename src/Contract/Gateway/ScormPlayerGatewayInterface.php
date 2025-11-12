@@ -7,5 +7,5 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 
 interface ScormPlayerGatewayInterface
 {
-    public function launch(int $packageId): ScormPlayerDTO;
+    public function launch(int $packageId, int $userId): ScormPlayerDTO;
 }

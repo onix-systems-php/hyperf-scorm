@@ -45,9 +45,9 @@ class ScormGateway implements ScormGatewayInterface
     }
 
 
-    public function launch(int $packageId): ScormPlayerDTO
+    public function launch(int $packageId, int $userId): ScormPlayerDTO
     {
-        return $this->scormPlayerService->run($packageId);
+        return $this->scormPlayerService->run($packageId, $userId);
     }
 
     public function statusJob(string $jobId): ResourceScormJobStatus

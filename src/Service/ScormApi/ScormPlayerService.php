@@ -16,6 +16,7 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\ScormApiStrategyFactory;
+use function Hyperf\Config\config;
 use function Hyperf\Support\make;
 
 /**
@@ -32,7 +33,7 @@ class ScormPlayerService
     ) {
     }
 
-    public function run(int $packageId): ScormPlayerDTO
+    public function run(int $packageId, $userId): ScormPlayerDTO
     {
         $package = $this->scormPackageRepository->findById($packageId, true, true);
 
@@ -42,28 +43,32 @@ class ScormPlayerService
             'packageId' => $packageId,
             'launchUrl' => $package->launch_url,
             'apiConfiguration' => $apiStrategy->getApiConfiguration(),
-            'playerHtml' => $this->generatePlayerHtml($package, $apiStrategy),
+            'playerHtml' => $this->generatePlayerHtml($package, $userId, $apiStrategy),
         ]);
     }
 
     private function generatePlayerHtml(
         ScormPackage $package,
+        int $userId,
         $apiStrategy
     ): string {
         $apiConfig = $apiStrategy->getApiConfiguration();
-        $apiEndpoint = $this->config->get('scorm.player.api_endpoint');
         $render = make(RenderInterface::class);
         return $render->getContents('OnixSystemsPHP\HyperfScorm::player', [
             'package' => $package,
-            //            'user' => [
-            //                'id' => null,
-            //                'name' => 'Guest User',
-            //            ],
-            'session_token' => null,
-            'launchUrl' => $package->launch_url,
-            'apiEndpoint' => $apiEndpoint,
+            'user' => [
+                'id' => $userId,
+                'session_token' => null,
+            ],
+            'scorm' => [
+                'timeout' =>  config('scorm.player.timeout'),
+                'debug' => config('scorm.player.debug'),
+                'autoCommitInterval' => config('scorm.tracking.auto_commit_interval'),
+                'version' => $package->scorm_version,
+                'launchUrl' => $package->launch_url,
+            ],
             'apiConfig' => $apiConfig,
-            'scormVersion' => $package->scorm_version,
+
         ]);
     }
 }

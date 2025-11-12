@@ -13,7 +13,7 @@ use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketContro
 use function Hyperf\Config\config;
 
 Router::addGroup('/v1/api/scorm', function () {
-    Router::get('/{packageId:\d+}/initialize', [ScormApiController::class, 'initialize']);
+    Router::get('/{packageId:\d+}/users/{userId}/initialize', [ScormApiController::class, 'initialize']);
     Router::post('/{packageId:\d+}/commit/{sessionToken}', [ScormApiController::class, 'commit']);
 });
 

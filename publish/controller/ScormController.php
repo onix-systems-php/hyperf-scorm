@@ -145,8 +145,9 @@ class ScormController extends AbstractController
     public function launch(
         ResponseInterface $response,
         int $packageId,
+        int $userId
     ): PsrResponseInterface {
-        $playerData = $this->scormGateway->launch($packageId);
+        $playerData = $this->scormGateway->launch($packageId, $userId);
         return $response->withHeader('Content-Type', 'text/html')
             ->withBody(new SwooleStream($playerData->playerHtml));
     }
