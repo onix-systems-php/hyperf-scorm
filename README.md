@@ -4,24 +4,15 @@
 [![Hyperf Version](https://img.shields.io/badge/hyperf-%5E3.1-brightgreen.svg)](https://hyperf.io)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Enterprise-grade SCORM package for Hyperf with async processing and real-time WebSocket progress tracking.
-
-## What is SCORM?
-
-SCORM (Sharable Content Object Reference Model) is the e-learning standard for creating and tracking online learning content. This package provides:
-
-- SCORM 1.2 & 2004 support with automatic version detection
-- Async queue processing for large packages
-- Real-time WebSocket progress notifications
-- Complete CMI data model implementation
-- Multi-SCO support with full Run-Time Environment
+Enterprise-grade SCORM package for Hyperf with Gateway architecture, async processing, and real-time WebSocket progress tracking.
 
 ## Features
 
 - ✅ **SCORM 1.2 & 2004** - Full compliance, auto-detect version
+- ✅ **Gateway Architecture** - Clean separation of concerns, stable public API
 - ✅ **Async Processing** - Queue-based handling with configurable threshold
 - ✅ **Real-time Progress** - WebSocket notifications with fallback
-- ✅ **Production Ready** - Battle-tested, memory efficient, comprehensive error handling
+- ✅ **Customizable Auth** - Published controllers for flexible authentication integration
 - ✅ **Flexible Storage** - S3, local storage, or custom drivers
 
 ## Requirements
@@ -32,50 +23,124 @@ SCORM (Sharable Content Object Reference Model) is the e-learning standard for c
 
 ## Installation
 
+### Step 1: Install Package
+
 ```bash
-# 1. Install package
 composer require onix-systems-php/hyperf-scorm
+```
 
-# 2. Publish configuration
+### Step 2: Publish Configuration
+
+```bash
 php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_config
+```
 
-# 3. Publish migrations
+### Step 3: Publish Migrations
+
+```bash
 php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_migrations
+```
 
-# 4. Publish example in directory storage/assets/scorm
+### Step 4: Publish Controller (REQUIRED)
+
+```bash
+php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_controller
+```
+
+This publishes `ScormController` to `app/Scorm/Controller/ScormController.php` where you'll integrate your authentication system and configure authorization (ACL).
+
+⚠️ **Important:** You MUST customize the published controller to integrate your authentication before using in production.
+
+### Step 5: Publish Example Files (Optional)
+
+```bash
 php bin/hyperf.php vendor:publish onix-systems-php/hyperf-scorm --id=scorm_example
+```
 
-# 5. Run migrations
+### Step 6: Run Migrations
+
+```bash
 php bin/hyperf.php migrate
+```
 
-# 6. Register routes in config/routes.php
+### Step 7: Register Routes
+
+Add to `config/routes.php`:
+
+```php
+// Package-provided API routes (SCORM player, job status, WebSocket)
 require_once './vendor/onix-systems-php/hyperf-scorm/publish/routes.php';
 
-# 7. Configure queue & WebSocket (see sections below)
+// Your published controller routes are auto-registered via Controller annotation
 ```
+
 ## Quick Start
 
 ### 1. Configure Environment
 
 ```env
 # Essential settings
-SCORM_MAX_FILE_SIZE=600 #MB
-SCORM_DEBUG=true
-SCORM_AUTO_COMMIT_INTERVAL=30 #sec
-SCORM_CACHE_TTL=3600 #sec
+SCORM_STORAGE_DRIVER=local           # s3|local
+SCORM_LOCAL_PATH=storage/public/scorm
+SCORM_LOCAL_PUBLIC_URL=http://localhost/public/scorm
+SCORM_MAX_FILE_SIZE=600              # MB
 SCORM_API_ENDPOINT=/v1/api/scorm
-SCORM_STORAGE_DRIVER=local #s3|local
 SCORM_WS_NAME=socket-io
+SCORM_DEBUG=false
+
+# Processing
+SCORM_AUTO_COMMIT_INTERVAL=30        # seconds
+SCORM_CACHE_TTL=3600                 # seconds
 ```
 
-### 2. Upload Package
+### 2. Integrate Authentication
+
+Edit published `app/Scorm/Controller/ScormController.php`:
+
+```php
+use OnixSystemsPHP\HyperfAuth\AuthManager;
+use OnixSystemsPHP\HyperfAuth\Annotation\Acl;
+use App\User\Constants\UserRoles;
+
+#[Controller(prefix: 'v1/scorm')]
+class ScormController extends AbstractController
+{
+    public function __construct(
+        private readonly ScormGatewayInterface $scormGateway,
+        private readonly AuthManager $authManager  // Add your auth
+    ) {}
+
+    #[PostMapping(path: 'packages/upload')]
+    #[Acl(roles: [UserRoles::GROUP_ADMINS])]  // Your ACL rules
+    public function upload(RequestUploadScormPackage $request): ResourceScormAsyncJob
+    {
+        // Extract userId from your auth system
+        $userId = $this->authManager->user()->id;
+
+        // Use gateway - business logic abstracted
+        $jobDTO = $this->scormGateway->upload(
+            ScormUploadDTO::make($request),
+            $userId
+        );
+
+        return ResourceScormAsyncJob::make($jobDTO);
+    }
+}
+```
+
+### 3. Upload Package
 
 ```bash
 curl -X POST https://your-api.com/v1/scorm/packages/upload \
-  -H "Authorization: Bearer TOKEN" \
-  -F "file=@package.zip"
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "file=@package.zip" \
+  -F "title=Introduction Course" \
+  -F "description=Basic training module"
+```
 
-# Returns: {
+**Response:**
+```json
+{
     "data": {
         "job_id": "31ee577a-3409-4228-950e-82eea8f9c172",
         "status": "queued",
@@ -88,19 +153,118 @@ curl -X POST https://your-api.com/v1/scorm/packages/upload \
 }
 ```
 
-### 3. Track Progress (WebSocket)
+### 4. Track Progress (WebSocket)
 
 ```javascript
-const ws = new WebSocket(`ws://your-domain:9502/scorm-progress?job_id=${jobId}`);
-ws.onmessage = (e) => {
-  const {stage, progress, status} = JSON.parse(e.data).data;
+const jobId = response.data.job_id;
+const ws = new WebSocket(
+  `ws://your-domain:9502/scorm-progress?job_id=${jobId}`
+);
+
+ws.onmessage = (event) => {
+  const { stage, progress, status, package_id } = JSON.parse(event.data).data;
   console.log(`${stage}: ${progress}%`);
+
+  if (status === 'completed') {
+    console.log(`Package ready: ${package_id}`);
+    ws.close();
+  }
 };
+```
+
+### 5. Launch SCORM Player
+
+```bash
+curl -X GET https://your-api.com/v1/scorm/player/123/launch \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Returns HTML player page with embedded SCORM content
+```
+
+## Gateway API
+
+The package uses Gateway pattern to provide a clean, stable public API. The `ScormGatewayInterface` extends three specialized interfaces for focused responsibilities:
+
+```php
+interface ScormGatewayInterface extends
+    ScormPlayerGatewayInterface,      // Launch player
+    ScormProgressGatewayInterface,     // Job tracking
+    ScormPackageGatewayInterface       // Package management
+{
+}
+```
+
+### ScormPackageGatewayInterface
+
+**Upload SCORM package (async):**
+```php
+upload(ScormUploadDTO $dto, int $userId): ScormAsyncJobDTO
+```
+
+**List packages with pagination:**
+```php
+index(array $filters, PaginationRequestDTO $pagination): PaginationResultDTO
+```
+
+**Delete package and all related data:**
+```php
+destroy(int $packageId): ScormPackage
+```
+
+### ScormPlayerGatewayInterface
+
+**Launch SCORM player:**
+```php
+launch(int $packageId): ScormPlayerDTO
+```
+
+Returns `ScormPlayerDTO`:
+- `package` (ScormPackageDTO): Package information
+- `playerHtml` (string): Complete HTML player page
+
+### ScormProgressGatewayInterface
+
+**Get job status:**
+```php
+statusJob(string $jobId): ResourceScormJobStatus
+```
+
+**Cancel queued job:**
+```php
+cancelJob(string $jobId): array
+```
+
+### Usage Example
+
+```php
+use OnixSystemsPHP\HyperfScorm\Contract\Gateway\ScormGatewayInterface;
+
+class YourController
+{
+    public function __construct(
+        private readonly ScormGatewayInterface $scormGateway
+    ) {}
+
+    public function someAction()
+    {
+        // Upload package
+        $jobDTO = $this->scormGateway->upload($dto, $userId);
+
+        // List packages
+        $result = $this->scormGateway->index($filters, $pagination);
+
+        // Launch player
+        $playerDTO = $this->scormGateway->launch($packageId);
+
+        // Track job
+        $status = $this->scormGateway->statusJob($jobId);
+    }
+}
 ```
 
 ## Configuration
 
-All settings in `config/autoload/scorm.php` can be overridden via environment variables.
+All configuration is in `config/autoload/scorm.php` (published in installation step 2).
 
 ### Environment Variables
 
@@ -145,7 +309,7 @@ return [
             'name' => 'socket',
             'type' => Server::SERVER_WEBSOCKET,
             'host' => '0.0.0.0',
-            'port' => 9502,//NOTICE this port must be open on the server
+            'port' => 9502,  // NOTICE: This port must be open on the server
             'callbacks' => [
                 Event::ON_HAND_SHAKE => [Hyperf\WebSocketServer\Server::class, 'onHandShake'],
                 Event::ON_MESSAGE => [Hyperf\WebSocketServer\Server::class, 'onMessage'],
@@ -159,6 +323,7 @@ return [
     ],
 ];
 ```
+
 ### Connection Flow
 
 1. Connect: `ws://host:9502/scorm-progress?job_id={uuid}`
@@ -182,23 +347,36 @@ return [
 }
 ```
 
-## API Reference
+## API Endpoints
 
-### Endpoints
+### Published Controller Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/v1/scorm/packages/upload` | Upload SCORM ZIP (returns job_id) |
-| GET | `/v1/scorm/packages` | List packages (paginated) |
-| DELETE | `/v1/scorm/packages/{id}` | Delete package |
-| GET | `/v1/api/scorm/player/{id}/launch` | Launch SCORM player |
-| GET | `/v1/scorm/jobs/{id}/status` | Get job status |
-| POST | `/v1/scorm/jobs/{id}/cancel` | Cancel job |
-| WS | `ws://host:9502/scorm-progress` | Real-time progress |
+Managed by your published `app/Scorm/Controller/ScormController.php`:
 
-All endpoints require authentication except WebSocket (uses query param validation).
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/v1/scorm/packages/upload` | Upload SCORM package | Required |
+| GET | `/v1/scorm/packages` | List packages (paginated) | Required |
+| GET | `/v1/scorm/player/{id}/launch` | Launch SCORM player | Required |
+| DELETE | `/v1/scorm/packages/{id}` | Delete package | Required |
 
-### SCORM Support
+**Note:** You control auth/ACL in your published controller.
+
+### Package-Provided Endpoints
+
+Internal API routes (auto-registered via `publish/routes.php`):
+
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/v1/api/scorm/{packageId}/users/{userId}/initialize` | Initialize SCORM session | None (internal) |
+| POST | `/v1/api/scorm/{packageId}/commit/{sessionToken}` | Save SCORM data | None (token-based) |
+| GET | `/v1/scorm/jobs/{jobId}/status` | Get job status | None (jobId-based) |
+| POST | `/v1/scorm/jobs/{jobId}/cancel` | Cancel job | None (jobId-based) |
+| WS | `ws://host:9502/scorm-progress?job_id={id}` | Real-time progress | None (jobId-based) |
+
+**Note:** Internal endpoints use session tokens/job IDs for security, not user auth.
+
+## SCORM Support
 
 | Feature | SCORM 1.2 | SCORM 2004 |
 |---------|:---------:|:----------:|
@@ -210,5 +388,9 @@ All endpoints require authentication except WebSocket (uses query param validati
 | Interactions | ✅ | ✅ |
 
 **Supported schemaversion:**
-1.2: `1.2`, `CAM 1.2`
-2004: `CAM 1.3`, `2004`, `2004 3rd Edition`, `2004 4th Edition`
+- **1.2**: `1.2`, `CAM 1.2`
+- **2004**: `CAM 1.3`, `2004`, `2004 3rd Edition`, `2004 4th Edition`
+
+## License
+
+This package is open-sourced software licensed under the [MIT license](LICENSE).

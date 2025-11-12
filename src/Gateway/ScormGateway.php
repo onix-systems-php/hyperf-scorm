@@ -19,14 +19,13 @@ use OnixSystemsPHP\HyperfScorm\Service\ScormJobStatusService;
 
 class ScormGateway implements ScormGatewayInterface
 {
-
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private readonly ScormAsyncQueueService $scormAsyncQueueService,
         private readonly DeleteScormPackageService $deleteScormPackageService,
         private readonly ScormPlayerService $scormPlayerService,
         private readonly ScormJobStatusService $scormJobStatusService,
-    ){
+    ) {
     }
     public function index(array $filters, PaginationRequestDTO $paginationRequestDTO): PaginationResultDTO
     {
