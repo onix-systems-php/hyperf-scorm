@@ -49,7 +49,7 @@ class ScormGateway implements ScormGatewayInterface
         return $this->scormPlayerService->run($packageId, $userId);
     }
 
-    public function statusJob(string $jobId): ResourceScormJobStatus
+    public function statusJob(string $jobId): array
     {
         $progress = $this->scormJobStatusService->getProgress($jobId);
         $result = $this->scormJobStatusService->getResult($jobId);
@@ -61,8 +61,7 @@ class ScormGateway implements ScormGatewayInterface
         }
 
         $status['job_id'] = $jobId;
-
-        return ResourceScormJobStatus::make($status);
+        return $status;
     }
 
     public function cancelJob(string $jobId): array
