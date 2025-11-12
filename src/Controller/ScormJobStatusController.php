@@ -67,68 +67,6 @@ class ScormJobStatusController extends AbstractController
     }
 
     #[OA\Post(
-        path: '/v1/scorm/jobs/batch-status',
-        operationId: 'getScormJobsBatchStatus',
-        summary: 'Get status for multiple SCORM processing jobs',
-        requestBody: new OA\RequestBody(
-            required: true,
-            content: new OA\JsonContent(
-                required: ['job_ids'],
-                properties: [
-                    new OA\Property(
-                        property: 'job_ids',
-                        type: 'array',
-                        items: new OA\Items(type: 'string'),
-                        example: ['job-uuid-1', 'job-uuid-2']
-                    ),
-                ]
-            )
-        ),
-        tags: ['scorm'],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'Batch job statuses',
-                content: new OA\JsonContent(
-                    properties: [
-                        new OA\Property(
-                            property: 'data',
-                            type: 'object',
-                            additionalProperties: new OA\AdditionalProperties(
-                                ref: '#/components/schemas/ResourceScormJobStatus'
-                            )
-                        ),
-                    ],
-                    type: 'object'
-                )
-            ),
-        ],
-    )]
-    public function getBatchStatus(RequestInterface $request): array
-    {
-        $jobIds = $request->input('job_ids', []);
-
-        if (empty($jobIds) || ! is_array($jobIds)) {
-            throw new \InvalidArgumentException('job_ids array is required');
-        }
-
-        $statuses = [];
-        foreach ($jobIds as $jobId) {
-            $progress = $this->jobStatusService->getProgress($jobId);
-            $result = $this->jobStatusService->getResult($jobId);
-
-            $status = $progress ?? $result;
-
-            if ($status !== null) {
-                $status['job_id'] = $jobId;
-                $statuses[$jobId] = $status;
-            }
-        }
-
-        return ['data' => $statuses];
-    }
-
-    #[OA\Post(
         path: '/v1/scorm/jobs/{jobId}/cancel',
         operationId: 'cancelScormJob',
         summary: 'Cancel SCORM processing job',

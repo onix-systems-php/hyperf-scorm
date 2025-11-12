@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 /**
  * This file is part of the extension library for Hyperf.
@@ -18,9 +17,6 @@ use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-/**
- * Service for creating SCORM packages.
- */
 #[Service]
 class CreateScormPackageService
 {

@@ -25,6 +25,4 @@ class ScormUploadDTO extends AbstractDTO
     public ?string $description = null;
 
     public ?array $metadata = [];
-
-    public ?int $userId = null;
 }

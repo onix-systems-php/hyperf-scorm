@@ -6,16 +6,19 @@
 
     <script>
         window.SCORM_CONFIG = {
-            apiEndpoint: '{{ $apiEndpoint }}',
-            timeout: {{ \Hyperf\Config\config('scorm.player.timeout', 30000) }},
-            debug: {{ \Hyperf\Config\config('scorm.player.debug', true) ? 'true' : 'false' }},
-            autoCommitInterval: {{ \Hyperf\Config\config('scorm.tracking.auto_commit_interval', 30) }}
-        };
-
+            apiEndpoint: '/v1/api/scorm',
+            timeout: '{{ $scorm['timeout'] }}',
+            debug: {{ $scorm['debug'] ? 'true' : 'false' }},
+            autoCommitInterval: '{{ $scorm['autoCommitInterval'] }}',
+            version: '{{ $scorm['version'] }}',
+        }
         window.packageId = '{{ $package->id }}';
-
+        window.user = {
+            'id': '{{ $user['id'] }}',
+            'name': '',
+            'session_token': null,
+        };
         console.log('[SCORM] Initializing player...');
-        console.log('[SCORM] API Endpoint:', window.SCORM_CONFIG.apiEndpoint);
     </script>
 
     <script>
@@ -29,16 +32,8 @@
             var apiCalls = 0;
             var pendingData = {};
             var pendingCommits = []; // Track all active commit requests
-
             var config = window.SCORM_CONFIG || {};
             var apiEndpoint = config.apiEndpoint;
-            var user = {
-                id: null,
-                name: "Guest",
-                session_token:  null
-            };
-
-            var debug = config.debug || false;
 
             // SCORM data storage - initialize with proper defaults
             var data = {
@@ -68,7 +63,7 @@
 
             // Debug logging
             function debugLog(message) {
-                if (debug) {
+                if (config.debug) {
                     console.log('[SCORM API] ' + message);
                 }
             }
@@ -125,7 +120,7 @@
             function loadDataFromServerSync(parameter) {
                 try {
                     var xhr = new XMLHttpRequest();
-                    var apiUrl = `${apiEndpoint}/${window.packageId}/initialize`;
+                    var apiUrl = `${apiEndpoint}/${window.packageId}/users/${window.user.id}/initialize`;
                     xhr.open('GET', apiUrl, false); // async: false
                     xhr.setRequestHeader('Content-Type', 'application/json');
                     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
@@ -163,8 +158,6 @@
                         return "false";
                     }
 
-                    // data["cmi.core.student_id"] = user.id;
-                    // data["cmi.core.student_name"] = user.name;
                     data["cmi.core.lesson_mode"] = "normal";
 
                     loadDataFromServerSync(parameter);
@@ -426,7 +419,7 @@
 
             // Debug panel update function
             function updateDebugPanel() {
-                if (debug && typeof window.updateDebugPanel === 'function') {
+                if (config.debug && typeof window.updateDebugPanel === 'function') {
                     window.updateDebugPanel();
                 }
             }
@@ -535,7 +528,7 @@
                 Package: {{ $package->title }}
             </div>
         </div>
-        <iframe id="scorm-frame" src="{{ $launchUrl }}" style="display:none;"></iframe>
+        <iframe id="scorm-frame" src="{{ $scorm['launchUrl'] }}" style="display:none;"></iframe>
     </div>
 
     <div id="debug-panel" class="scorm-debug-panel" style="display:none"></div>

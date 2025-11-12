@@ -1,31 +1,44 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
  * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE
  */
 
-namespace OnixSystemsPHP\HyperfScorm\Controller;
+namespace App\Scorm\Controller;
 
+use App\Common\Constants\UserRoles;
+use Hyperf\Context\ApplicationContext;
+use Hyperf\HttpMessage\Stream\SwooleStream;
+use Hyperf\HttpServer\Annotation\Controller;
+use Hyperf\HttpServer\Annotation\DeleteMapping;
+use Hyperf\HttpServer\Annotation\GetMapping;
+use Hyperf\HttpServer\Annotation\PostMapping;
 use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\HttpServer\Contract\ResponseInterface;
+use OnixSystemsPHP\HyperfAuth\SessionManager;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfCore\DTO\Common\PaginationRequestDTO;
 use OnixSystemsPHP\HyperfCore\Resource\ResourceSuccess;
+use OnixSystemsPHP\HyperfPolicy\Annotation\Acl;
+use OnixSystemsPHP\HyperfScorm\Contract\Gateway\ScormGatewayInterface;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
-use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Request\RequestUploadScormPackage;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormAsyncJob;
 use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormPackagePaginated;
-use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
-use OnixSystemsPHP\HyperfScorm\Service\ScormAsyncQueueService;
 use OpenApi\Attributes as OA;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
-use function Hyperf\Support\make;
 
+#[Controller(prefix: 'v1/scorm')]
 class ScormController extends AbstractController
 {
+    public function __construct(private readonly ScormGatewayInterface $scormGateway)
+    {
+    }
+
     #[OA\Post(
         path: '/v1/scorm/packages/upload',
         operationId: 'uploadScormPackageZip',
@@ -51,11 +64,14 @@ class ScormController extends AbstractController
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
     )]
+    #[PostMapping(path: 'packages/upload')]//NOTICE you can use your routing
+    #[Acl(UserRoles::GROUP_ADMINS)]//NOTICE you can use your ACL rules
     public function upload(
         RequestUploadScormPackage $request,
-        ScormAsyncQueueService $service
     ): ResourceScormAsyncJob {
-        $jobDTO = $service->run(ScormUploadDTO::make($request));
+        $sessionManager = ApplicationContext::getContainer()->get(SessionManager::class);//Notice Use your SessionManager
+        $userId = $sessionManager->user()->getId();
+        $jobDTO = $this->scormGateway->upload(ScormUploadDTO::make($request), $userId);
         return ResourceScormAsyncJob::make($jobDTO);
     }
 
@@ -80,21 +96,64 @@ class ScormController extends AbstractController
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
     )]
+    #[GetMapping(path: 'packages')]//NOTICE you can use your routing
     public function index(RequestInterface $request): ResourceScormPackagePaginated
     {
-        /* @var ScormPackageRepository $scormPackageRepository */
-        $scormPackageRepository = make(ScormPackageRepository::class);
-
-        $packages = $scormPackageRepository->getPaginated(
-            $request->getQueryParams(),
-            PaginationRequestDTO::make($request)
-        );
+        $packages = $this->scormGateway->index($request->getQueryParams(), PaginationRequestDTO::make($request));
 
         return ResourceScormPackagePaginated::make($packages);
     }
 
+    #[OA\Get(// @SONAR_STOP@
+        path: '/v1/scorm/player/{packageId}/launch',
+        operationId: 'launchScormPlayer',
+        summary: 'Launch SCORM player',
+        security: [['bearerAuth' => []]],
+        tags: ['scorm'],
+        parameters: [
+            new OA\Parameter(
+                name: 'packageId',
+                description: 'SCORM Package ID',
+                in: 'path',
+                required: true,
+                schema: new OA\Schema(type: 'integer')
+            ),
+            new OA\Parameter(
+                name: 'sessionToken',
+                description: 'Session token to resume existing session',
+                in: 'path',
+                required: false,
+                schema: new OA\Schema(type: 'string', nullable: true)
+            ),
+        ],
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'SCORM player HTML page',
+                content: new OA\MediaType(
+                    mediaType: 'text/html',
+                    schema: new OA\Schema(type: 'string')
+                )
+            ),
+            new OA\Response(ref: '#/components/responses/403', response: 403),
+            new OA\Response(ref: '#/components/responses/404', response: 404),
+            new OA\Response(ref: '#/components/responses/500', response: 500),
+        ],
+    )]
+    #[GetMapping(path: 'player/{packageId}/launch')]//NOTICE you can use your routing
+    #[Acl(UserRoles::GROUP_ALL)]//@SONAR_START@//NOTICE you can use your ACL rules//
+    public function launch(
+        ResponseInterface $response,
+        int $packageId,
+        int $userId
+    ): PsrResponseInterface {
+        $playerData = $this->scormGateway->launch($packageId, $userId);
+        return $response->withHeader('Content-Type', 'text/html')
+            ->withBody(new SwooleStream($playerData->playerHtml));
+    }
+
     #[OA\Delete(
-        path: '/v1/scorm/packages/{id}',
+        path: 'v1/scorm/packages/{id}',
         operationId: 'deleteScormPackage',
         summary: 'Delete SCORM package',
         tags: ['scorm'],
@@ -105,9 +164,11 @@ class ScormController extends AbstractController
             new OA\Response(ref: '#/components/responses/500', response: 500),
         ],
     )]
-    public function destroy(DeleteScormPackageService $service, int $id): ResourceSuccess
+    #[DeleteMapping(path: 'packages/{id}')]
+    #[Acl([UserRoles::ADMIN])]//NOTICE you can use your ACL rules
+    public function destroy(int $id): ResourceSuccess
     {
-        $service->run($id);
+        $this->scormGateway->destroy($id);
         return ResourceSuccess::make([]);
     }
 }

@@ -30,7 +30,7 @@ class ScormAsyncQueueService
     ) {
     }
 
-    public function run(ScormUploadDTO $dto): ScormAsyncJobDTO
+    public function run(ScormUploadDTO $dto, int $userId): ScormAsyncJobDTO
     {
         $jobId = Uuid::uuid4()->toString();
         $uploadedFile = $this->tempFileService->saveTempFile($dto->file, $jobId);
@@ -38,7 +38,7 @@ class ScormAsyncQueueService
         $this->jobStatusService->initializeJob($jobId, [
             'job_id' => $jobId,
             'status' => 'queued',
-            'progress' => 0,
+            'progress' => 15,
             'stage' => 'queued',
             'file_name' => $dto->file->getClientFilename(),
             'file_size' => $dto->file->getSize(),
@@ -51,7 +51,7 @@ class ScormAsyncQueueService
             $uploadedFile,
             $dto->file->getClientFilename(),
             $dto->file->getSize(),
-            1, // FIXME: Get actual user ID from authentication context - requires UserContextService implementation
+            $userId,
             [
                 'title' => $dto->title,
                 'description' => $dto->description ?? null,
@@ -87,16 +87,6 @@ class ScormAsyncQueueService
         ]);
 
         return true;
-    }
-
-    public function getJobProgress(string $jobId): ?array
-    {
-        return $this->jobStatusService->getProgress($jobId);
-    }
-
-    public function getJobResult(string $jobId): ?array
-    {
-        return $this->jobStatusService->getResult($jobId);
     }
 
     private function estimateProcessingTime(int $fileSize): int

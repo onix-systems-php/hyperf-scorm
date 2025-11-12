@@ -26,7 +26,9 @@ class InitializeScormService
         public readonly ScormPackageRepository $scormPackageRepository,
         public readonly ScormUserSessionRepository $scormUserSessionRepository,
         public readonly ScormPlayerService $scormPlayerService,
-    ) {}
+    ){
+
+    }
 
     public function run(int $packageId, int $userId): ScormSession
     {
