@@ -46,7 +46,7 @@
     "hyperf/view": "^3.1",
     "hyperf/view-engine": "^3.1",
     "ramsey/uuid": "~4.7",
-    "yzen.dev/plain-to-class": "^1",
+    "yzen.dev/plain-to-class": "^3",
     "hyperf/async-queue": "^3.1"
   },
 
