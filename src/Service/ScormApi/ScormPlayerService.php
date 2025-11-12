@@ -29,7 +29,6 @@ class ScormPlayerService
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private readonly ScormApiStrategyFactory $apiStrategyFactory,
-        private readonly ConfigInterface $config
     ) {
     }
 
@@ -40,9 +39,7 @@ class ScormPlayerService
         $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
 
         return ScormPlayerDTO::make([
-            'packageId' => $packageId,
-            'launchUrl' => $package->launch_url,
-            'apiConfiguration' => $apiStrategy->getApiConfiguration(),
+            'package' => $package->toArray(),
             'playerHtml' => $this->generatePlayerHtml($package, $userId, $apiStrategy),
         ]);
     }
@@ -68,7 +65,6 @@ class ScormPlayerService
                 'launchUrl' => $package->launch_url,
             ],
             'apiConfig' => $apiConfig,
-
         ]);
     }
 }

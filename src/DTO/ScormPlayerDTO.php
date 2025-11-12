@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -15,15 +16,7 @@ use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
  */
 class ScormPlayerDTO extends AbstractDTO
 {
-    public int $packageId;
-
-    public string $sessionId;
-
-    public string $sessionToken;
-
-    public string $launchUrl;
-
-    public array $apiConfiguration;
+    public ScormPackageDTO $package;
 
     public string $playerHtml;
 }
