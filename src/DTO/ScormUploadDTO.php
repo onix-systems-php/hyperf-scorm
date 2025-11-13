@@ -18,11 +18,16 @@ use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
  */
 class ScormUploadDTO extends AbstractDTO
 {
-    public string|UploadedFile $file;
+    public UploadedFile $file;
 
     public string $title;
 
     public ?string $description = null;
 
     public ?array $metadata = [];
+
+    public function setFileAttribute(UploadedFile $value)
+    {
+        $this->file = $value;
+    }
 }
