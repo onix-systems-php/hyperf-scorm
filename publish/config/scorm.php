@@ -13,14 +13,14 @@ return [
     'storage' => [
         'default' => env('SCORM_STORAGE_DRIVER', 's3'),
         'local' => [
-            'domain' => env('DOMAIN_API', null),
+            'domain' => env('DOMAIN_API'),
             'public_path_prefix' => DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads',
             'storage_path_prefix' => DIRECTORY_SEPARATOR . 'uploads',
         ],
         's3' => [
             'domain' => env('SCORM_S3_DOMAIN'),
-            'public_path_prefix' => DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'scorm-packages',
-            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'scorm-packages',
+            'public_path_prefix' => DIRECTORY_SEPARATOR .  'scorm-packages',
+            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'scorm-packages',
         ],
     ],
 
@@ -29,7 +29,6 @@ return [
     ],
 
     'player' => [
-        'api_endpoint' => env('SCORM_API_ENDPOINT', '/v1/api/scorm'),
         'timeout' => env('SCORM_API_TIMEOUT', 30000), // 30 seconds in milliseconds
         'debug' => env('SCORM_DEBUG', false),
     ],
