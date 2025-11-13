@@ -44,13 +44,17 @@ class CreateScormPackagesTable extends Migration
 
         Schema::create('scorm_sessions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('package_id')
-                ->constrained('scorm_packages')
+            $table->unsignedBigInteger('package_id');
+            $table->foreign('package_id')
+                ->references('id')->on('scorm_packages')
+                ->onUpdate('cascade')
                 ->onDelete('cascade');
 
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onUpdate('cascade')
+                ->onDelete('restrict');
 
             $table->string('status', 25)->nullable();
             $table->timestamp('started_at')->nullable();
@@ -93,8 +97,10 @@ class CreateScormPackagesTable extends Migration
 
         Schema::create('scorm_interactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('session_id')
-                ->constrained('scorm_sessions')
+            $table->unsignedBigInteger('session_id');
+            $table->foreign('session_id')
+                ->references('id')->on('scorm_sessions')
+                ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->bigInteger('interaction_id')->nullable();
             $table->string('interaction_type', 250)->nullable();
