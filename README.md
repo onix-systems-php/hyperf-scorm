@@ -391,6 +391,42 @@ Internal API routes (auto-registered via `publish/routes.php`):
 - **1.2**: `1.2`, `CAM 1.2`
 - **2004**: `CAM 1.3`, `2004`, `2004 3rd Edition`, `2004 4th Edition`
 
+## Troubleshooting
+
+### Updating from hyperf-core 1.2 to 1.3
+
+If you have an older version of the `hyperf-core` package (1.2) installed, you need to update it along with the `plain-to-class` library:
+
+```bash
+composer update onix-systems-php/hyperf-core yzen.dev/plain-to-class
+```
+
+This ensures compatibility between the core package and the SCORM package dependencies.
+
+### UploadedFile Type Conversion Issue (plain-to-class v3.0+)
+
+If you're using `yzen.dev/plain-to-class` v3.0+ and encounter a class validation error with `UploadedFile` type (e.g., `Hyperf\HttpMessage\Upload\UploadedFile`), you need to add a custom setter in your DTO.
+
+**Solution:**
+
+Add a custom setter for the `UploadedFile` field in your DTO class:
+
+```php
+use Hyperf\HttpMessage\Upload\UploadedFile;
+
+class YourDTO
+{
+    public UploadedFile $file;
+
+    public function setFileAttribute(UploadedFile $value): void
+    {
+        $this->file = $value;
+    }
+}
+```
+
+For more details, see the [plain-to-class custom setter documentation](https://github.com/yzen-dev/plain-to-class/tree/feature/v3.0.0-dev?tab=readme-ov-file#custom-setter).
+
 ## License
 
 This package is open-sourced software licensed under the [MIT license](LICENSE).
