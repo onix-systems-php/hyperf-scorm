@@ -30,7 +30,7 @@ class DeleteScormPackageService
     #[Transactional(attempts: 1)]
     public function run(int $packageId): ScormPackage
     {
-        $package = $this->scormPackageRepository->findById($packageId, true, true);
+        $package = $this->scormPackageRepository->getById($packageId, true, true);
         $this->scormPackageRepository->delete($package);
         $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, []));
 

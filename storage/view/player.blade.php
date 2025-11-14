@@ -528,7 +528,12 @@
                 Package: {{ $package->title }}
             </div>
         </div>
-        <iframe id="scorm-frame" src="{{ $scorm['launchUrl'] }}" style="display:none;"></iframe>
+        <iframe
+            id="scorm-frame"
+            src="/v1/api/scorm/proxy/{{ $package->id }}/{{$package->launch_url}}"
+            style="display:none;"
+            sandbox="allow-same-origin allow-scripts allow-forms"
+        ></iframe>
     </div>
 
     <div id="debug-panel" class="scorm-debug-panel" style="display:none"></div>

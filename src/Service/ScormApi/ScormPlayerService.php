@@ -34,7 +34,7 @@ class ScormPlayerService
 
     public function run(int $packageId, $userId): ScormPlayerDTO
     {
-        $package = $this->scormPackageRepository->findById($packageId, true, true);
+        $package = $this->scormPackageRepository->getById($packageId, true, true);
 
         $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
 
