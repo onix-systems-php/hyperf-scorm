@@ -25,8 +25,6 @@ class ScormProxyController extends AbstractController
     }
     public function proxy(int $packageId, string $path): ResponseInterface
     {
-        xdebug_break();
-
         $package = $this->scormPackageRepository->getById($packageId, true, true);
 
         $fullPath = $this->buildFullPath($package, $path);
@@ -44,7 +42,7 @@ class ScormProxyController extends AbstractController
 
             return $this->response
                 ->withHeader('Content-Type', $this->memeTypeResolverService->getMimeTypeByPath($fullPath))
-//                ->withHeader('Cache-Control', 'public, max-age=31536000, immutable') // Cache for 1 year
+                ->withHeader('Cache-Control', 'public, max-age=1200, immutable')
                 ->withHeader('Access-Control-Allow-Origin', '*')
                 ->withBody(new SwooleStream(stream_get_contents($stream)));
         } finally {
