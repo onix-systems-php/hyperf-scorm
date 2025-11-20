@@ -17,7 +17,9 @@ class ProcessedScormPackageDTO extends AbstractDTO
 
     public string $contentPath;
 
-    public string $launch_url;
+    public string $launcher_path;
 
     public string $domain;
+
+    public string $storage;
 }

@@ -40,7 +40,7 @@ class ScormPackageRepository extends AbstractRepository
         return $query->paginateDTO($paginationDTO);
     }
 
-    public function findById(int $id, bool $lock = false, bool $force = false): ?ScormPackage
+    public function getById(int $id, bool $lock = false, bool $force = false): ?ScormPackage
     {
         return $this->finder('id', $id)->fetchOne($lock, $force);
     }

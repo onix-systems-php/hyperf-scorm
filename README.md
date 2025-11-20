@@ -84,7 +84,6 @@ SCORM_STORAGE_DRIVER=local           # s3|local
 SCORM_LOCAL_PATH=storage/public/scorm
 SCORM_LOCAL_PUBLIC_URL=http://localhost/public/scorm
 SCORM_MAX_FILE_SIZE=600              # MB
-SCORM_API_ENDPOINT=/v1/api/scorm
 SCORM_WS_NAME=socket-io
 SCORM_DEBUG=false
 
@@ -285,7 +284,6 @@ All configuration is in `config/autoload/scorm.php` (published in installation s
 | `SCORM_S3_PATH_STYLE` | `false` | - | Use path-style endpoint (true for MinIO/custom S3) |
 | `SCORM_S3_DOMAIN` | - | - | Custom domain for S3 public URLs (CDN) |
 | **API & Player Configuration** ||||
-| `SCORM_API_ENDPOINT` | `/v1/api/scorm` | - | Base API endpoint path for SCORM player |
 | `SCORM_API_TIMEOUT` | `30000` | ms | API request timeout in milliseconds |
 | `SCORM_DEBUG` | `false` | - | Enable debug mode (verbose logging) |
 | `SCORM_AUTO_COMMIT_INTERVAL` | `30` | sec | Auto-commit interval for CMI data |

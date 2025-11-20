@@ -83,7 +83,8 @@ class ScormPackageProcessor
                 'scorm_version' => $processedPackage->manifestData->version,
                 'content_path' => $processedPackage->contentPath,
                 'domain' => $processedPackage->domain,
-                'launch_url' => $processedPackage->launch_url,
+                'storage' => $processedPackage->storage,
+                'launcher_path' => $processedPackage->launcher_path,
                 'original_filename' => $dto->file->getClientFilename(),
                 'file_size' => $dto->file->getSize(),
                 'file_hash' => hash_file('sha256', (string)$dto->file->getSize()),
@@ -92,6 +93,7 @@ class ScormPackageProcessor
             ]);
 
             $this->scormPackageRepository->save($package);
+
             $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, $package->toArray()));
 
             $this->progressTracker->track($progressContext, [

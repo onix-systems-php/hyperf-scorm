@@ -21,7 +21,7 @@ class ScoDTO extends AbstractDTO
 
     public string $title;
 
-    public string $launch_url;
+    public string $launcher_path;
 
     public ?float $mastery_score;
 
@@ -51,7 +51,7 @@ class ScoDTO extends AbstractDTO
         return [
             'identifier' => $this->identifier,
             'title' => $this->title,
-            'launch_url' => $this->launch_url,
+            'launcher_path' => $this->launcher_path,
             'mastery_score' => $this->mastery_score,
             'mastery_score_percentage' => $this->getMasteryScorePercentage(),
             'max_time_seconds' => $this->max_time_seconds,

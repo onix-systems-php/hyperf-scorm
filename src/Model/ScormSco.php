@@ -18,7 +18,7 @@ use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
  * @property int $package_id
  * @property string $identifier
  * @property string $title
- * @property null|string $launch_url
+ * @property string $launcher_path
  * @property null|array $prerequisites
  * @property null|array $parameters
  * @property null|string $masteryScore
@@ -38,7 +38,7 @@ class ScormSco extends AbstractModel
         'package_id',
         'identifier',
         'title',
-        'launch_url',
+        'launcher_path',
         'prerequisites',
         'parameters',
         'mastery_score',

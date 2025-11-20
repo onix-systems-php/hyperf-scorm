@@ -14,7 +14,7 @@ class ScormPackageDTO extends AbstractDTO
     public ?string $file_size;
     public ?string $file_hash;
     public string $domain;
-    public string $launch_url;
+    public string $launcher_path;
     public string $content_path;
     public bool $is_active;
     public string $created_at;

@@ -34,7 +34,7 @@ class ScormPlayerService
 
     public function run(int $packageId, $userId): ScormPlayerDTO
     {
-        $package = $this->scormPackageRepository->findById($packageId, true, true);
+        $package = $this->scormPackageRepository->getById($packageId, true, true);
 
         $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
 
@@ -62,7 +62,7 @@ class ScormPlayerService
                 'debug' => config('scorm.player.debug'),
                 'autoCommitInterval' => config('scorm.tracking.auto_commit_interval'),
                 'version' => $package->scorm_version,
-                'launchUrl' => $package->launch_url,
+                'launcherPath' => $package->launcher_path,
             ],
             'apiConfig' => $apiConfig,
         ]);

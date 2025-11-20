@@ -102,7 +102,7 @@ class ScormScoRepository extends AbstractRepository
     public function findLaunchableScos(int $packageId): array
     {
         return $this->query()->where('package_id', $packageId)
-            ->whereNotNull('launch_url')
+            ->whereNotNull('launcher_path')
             ->orderBy('created_at')
             ->get()
             ->toArray();
@@ -115,14 +115,14 @@ class ScormScoRepository extends AbstractRepository
             ->first();
     }
 
-    public function updateLaunchUrl(int $id, string $launchUrl): bool
+    public function updateLauncherPath(int $id, string $launcherPath): bool
     {
         $sco = $this->findById($id);
         if (! $sco) {
             return false;
         }
 
-        $sco->launch_url = $launchUrl;
+        $sco->launcher_path = $launcherPath;
         $sco->save();
 
         return true;
@@ -146,7 +146,7 @@ class ScormScoRepository extends AbstractRepository
     {
         $totalScos = $this->countByPackage($packageId);
         $launchableScos = $this->query()->where('package_id', $packageId)
-            ->whereNotNull('launch_url')
+            ->whereNotNull('launcher_path')
             ->count();
 
         $scosWithPrerequisites = $this->query()->where('package_id', $packageId)
