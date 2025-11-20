@@ -83,6 +83,7 @@ class ScormPackageProcessor
                 'scorm_version' => $processedPackage->manifestData->version,
                 'content_path' => $processedPackage->contentPath,
                 'domain' => $processedPackage->domain,
+                'storage' => $processedPackage->storage,
                 'launcher_path' => $processedPackage->launcher_path,
                 'original_filename' => $dto->file->getClientFilename(),
                 'file_size' => $dto->file->getSize(),

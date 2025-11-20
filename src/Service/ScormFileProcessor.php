@@ -46,6 +46,7 @@ class ScormFileProcessor
                 'contentPath' => $publicPath,
                 'launcher_path' => $manifestDto->getPrimaryLauncherPath(),
                 'domain' => $domain,
+                'storage' => $storage,
             ]);
         } catch (\Exception $exception) {
             throw new ScormParsingException(

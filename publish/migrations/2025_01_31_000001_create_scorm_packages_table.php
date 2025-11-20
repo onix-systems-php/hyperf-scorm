@@ -26,6 +26,7 @@ class CreateScormPackagesTable extends Migration
             $table->string('identifier')->unique()->nullable();
             $table->string('content_path');
             $table->string('domain');
+            $table->string('storage');
             $table->string('launcher_path');
             $table->json('manifest_data');
             $table->string('scorm_version');
@@ -89,10 +90,10 @@ class CreateScormPackagesTable extends Migration
             $table->string('student_name')->nullable();
             $table->timestamps();
 
-            $table->index(['user_id', 'package_id']);
-            $table->index('session_token');
-            $table->index('started_at');
-            $table->index('completed_at');
+            $table->index(['user_id', 'package_id'], 'idx_scorm_user_package');
+            $table->index('session_token', 'idx_scorm_session_token');
+            $table->index('started_at', 'idx_scorm_started_at');
+            $table->index('completed_at', 'idx_scorm_completed_at');
         });
 
         Schema::create('scorm_interactions', function (Blueprint $table) {
@@ -115,8 +116,8 @@ class CreateScormPackagesTable extends Migration
             $table->timestamp('interaction_timestamp');
             $table->timestamps();
 
-            $table->index(['session_id']);
-            $table->index(['type']);
+            $table->index(['session_id'], 'idx_scorm_session_id');
+            $table->index(['type'], 'idx_scorm_type');
         });
     }
 
@@ -125,6 +126,23 @@ class CreateScormPackagesTable extends Migration
      */
     public function down(): void
     {
+        Schema::table('scorm_sessions', function (Blueprint $table) {
+            $table->dropForeign(['idx_package_id']);
+            $table->dropForeign(['idx_user_id']);
+        });
+
+        Schema::table('scorm_interactions', function (Blueprint $table) {
+            $table->dropForeign(['idx_session_id']);
+            $table->dropForeign(['idx_type']);
+        });
+
+        Schema::table('scorm_packages', function (Blueprint $table) {
+            $table->dropIndex('idx_identifier_version');
+            $table->dropIndex('idx_active_created');
+            $table->dropIndex('idx_scorm_version');
+            $table->dropIndex('idx_search_text');
+        });
+
         Schema::dropIfExists('scorm_user_sessions');
         Schema::dropIfExists('scorm_interactions');
         Schema::dropIfExists('scorm_packages');
