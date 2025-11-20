@@ -24,7 +24,7 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
  * @property string $scorm_version
  * @property string $content_path
  * @property string $domain
- * @property string $launch_url
+ * @property string $launcher_path
  * @property null|string $original_filename
  * @property null|int $file_size
  * @property null|string $file_hash
@@ -47,7 +47,7 @@ class ScormPackage extends AbstractModel
         'scorm_version',
         'content_path',
         'domain',
-        'launch_url',
+        'launcher_path',
         'original_filename',
         'file_size',
         'file_hash',

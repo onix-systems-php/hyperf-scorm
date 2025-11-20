@@ -530,7 +530,7 @@
         </div>
         <iframe
             id="scorm-frame"
-            src="/v1/api/scorm/proxy/{{ $package->id }}/{{$package->launch_url}}"
+            src="/v1/api/scorm/proxy/{{ $package->id }}/{{$package->launcher_path}}"
             style="display:none;"
             sandbox="allow-same-origin allow-scripts allow-forms"
         ></iframe>

@@ -36,7 +36,7 @@ use OpenApi\Attributes as OA;
             new OA\Property(property: 'file_hash', type: 'string', nullable: true),
             new OA\Property(property: 'is_active', type: 'boolean'),
             new OA\Property(property: 'manifest_data', type: 'object'),
-            new OA\Property(property: 'launch_url', type: 'string', nullable: true),
+            new OA\Property(property: 'launcher_path', type: 'string', nullable: true),
             new OA\Property(property: 'author', type: 'string', nullable: true),
             new OA\Property(property: 'mastery_score', type: 'number', nullable: true),
             new OA\Property(

@@ -254,7 +254,7 @@ class ScormManifestParser
                     $scos[] = ScoDTO::make([
                         'identifier' => $identifierref,
                         'title' => (string) ($item->title ?? 'Untitled SCO'),
-                        'launch_url' => $this->buildLaunchUrl($resource, $item),
+                        'launcher_path' => $this->buildLauncherPath($resource, $item),
                         'mastery_score' => isset($item['adlcp:masteryscore'])
                             ? (float) $item['adlcp:masteryscore']
                             : null,
@@ -282,19 +282,19 @@ class ScormManifestParser
     /**
      * Build complete launch URL from resource and item data.
      */
-    private function buildLaunchUrl(array $resource, \SimpleXMLElement $item): string
+    private function buildLauncherPath(array $resource, \SimpleXMLElement $item): string
     {
         $href = $resource['href'];
         $base = $resource['base'];
         $parameters = (string) ($item['parameters'] ?? '');
 
-        $launchUrl = $base ? rtrim($base, '/') . '/' . ltrim($href, '/') : $href;
+        $launcherPath = $base ? rtrim($base, '/') . '/' . ltrim($href, '/') : $href;
 
         if (! empty($parameters)) {
-            $separator = strpos($launchUrl, '?') !== false ? '&' : '?';
-            $launchUrl .= $separator . $parameters;
+            $separator = strpos($launcherPath, '?') !== false ? '&' : '?';
+            $launcherPath .= $separator . $parameters;
         }
 
-        return $launchUrl;
+        return $launcherPath;
     }
 }

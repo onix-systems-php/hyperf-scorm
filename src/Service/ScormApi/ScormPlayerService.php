@@ -62,7 +62,7 @@ class ScormPlayerService
                 'debug' => config('scorm.player.debug'),
                 'autoCommitInterval' => config('scorm.tracking.auto_commit_interval'),
                 'version' => $package->scorm_version,
-                'launchUrl' => $package->launch_url,
+                'launcherPath' => $package->launcher_path,
             ],
             'apiConfig' => $apiConfig,
         ]);

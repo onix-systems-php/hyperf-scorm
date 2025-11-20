@@ -83,7 +83,7 @@ class ScormPackageProcessor
                 'scorm_version' => $processedPackage->manifestData->version,
                 'content_path' => $processedPackage->contentPath,
                 'domain' => $processedPackage->domain,
-                'launch_url' => $processedPackage->launch_url,
+                'launcher_path' => $processedPackage->launcher_path,
                 'original_filename' => $dto->file->getClientFilename(),
                 'file_size' => $dto->file->getSize(),
                 'file_hash' => hash_file('sha256', (string)$dto->file->getSize()),
@@ -91,11 +91,6 @@ class ScormPackageProcessor
                 'is_active' => true,
             ]);
 
-            $this->scormPackageRepository->save($package);
-
-            // Update launch_url to proxy endpoint with full launch file path
-            $launchPath = $processedPackage->launch_url; // e.g., "index.html" or "scormdriver/indexAPI.html"
-            $package->launch_url = $processedPackage->domain . '/v1/api/scorm/proxy/' . $package->id . '/' . $launchPath;
             $this->scormPackageRepository->save($package);
 
             $this->eventDispatcher->dispatch(new Action(self::ACTION, $package, $package->toArray()));

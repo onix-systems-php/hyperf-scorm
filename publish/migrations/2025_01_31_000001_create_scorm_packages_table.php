@@ -26,7 +26,7 @@ class CreateScormPackagesTable extends Migration
             $table->string('identifier')->unique()->nullable();
             $table->string('content_path');
             $table->string('domain');
-            $table->string('launch_url');
+            $table->string('launcher_path');
             $table->json('manifest_data');
             $table->string('scorm_version');
             $table->boolean('is_active')->default(true);

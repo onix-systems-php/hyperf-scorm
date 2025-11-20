@@ -31,10 +31,10 @@ class ScormManifestDTO extends AbstractDTO
         return $this->scos[0] ?? null;
     }
 
-    public function getPrimaryLaunchUrl(): ?string
+    public function getPrimaryLauncherPath(): ?string
     {
         $primarySco = $this->getPrimarySco();
-        return $primarySco?->launch_url;
+        return $primarySco?->launcher_path;
     }
 
     public function getScoByIdentifier(string $identifier): ?ScoDTO
@@ -66,7 +66,7 @@ class ScormManifestDTO extends AbstractDTO
             'version_label' => $this->version,
             'description' => $this->description,
             'scos' => array_map(fn ($sco) => $sco->toArray(), $this->scos),
-            'primary_launch_url' => $this->getPrimaryLaunchUrl(),
+            'primary_launch_path' => $this->getPrimaryLauncherPath(),
             'sco_count' => $this->getScoCount(),
         ];
     }
