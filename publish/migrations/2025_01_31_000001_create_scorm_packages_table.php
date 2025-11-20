@@ -126,14 +126,19 @@ class CreateScormPackagesTable extends Migration
      */
     public function down(): void
     {
-        Schema::table('scorm_sessions', function (Blueprint $table) {
-            $table->dropForeign(['idx_package_id']);
-            $table->dropForeign(['idx_user_id']);
+        Schema::table('scorm_interactions', function (Blueprint $table) {
+            $table->dropForeign(['session_id']);
+            $table->dropIndex('idx_scorm_session_id');
+            $table->dropIndex('idx_scorm_type');
         });
 
-        Schema::table('scorm_interactions', function (Blueprint $table) {
-            $table->dropForeign(['idx_session_id']);
-            $table->dropForeign(['idx_type']);
+        Schema::table('scorm_sessions', function (Blueprint $table) {
+            $table->dropForeign(['package_id']);
+            $table->dropForeign(['user_id']);
+            $table->dropIndex('idx_scorm_user_package');
+            $table->dropIndex('idx_scorm_session_token');
+            $table->dropIndex('idx_scorm_started_at');
+            $table->dropIndex('idx_scorm_completed_at');
         });
 
         Schema::table('scorm_packages', function (Blueprint $table) {
@@ -143,8 +148,8 @@ class CreateScormPackagesTable extends Migration
             $table->dropIndex('idx_search_text');
         });
 
-        Schema::dropIfExists('scorm_user_sessions');
         Schema::dropIfExists('scorm_interactions');
+        Schema::dropIfExists('scorm_sessions');
         Schema::dropIfExists('scorm_packages');
     }
 }
