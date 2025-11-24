@@ -43,7 +43,7 @@ use OpenApi\Attributes as OA;
                     ),
                     new OA\Property(property: 'result', type: 'string', enum: ['correct', 'incorrect', 'unanticipated', 'neutral'], example: 'incorrect'),
                     new OA\Property(property: 'weighting', type: 'integer', minimum: 0, example: 10),
-                    new OA\Property(property: 'latency', type: 'integer', minimum: 0, example: 51),
+                    new OA\Property(property: 'latency_seconds', type: 'integer', minimum: 0, example: 51),
                     new OA\Property(property: 'timestamp', type: 'string', format: 'date-time', example: '2025-08-29T21:26:27.0+03'),
                     new OA\Property(
                         property: 'objectives',
@@ -110,7 +110,7 @@ class RequestCommitScorm extends FormRequest
             'interactions.*.correct_response.*' => ['string', 'max:500'],
             'interactions.*.result' => ['required', 'string', 'in:correct,incorrect,unanticipated,neutral'],
             'interactions.*.weighting' => ['nullable', 'integer', 'min:0'],
-            'interactions.*.latency' => ['nullable', 'integer', 'min:0'],
+            'interactions.*.latency_seconds' => ['nullable', 'integer', 'min:0'],
             'interactions.*.interaction_timestamp' => ['required', 'string', 'date'],
             'interactions.*.objectives' => ['nullable', 'array'],
             'interactions.*.objectives.*.id' => ['required', 'string', 'max:255'],

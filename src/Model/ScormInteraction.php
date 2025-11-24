@@ -12,6 +12,25 @@ namespace OnixSystemsPHP\HyperfScorm\Model;
 use Hyperf\Database\Model\Model;
 use Hyperf\Database\Model\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $session_id
+ * @property int $cmi_commit_id
+ * @property string $interaction_id
+ * @property string $type
+ * @property string $description
+ * @property array|null $learner_response
+ * @property array|null $correct_response
+ * @property string $result
+ * @property float $weighting
+ * @property int $latency_seconds
+ * @property \DateTime|null $interaction_timestamp
+ * @property array|null $objectives
+ * @property \DateTime|null $created_at
+ * @property \DateTime|null $updated_at
+ *
+ * @property ScormSession $session
+ */
 class ScormInteraction extends Model
 {
     protected ?string $table = 'scorm_interactions';
@@ -26,7 +45,7 @@ class ScormInteraction extends Model
         'correct_response',
         'result',
         'weighting',
-        'latency',
+        'latency_seconds',
         'interaction_timestamp',
         'objectives',
         'created_at',

@@ -37,9 +37,9 @@ class ScormFileProcessor
             $scormFile->extract();
             $manifestDto = $this->manifestParser->parse($scormFile->getManifestPath());
             $storage = $this->config->get('scorm.storage.default');
-            [$path, $publicPath, $domain] = $this->getStoragePath($scormFile, $storage);
-            $this->uploadDirectory($scormFile->getExtractDir(), $storage, $path);
-            $this->localFilesystem->deleteDirectory($scormFile->getExtractDir());
+            [$path, $publicPath, $domain] = $this->getStoragePath($scormFile->getExtractDir(), $storage);
+
+            $this->uploadDirectory($scormFile->getExtractedBaseDir(), $storage, $path);
 
             return ProcessedScormPackageDTO::make([
                 'manifestData' => $manifestDto,
@@ -58,14 +58,14 @@ class ScormFileProcessor
         }
     }
 
-    private function getStoragePath(ScormFile $scormFile, string $storage): array
+    private function getStoragePath($extractDir, string $storage): array
     {
         $storagePathConfig = $this->config->get("scorm.storage.{$storage}.storage_path_prefix", '');
         $storagePublicConfig = $this->config->get("scorm.storage.{$storage}.public_path_prefix", '');
         $domain = $this->config->get("scorm.storage.{$storage}.domain", '');
 
-        $path = $storagePathConfig . DIRECTORY_SEPARATOR . $scormFile->getExtractDir();
-        $publicPath = $storagePublicConfig . DIRECTORY_SEPARATOR . $scormFile->getExtractDir();
+        $path = $storagePathConfig . DIRECTORY_SEPARATOR . $extractDir;
+        $publicPath = $storagePublicConfig . DIRECTORY_SEPARATOR . $extractDir;
 
         return [$path, $publicPath, $domain];
     }

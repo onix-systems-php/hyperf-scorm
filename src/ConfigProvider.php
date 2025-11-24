@@ -76,7 +76,7 @@ class ConfigProvider
                     'concurrent' => [
                         'limit' => 3,
                     ],
-                    'max_attempts' => 1,
+                    'max_attempts' => 3,
                 ],
             ],
             'publish' => [
