@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Controller;
 
-use Hyperf\Contract\ConfigInterface;
 use Hyperf\Filesystem\FilesystemFactory;
 use Hyperf\HttpMessage\Stream\SwooleStream;
 use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
@@ -18,7 +17,6 @@ class ScormProxyController extends AbstractController
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private readonly FilesystemFactory $filesystemFactory,
-        private readonly ConfigInterface $config,
         private readonly MemeTypeResolverService $memeTypeResolverService,
     ) {
 
@@ -26,12 +24,8 @@ class ScormProxyController extends AbstractController
     public function proxy(int $packageId, string $path): ResponseInterface
     {
         $package = $this->scormPackageRepository->getById($packageId, true, true);
-
         $fullPath = $this->buildFullPath($package, $path);
-        $storage = $this->config->get('scorm.storage.default');
-        $filesystem = $this->filesystemFactory->get($storage);
-
-
+        $filesystem = $this->filesystemFactory->get($package->storage);
 
         try {
             $stream = $filesystem->readStream($fullPath);

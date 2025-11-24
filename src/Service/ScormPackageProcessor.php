@@ -63,9 +63,9 @@ class ScormPackageProcessor
 
             $scormFile = ScormFile::fromArray([
                 'storage' => 'scorm-queue',
-                'path' => $dto->file->getPath(),
-                'full_path' => $dto->file->getPathname(),
-                'extract_dir' => $progressContext->jobId,
+                'file_path' => $dto->file->getPathname(),
+                'extract_dir' => basename($dto->file->getPath()),
+                'extract_base_path' => dirname($dto->file->getPath()),
             ]);
 
             $processedPackage = $this->fileProcessor->run($scormFile);

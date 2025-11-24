@@ -104,16 +104,15 @@ class CreateScormPackagesTable extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->bigInteger('interaction_id')->nullable();
-            $table->string('interaction_type', 250)->nullable();
             $table->string('type', 50);
             $table->text('description');
             $table->jsonb('learner_response');
             $table->jsonb('correct_response');
             $table->jsonb('objectives');
             $table->string('result');
-            $table->integer('weighting');
-            $table->integer('latency');
-            $table->timestamp('interaction_timestamp');
+            $table->integer('weighting')->default(0);
+            $table->integer('latency_seconds')->default(0);
+            $table->timestamp('interaction_timestamp')->nullable();
             $table->timestamps();
 
             $table->index(['session_id'], 'idx_scorm_session_id');

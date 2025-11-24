@@ -25,9 +25,9 @@ class ScormCommitInteractionDTO extends AbstractDTO
 
     public string $result = 'neutral';
 
-    public ?float $weighting = null;
+    public float $weighting = 0;
 
-    public ?float $latency_seconds = null;
+    public int $latency_seconds = 0;
 
     public string $interaction_timestamp;
 
