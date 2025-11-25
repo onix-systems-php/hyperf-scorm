@@ -9,62 +9,81 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Service\ScormApi;
 
-use Hyperf\Contract\ConfigInterface;
+use Hyperf\Redis\Redis;
 use Hyperf\View\RenderInterface;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfScorm\Service\ScormApi\Strategy\ScormApiStrategyFactory;
+use Psr\Log\LoggerInterface;
 use function Hyperf\Config\config;
-use function Hyperf\Support\make;
 
-/**
- * SCORM Player Service - generates player content with session restoration
- * Supports both SCORM 1.2 and SCORM 2004 with user progress restoration.
- */
 #[Service]
 class ScormPlayerService
 {
+    private const USER_ID_PLACEHOLDER = '{{USER_ID}}';
+
+    private const CACHE_TTL = 3600;
+
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly ScormApiStrategyFactory $apiStrategyFactory,
+        private readonly RenderInterface $render,
+        private readonly Redis $redis,
     ) {
     }
 
     public function run(int $packageId, $userId): ScormPlayerDTO
     {
-        $package = $this->scormPackageRepository->getById($packageId, true, true);
-
-        $apiStrategy = $this->apiStrategyFactory->createForVersion($package->scorm_version);
+        $package = $this->scormPackageRepository->getById($packageId, false, true);
+        $playerHtml = $this->getPlayerHtml($package, $userId);
 
         return ScormPlayerDTO::make([
             'package' => $package->toArray(),
-            'playerHtml' => $this->generatePlayerHtml($package, $userId, $apiStrategy),
+            'playerHtml' => $playerHtml,
         ]);
     }
 
-    private function generatePlayerHtml(
+    private function getPlayerHtml(
         ScormPackage $package,
         int $userId,
-        $apiStrategy
     ): string {
-        $apiConfig = $apiStrategy->getApiConfiguration();
-        $render = make(RenderInterface::class);
-        return $render->getContents('OnixSystemsPHP\HyperfScorm::player', [
+
+        $cacheKey = $this->generateCacheKey($package);
+        $template = $this->redis->get($cacheKey);
+
+        if ($template === false || !is_string($template)) {
+            $template = $this->renderTemplate($package);
+            $this->redis->setex($cacheKey, self::CACHE_TTL, $template);
+        }
+
+        return str_replace(self::USER_ID_PLACEHOLDER, (string)$userId, $template);
+    }
+
+    private function generateCacheKey(ScormPackage $package):string
+    {
+        return sprintf(
+            'scorm:player_template:%d:%s:%d',
+            $package->id,
+            $package->scorm_version,
+            $package->updated_at->timestamp
+        );
+    }
+
+    private function renderTemplate(ScormPackage $package) :string
+    {
+       return $this->render->getContents('OnixSystemsPHP\HyperfScorm::player', [
             'package' => $package,
             'user' => [
-                'id' => $userId,
+                'id' => self::USER_ID_PLACEHOLDER,
                 'session_token' => null,
             ],
             'scorm' => [
-                'timeout' =>  config('scorm.player.timeout'),
+                'timeout' => config('scorm.player.timeout'),
                 'debug' => config('scorm.player.debug'),
                 'autoCommitInterval' => config('scorm.tracking.auto_commit_interval'),
                 'version' => $package->scorm_version,
                 'launcherPath' => $package->launcher_path,
             ],
-            'apiConfig' => $apiConfig,
         ]);
     }
 }

@@ -38,7 +38,7 @@ class ScormUserSessionRepository extends AbstractRepository
     ): ?ScormSession {
         return $this
             ->finder('packageId', $packageId)
-            ->finder('scopeUserId', $userId)
+            ->finder('userId', $userId)
             ->fetchOne($lock, $force);
     }
 
