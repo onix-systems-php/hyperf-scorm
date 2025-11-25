@@ -23,7 +23,7 @@ class ScormProxyController extends AbstractController
     }
     public function proxy(int $packageId, string $path): ResponseInterface
     {
-        $package = $this->scormPackageRepository->getById($packageId, true, true);
+        $package = $this->scormPackageRepository->getById($packageId, false, true);
         $fullPath = $this->buildFullPath($package, $path);
         $filesystem = $this->filesystemFactory->get($package->storage);
 
