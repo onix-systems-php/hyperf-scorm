@@ -59,7 +59,7 @@
   },
   "extra": {
     "hyperf": {
-      "config": "OnixSystemsPHP\\HyperfCore\\ConfigProvider"
+      "config": "OnixSystemsPHP\\HyperfScorm\\ConfigProvider"
     }
   }
 }
