@@ -32,17 +32,14 @@ const ScormUploaderApp = createApp({
 
         // Computed properties
         const hasCompleted = computed(() => {
-            return uploads.value.some(
-                upload =>
+            return uploads.value.some(upload =>
                 upload.status === 'completed' || upload.status === 'failed'
             );
         });
 
         // Utility functions
         const formatFileSize = (bytes) => {
-            if (bytes === 0) {
-                return '0 Bytes';
-            }
+            if (bytes === 0) return '0 Bytes';
             const k = 1024;
             const sizes = ['Bytes', 'KB', 'MB', 'GB'];
             const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -54,8 +51,7 @@ const ScormUploaderApp = createApp({
         };
 
         const validateFile = (file) => {
-            if (!file) {
-                return  valid: false, error: 'No file selected' };
+            if (!file) return { valid: false, error: 'No file selected' };
 
             if (!file.name.toLowerCase().endsWith('.zip')) {
                 return { valid: false, error: 'Only ZIP files are allowed' };
@@ -74,7 +70,7 @@ const ScormUploaderApp = createApp({
             localStorage.setItem('scorm_api_token', apiToken.value);
         };
 
-        const testConnection = async() => {
+        const testConnection = async () => {
             if (!apiToken.value) {
                 connectionStatus.value = { success: false, message: 'Please enter API token' };
                 return;
@@ -85,7 +81,7 @@ const ScormUploaderApp = createApp({
 
             try {
                 // Test connection with a dummy request
-                const response = await fetch(`${apiConfig.baseUrl}${apiConfig.endpoints.status} / test / status`, {
+                const response = await fetch(`${apiConfig.baseUrl}${apiConfig.endpoints.status}/test/status`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${apiToken.value}`,
@@ -100,7 +96,7 @@ const ScormUploaderApp = createApp({
                 } else if (response.status === 401) {
                     connectionStatus.value = { success: false, message: 'Invalid API token' };
                 } else {
-                    connectionStatus.value = { success: false, message: `Connection failed(${response.status})` };
+                    connectionStatus.value = { success: false, message: `Connection failed (${response.status})` };
                 }
             } catch (error) {
                 connectionStatus.value = { success: false, message: 'Connection failed: ' + error.message };
@@ -188,7 +184,7 @@ const ScormUploaderApp = createApp({
 
                 const result = await response.json();
 
-                if (response.ok && result.data ? .job_id) {
+                if (response.ok && result.data?.job_id) {
                     // Update upload with job ID
                     upload.jobId = result.data.job_id;
                     upload.status = 'processing';
@@ -210,13 +206,11 @@ const ScormUploaderApp = createApp({
             }
         };
 
-        const cancelUpload = async(jobId) => {
-            if (!jobId || !apiToken.value) {
-                return;
-            }
+        const cancelUpload = async (jobId) => {
+            if (!jobId || !apiToken.value) return;
 
             try {
-                const response = await fetch(`${apiConfig.baseUrl}${apiConfig.endpoints.cancel} / ${jobId} / cancel`, {
+                const response = await fetch(`${apiConfig.baseUrl}${apiConfig.endpoints.cancel}/${jobId}/cancel`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${apiToken.value}`,
@@ -244,8 +238,7 @@ const ScormUploaderApp = createApp({
         };
 
         const clearCompleted = () => {
-            uploads.value = uploads.value.filter(
-                upload =>
+            uploads.value = uploads.value.filter(upload =>
                 upload.status === 'processing' || upload.status === 'uploading'
             );
         };
