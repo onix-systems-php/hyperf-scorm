@@ -81,9 +81,7 @@ require_once './vendor/onix-systems-php/hyperf-scorm/publish/routes.php';
 ```env
 # Essential settings
 SCORM_STORAGE_DRIVER=local           # scormS3|local
-SCORM_LOCAL_PATH=storage/public/scorm
-SCORM_LOCAL_PUBLIC_URL=http://localhost/public/scorm
-SCORM_MAX_FILE_SIZE=600              # MB
+SCORM_MAX_FILE_SIZE=100              # MB
 SCORM_WS_NAME=socket-io
 SCORM_DEBUG=false
 
