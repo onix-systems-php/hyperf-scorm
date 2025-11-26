@@ -270,7 +270,6 @@ All configuration is in `config/autoload/scorm.php` (published in installation s
 | **Storage Configuration** |                 |||
 | `SCORM_STORAGE_DRIVER` | `local`         | - | Storage driver: `scormS3` or `local` |
 | `SCORM_MAX_FILE_SIZE` | `100`           | MB | Maximum SCORM package upload size |
-| **Local Storage (when driver=local)** |                 |||
 | **S3 Storage (when driver=s3)** |                 |||
 | `SCORM_S3_KEY` | -               | - | AWS access key ID (required for S3) |
 | `SCORM_S3_SECRET` | -               | - | AWS secret access key (required for S3) |
