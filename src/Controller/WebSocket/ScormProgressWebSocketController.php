@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -147,10 +147,6 @@ class ScormProgressWebSocketController implements OnMessageInterface, OnOpenInte
         return $registry->getSubscribedFds($jobId);
     }
 
-    /**
-     * Initialize dependencies lazily using ApplicationContext
-     * Note: WebSocket controllers cannot use constructor injection in Hyperf.
-     */
     private function initializeDependencies(): void
     {
         if (! isset($this->connectionRegistry)) {

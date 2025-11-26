@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,16 +11,15 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use OnixSystemsPHP\HyperfCore\Service\Service;
-use Psr\Log\LoggerInterface;
 
 #[Service]
 class ScormTempFileService
 {
     private const TEMP_DIR = BASE_PATH . '/runtime/scorm-queue-tmp';
 
-    public function __construct(
-        private readonly LoggerInterface $logger,
-    ) {}
+    public function __construct()
+    {
+    }
 
     public function saveTempFile(UploadedFile $file, string $folder): string
     {

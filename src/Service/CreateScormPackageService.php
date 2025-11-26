@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -25,7 +26,8 @@ class CreateScormPackageService
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private EventDispatcherInterface $eventDispatcher,
-    ) {}
+    ) {
+    }
 
     #[Transactional(attempts: 1)]
     public function run(CreateScormPackageDTO $dto): ScormPackage

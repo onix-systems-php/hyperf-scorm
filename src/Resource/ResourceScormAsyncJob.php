@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -22,10 +22,10 @@ use OpenApi\Attributes as OA;
     properties: [
         new OA\Property(property: 'job_id', type: 'string', format: 'uuid'),
         new OA\Property(property: 'status', type: 'string', enum: ['queued', 'processing', 'completed', 'failed']),
-        new OA\Property(property: 'progress', type: 'integer', minimum: 0, maximum: 100),
+        new OA\Property(property: 'progress', type: 'integer', maximum: 100, minimum: 0),
         new OA\Property(property: 'stage', type: 'string'),
-        new OA\Property(property: 'estimated_time', type: 'integer', description: 'Estimated time in seconds'),
-        new OA\Property(property: 'is_async', type: 'boolean', description: 'Flag indicating async upload'),
+        new OA\Property(property: 'estimated_time', description: 'Estimated time in seconds', type: 'integer'),
+        new OA\Property(property: 'is_async', description: 'Flag indicating async upload', type: 'boolean'),
     ]
 )]
 class ResourceScormAsyncJob extends AbstractResource

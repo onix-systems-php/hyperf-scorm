@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,9 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\Request;
 
 use Hyperf\Validation\Request\FormRequest;
 
-/**
- * Request validation for setting CMI value.
- */
 class RequestSetCmiValue extends FormRequest
 {
     public function rules(): array

@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -12,17 +12,22 @@ namespace OnixSystemsPHP\HyperfScorm\Model;
 use Hyperf\Database\Model\Model;
 
 /**
- * SCORM Activity Model.
+ * @property int $id
+ * @property int $session_id
+ * @property int $package_id
+ * @property int $user_id
+ * @property string $activity_type
+ * @property array $activity_data
+ * @property \Carbon\Carbon $activity_timestamp
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ *
+ * @property ScormSession $session
+ * @property ScormPackage $package
+ * @property User $user
  */
 class ScormActivity extends Model
 {
-    // Activity types
-    public const TYPE_QUESTION_ANSWER = 'question_answer';
-
-    public const TYPE_LESSON_COMPLETE = 'lesson_complete';
-
-    public const TYPE_LOCATION_CHANGE = 'location_change';
-
     protected ?string $table = 'scorm_activities';
 
     protected array $fillable = [
@@ -41,25 +46,16 @@ class ScormActivity extends Model
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * Get the session associated with this activity.
-     */
     public function session()
     {
         return $this->belongsTo(ScormSession::class, 'session_id');
     }
 
-    /**
-     * Get the package associated with this activity.
-     */
     public function package()
     {
         return $this->belongsTo(ScormPackage::class, 'package_id');
     }
 
-    /**
-     * Get the user associated with this activity.
-     */
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');//TODO move user move to config

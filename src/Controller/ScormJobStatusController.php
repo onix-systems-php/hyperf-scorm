@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -20,7 +20,8 @@ class ScormJobStatusController extends AbstractController
 {
     public function __construct(
         private readonly ScormJobStatusService $jobStatusService,
-    ) {}
+    ) {
+    }
 
     #[OA\Get(
         path: '/v1/scorm/jobs/{jobId}/status',
@@ -52,14 +53,12 @@ class ScormJobStatusController extends AbstractController
         $progress = $this->jobStatusService->getProgress($jobId);
         $result = $this->jobStatusService->getResult($jobId);
 
-        // Use progress data as primary source, fallback to result if job completed
         $status = $progress ?? $result;
 
         if ($status === null) {
             throw new \RuntimeException('Job not found or expired', 404);
         }
 
-        // Ensure job_id is included in response
         $status['job_id'] = $jobId;
 
         return ResourceScormJobStatus::make($status);
@@ -105,7 +104,6 @@ class ScormJobStatusController extends AbstractController
             throw new \RuntimeException('Job not found or expired', 404);
         }
 
-        // Check if job can be cancelled (not already processing)
         if ($progress && $progress['status'] === 'processing') {
             return [
                 'success' => false,
@@ -114,7 +112,6 @@ class ScormJobStatusController extends AbstractController
             ];
         }
 
-        // Cancel the job by updating status
         $this->jobStatusService->updateProgress($jobId, [
             'status' => 'cancelled',
             'progress' => 0,

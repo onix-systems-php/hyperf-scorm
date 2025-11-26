@@ -11,7 +11,6 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormPlayerDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormUploadDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
-use OnixSystemsPHP\HyperfScorm\Resource\ResourceScormJobStatus;
 use OnixSystemsPHP\HyperfScorm\Service\DeleteScormPackageService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormApi\ScormPlayerService;
 use OnixSystemsPHP\HyperfScorm\Service\ScormAsyncQueueService;

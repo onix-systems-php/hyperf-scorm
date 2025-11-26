@@ -13,13 +13,11 @@ use Psr\Http\Message\ResponseInterface;
 
 class ScormProxyController extends AbstractController
 {
-
     public function __construct(
         private readonly ScormPackageRepository $scormPackageRepository,
         private readonly FilesystemFactory $filesystemFactory,
         private readonly MemeTypeResolverService $memeTypeResolverService,
     ) {
-
     }
     public function proxy(int $packageId, string $path): ResponseInterface
     {
@@ -44,11 +42,11 @@ class ScormProxyController extends AbstractController
         }
     }
 
-    private function buildFullPath(ScormPackage $package , string $path): string
+    private function buildFullPath(ScormPackage $package, string $path): string
     {
         return ltrim(join(DIRECTORY_SEPARATOR, [
             ltrim($package->content_path, '/'),
-            ltrim(urldecode($path), '/')
-        ]),'/');
+            ltrim(urldecode($path), '/'),
+        ]), '/');
     }
 }

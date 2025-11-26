@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -59,7 +59,7 @@ class ScormPlayerService
         return str_replace(self::USER_ID_PLACEHOLDER, (string)$userId, $template);
     }
 
-    private function generateCacheKey(ScormPackage $package):string
+    private function generateCacheKey(ScormPackage $package): string
     {
         return sprintf(
             'scorm:player_template:%d:%s:%d',
@@ -69,9 +69,9 @@ class ScormPlayerService
         );
     }
 
-    private function renderTemplate(ScormPackage $package) :string
+    private function renderTemplate(ScormPackage $package): string
     {
-       return $this->render->getContents('OnixSystemsPHP\HyperfScorm::player', [
+        return $this->render->getContents('OnixSystemsPHP\HyperfScorm::player', [
             'package' => $package,
             'user' => [
                 'id' => self::USER_ID_PLACEHOLDER,

@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -12,10 +12,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 use Hyperf\HttpMessage\Upload\UploadedFile;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-/**
- * DTO for SCORM package upload operations
- * Unified DTO replacing legacy UploadPackageDTO and UploadScormDTO.
- */
 class ScormUploadDTO extends AbstractDTO
 {
     public UploadedFile $file;

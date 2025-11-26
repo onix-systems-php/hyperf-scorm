@@ -3,7 +3,8 @@
  * Handles real-time updates from the server
  */
 class WebSocketManager {
-    constructor() {
+    constructor()
+    {
         this.socket = null;
         this.isConnected = false;
         this.reconnectInterval = 3000; // 3 seconds
@@ -22,7 +23,8 @@ class WebSocketManager {
     /**
      * Connect to WebSocket server
      */
-    connect(userId = null) {
+    connect(userId = null)
+    {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
             console.log('WebSocket already connected');
             return;
@@ -30,9 +32,9 @@ class WebSocketManager {
 
         this.userId = userId;
         const wsUrl = this.getWebSocketUrl();
-        
+
         console.log('Connecting to WebSocket:', wsUrl);
-        
+
         try {
             this.socket = new WebSocket(wsUrl);
             this.setupEventListeners();
@@ -46,29 +48,31 @@ class WebSocketManager {
     /**
      * Get WebSocket URL based on current location
      */
-    getWebSocketUrl() {
+    getWebSocketUrl()
+    {
         const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
         const hostname = location.hostname;
         const port = 9501; // Default WebSocket port for Hyperf
-        
+
         return `${protocol}//${hostname}:${port}`;
     }
 
     /**
      * Setup WebSocket event listeners
      */
-    setupEventListeners() {
+    setupEventListeners()
+    {
         this.socket.onopen = (event) => {
             console.log('WebSocket connected');
             this.isConnected = true;
             this.reconnectAttempts = 0;
             this.triggerCallbacks('onConnect', event);
-            
+
             // Send subscription message if userId is available
             if (this.userId) {
                 this.subscribeToUpdates(this.userId);
             }
-            
+
             // Setup ping to keep connection alive
             this.startPing();
         };
@@ -77,7 +81,7 @@ class WebSocketManager {
             try {
                 const data = JSON.parse(event.data);
                 console.log('WebSocket message received:', data);
-                
+
                 // Handle different message types
                 switch (data.type) {
                     case 'scorm_upload_progress':
@@ -95,7 +99,7 @@ class WebSocketManager {
                     default:
                         console.log('Unknown message type:', data.type);
                 }
-                
+
                 this.triggerCallbacks('onMessage', data);
             } catch (error) {
                 console.error('Error parsing WebSocket message:', error);
@@ -107,7 +111,7 @@ class WebSocketManager {
             this.isConnected = false;
             this.stopPing();
             this.triggerCallbacks('onDisconnect', event);
-            
+
             // Attempt to reconnect unless it was intentional
             if (event.code !== 1000) {
                 this.scheduleReconnect();
@@ -123,7 +127,8 @@ class WebSocketManager {
     /**
      * Subscribe to SCORM processing updates for a user
      */
-    subscribeToUpdates(userId) {
+    subscribeToUpdates(userId)
+    {
         if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
             const message = {
                 action: 'subscribe',
@@ -137,7 +142,8 @@ class WebSocketManager {
     /**
      * Handle progress update message
      */
-    handleProgressUpdate(data) {
+    handleProgressUpdate(data)
+    {
         // Progress data structure:
         // {
         //   type: 'scorm_upload_progress',
@@ -151,7 +157,7 @@ class WebSocketManager {
         //     memory_usage: 67108864
         //   }
         // }
-        
+
         this.triggerCallbacks('onProgress', {
             jobId: data.job_id,
             progress: data.progress
@@ -161,7 +167,8 @@ class WebSocketManager {
     /**
      * Handle completion notification
      */
-    handleCompletionNotification(data) {
+    handleCompletionNotification(data)
+    {
         this.triggerCallbacks('onComplete', {
             jobId: data.job_id,
             result: data.result,
@@ -172,7 +179,8 @@ class WebSocketManager {
     /**
      * Handle error notification
      */
-    handleErrorNotification(data) {
+    handleErrorNotification(data)
+    {
         this.triggerCallbacks('onError', {
             jobId: data.job_id,
             error: data.error
@@ -182,7 +190,8 @@ class WebSocketManager {
     /**
      * Start ping interval to keep connection alive
      */
-    startPing() {
+    startPing()
+    {
         this.pingInterval = setInterval(() => {
             if (this.isConnected && this.socket.readyState === WebSocket.OPEN) {
                 this.socket.send(JSON.stringify({ type: 'ping' }));
@@ -193,7 +202,8 @@ class WebSocketManager {
     /**
      * Stop ping interval
      */
-    stopPing() {
+    stopPing()
+    {
         if (this.pingInterval) {
             clearInterval(this.pingInterval);
             this.pingInterval = null;
@@ -203,7 +213,8 @@ class WebSocketManager {
     /**
      * Schedule reconnection attempt
      */
-    scheduleReconnect() {
+    scheduleReconnect()
+    {
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
             console.log('Max reconnection attempts reached');
             return;
@@ -211,9 +222,9 @@ class WebSocketManager {
 
         this.reconnectAttempts++;
         const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000); // Exponential backoff, max 30s
-        
+
         console.log(`Scheduling reconnect attempt ${this.reconnectAttempts} in ${delay}ms`);
-        
+
         setTimeout(() => {
             if (!this.isConnected) {
                 this.connect(this.userId);
@@ -224,22 +235,24 @@ class WebSocketManager {
     /**
      * Disconnect from WebSocket
      */
-    disconnect() {
+    disconnect()
+    {
         console.log('Disconnecting WebSocket');
         this.stopPing();
-        
+
         if (this.socket) {
             this.socket.close(1000, 'Intentional disconnect');
             this.socket = null;
         }
-        
+
         this.isConnected = false;
     }
 
     /**
      * Add event callback
      */
-    on(event, callback) {
+    on(event, callback)
+    {
         if (this.callbacks[event]) {
             this.callbacks[event].push(callback);
         }
@@ -248,7 +261,8 @@ class WebSocketManager {
     /**
      * Remove event callback
      */
-    off(event, callback) {
+    off(event, callback)
+    {
         if (this.callbacks[event]) {
             const index = this.callbacks[event].indexOf(callback);
             if (index > -1) {
@@ -260,7 +274,8 @@ class WebSocketManager {
     /**
      * Trigger callbacks for an event
      */
-    triggerCallbacks(event, data) {
+    triggerCallbacks(event, data)
+    {
         if (this.callbacks[event]) {
             this.callbacks[event].forEach(callback => {
                 try {
@@ -275,7 +290,8 @@ class WebSocketManager {
     /**
      * Get connection status
      */
-    getStatus() {
+    getStatus()
+    {
         return {
             connected: this.isConnected,
             readyState: this.socket ? this.socket.readyState : WebSocket.CLOSED,

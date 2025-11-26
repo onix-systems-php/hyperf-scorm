@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -12,7 +12,6 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfCore\Service\Service;
 use Psr\Log\LoggerInterface;
-
 use function Hyperf\Config\config;
 
 #[Service]
@@ -25,11 +24,12 @@ class WebSocketConnectionService
     public function __construct(
         private readonly Redis $redis,
         private readonly LoggerInterface $logger,
-    ) {}
+    ) {
+    }
 
     public function registerConnection(string $jobId, int $fd): void
     {
-        $this->redis->hSet(self::REDIS_KEY_PREFIX . $jobId, (string) $fd, time());
+        $this->redis->hSet(self::REDIS_KEY_PREFIX . $jobId, (string)$fd, time());
         $this->redis->set(
             self::REDIS_FD_TO_JOB_PREFIX . $fd,
             $jobId,
@@ -44,7 +44,7 @@ class WebSocketConnectionService
 
     public function unregisterConnection(string $jobId, int $fd): void
     {
-        $this->redis->hDel(self::REDIS_KEY_PREFIX . $jobId, (string) $fd);
+        $this->redis->hDel(self::REDIS_KEY_PREFIX . $jobId, (string)$fd);
         $this->redis->del(self::REDIS_FD_TO_JOB_PREFIX . $fd);
 
         $remaining = $this->redis->hLen(self::REDIS_KEY_PREFIX . $jobId);
@@ -83,7 +83,7 @@ class WebSocketConnectionService
     public function getJobIdByFd(int $fd): ?string
     {
         $jobId = $this->redis->get(self::REDIS_FD_TO_JOB_PREFIX . $fd);
-        return $jobId !== false ? (string) $jobId : null;
+        return $jobId !== false ? (string)$jobId : null;
     }
 
     public function getConnectionCount(string $jobId): int

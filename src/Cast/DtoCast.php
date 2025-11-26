@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -60,7 +60,7 @@ abstract class DtoCast implements CastsAttributes
                     . $dtoClass,
             );
         }
-        /* @var AbstractDTO $value */
+        /** @var AbstractDTO $value */
 
         return json_encode($value->toArray());
     }

@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,7 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\Service;
 
 use Hyperf\Redis\Redis;
 use OnixSystemsPHP\HyperfCore\Service\Service;
-
 use function Hyperf\Config\config;
 
 /**
@@ -29,11 +28,9 @@ class ScormJobStatusService
 
     public function __construct(
         private readonly Redis $redis,
-    ) {}
+    ) {
+    }
 
-    /**
-     * Initialize job status when job is queued.
-     */
     public function initializeJob(string $jobId, array $data): void // notice same methods initializeJob and  updateProgress refactor to method progress
     {
         $key = self::JOB_STATUS_PREFIX . $jobId;
@@ -41,9 +38,6 @@ class ScormJobStatusService
         $this->redis->setex($key, $ttl, json_encode($data));
     }
 
-    /**
-     * Update job progress during processing.
-     */
     public function updateProgress(string $jobId, array $data): void
     {
         $key = self::PROGRESS_PREFIX . $jobId;
@@ -51,9 +45,6 @@ class ScormJobStatusService
         $this->redis->setex($key, $ttl, json_encode($data));
     }
 
-    /**
-     * Set final job result.
-     */
     public function setResult(string $jobId, array $data, ?int $ttl = null): void
     {
         $key = self::RESULT_PREFIX . $jobId;
@@ -61,9 +52,6 @@ class ScormJobStatusService
         $this->redis->setex($key, $ttl ?? $defaultTtl, json_encode($data));
     }
 
-    /**
-     * Get job status.
-     */
     public function getStatus(string $jobId): ?array
     {
         $key = self::JOB_STATUS_PREFIX . $jobId;
@@ -71,9 +59,6 @@ class ScormJobStatusService
         return $data ? json_decode($data, true) : null;
     }
 
-    /**
-     * Get job progress.
-     */
     public function getProgress(string $jobId): ?array
     {
         $key = self::PROGRESS_PREFIX . $jobId;
@@ -81,9 +66,6 @@ class ScormJobStatusService
         return $data ? json_decode($data, true) : null;
     }
 
-    /**
-     * Get job result.
-     */
     public function getResult(string $jobId): ?array
     {
         $key = self::RESULT_PREFIX . $jobId;
@@ -91,9 +73,6 @@ class ScormJobStatusService
         return $data ? json_decode($data, true) : null;
     }
 
-    /**
-     * Delete job status and progress data.
-     */
     public function deleteJob(string $jobId): void
     {
         $this->redis->del(self::JOB_STATUS_PREFIX . $jobId);

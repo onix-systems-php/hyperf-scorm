@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -57,7 +57,7 @@ use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
  * @property Carbon $deleted_at
  *
  * @property ?Collection $interactions
- * @property ?ScormPackage $package
+ * @property ScormPackage $package
  * @property User $user
  */
 class ScormSession extends AbstractModel

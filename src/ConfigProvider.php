@@ -71,7 +71,7 @@ class ConfigProvider
                     'channel' => 'scorm-jobs',
                     'timeout' => 3,
                     'retry_seconds' => 10,
-                    'handle_timeout' => 1800, // 30 minutes for large SCORM files
+                    'handle_timeout' => 1800,
                     'processes' => 3,
                     'concurrent' => [
                         'limit' => 3,
