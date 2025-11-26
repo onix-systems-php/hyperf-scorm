@@ -80,7 +80,7 @@ require_once './vendor/onix-systems-php/hyperf-scorm/publish/routes.php';
 
 ```env
 # Essential settings
-SCORM_STORAGE_DRIVER=local           # s3|local
+SCORM_STORAGE_DRIVER=local           # scormS3|local
 SCORM_LOCAL_PATH=storage/public/scorm
 SCORM_LOCAL_PUBLIC_URL=http://localhost/public/scorm
 SCORM_MAX_FILE_SIZE=600              # MB
@@ -267,34 +267,32 @@ All configuration is in `config/autoload/scorm.php` (published in installation s
 
 ### Environment Variables
 
-| Variable | Default | Unit | Description |
-|----------|---------|------|-------------|
-| **Storage Configuration** ||||
-| `SCORM_STORAGE_DRIVER` | `local` | - | Storage driver: `s3` or `local` |
-| `SCORM_MAX_FILE_SIZE` | `600` | MB | Maximum SCORM package upload size |
-| **Local Storage (when driver=local)** ||||
-| `SCORM_LOCAL_PATH` | `storage/public/scorm` | - | Local filesystem path for SCORM content |
-| `SCORM_LOCAL_PUBLIC_URL` | `http://localhost/public/scorm` | - | Public URL for local storage access |
-| **S3 Storage (when driver=s3)** ||||
-| `SCORM_S3_KEY` | - | - | AWS access key ID (required for S3) |
-| `SCORM_S3_SECRET` | - | - | AWS secret access key (required for S3) |
-| `SCORM_S3_REGION` | `us-east-1` | - | AWS region for S3 bucket |
+| Variable | Default         | Unit | Description |
+|----------|-----------------|------|-------------|
+| **Storage Configuration** |                 |||
+| `SCORM_STORAGE_DRIVER` | `local`         | - | Storage driver: `scormS3` or `local` |
+| `SCORM_MAX_FILE_SIZE` | `100`           | MB | Maximum SCORM package upload size |
+| **Local Storage (when driver=local)** |                 |||
+| **S3 Storage (when driver=s3)** |                 |||
+| `SCORM_S3_KEY` | -               | - | AWS access key ID (required for S3) |
+| `SCORM_S3_SECRET` | -               | - | AWS secret access key (required for S3) |
+| `SCORM_S3_REGION` | `us-east-1`     | - | AWS region for S3 bucket |
 | `SCORM_S3_BUCKET` | `scorm-content` | - | S3 bucket name for SCORM content |
-| `SCORM_S3_ENDPOINT` | - | - | Custom S3 endpoint (for S3-compatible services) |
-| `SCORM_S3_PATH_STYLE` | `false` | - | Use path-style endpoint (true for MinIO/custom S3) |
-| `SCORM_S3_DOMAIN` | - | - | Custom domain for S3 public URLs (CDN) |
-| **API & Player Configuration** ||||
-| `SCORM_API_TIMEOUT` | `30000` | ms | API request timeout in milliseconds |
-| `SCORM_DEBUG` | `false` | - | Enable debug mode (verbose logging) |
-| `SCORM_AUTO_COMMIT_INTERVAL` | `30` | sec | Auto-commit interval for CMI data |
-| **WebSocket Configuration** ||||
-| `SCORM_WS_NAME` | `socket-io` | - | WebSocket server name identifier |
-| **Cache Configuration** ||||
-| `SCORM_CACHE_TTL` | `3600` | sec | Cache time-to-live for SCORM data |
-| **Redis TTL Configuration** ||||
-| `SCORM_REDIS_TTL_JOB_STATUS` | `3600` | sec | Job status cache TTL (1 hour) |
-| `SCORM_REDIS_TTL_JOB_RESULT` | `86400` | sec | Job result cache TTL (24 hours) |
-| `SCORM_REDIS_TTL_WEBSOCKET` | `86400` | sec | WebSocket connection data TTL (24 hours) |
+| `SCORM_S3_ENDPOINT` | -               | - | Custom S3 endpoint (for S3-compatible services) |
+| `SCORM_S3_PATH_STYLE` | `false`         | - | Use path-style endpoint (true for MinIO/custom S3) |
+| `SCORM_S3_DOMAIN` | -               | - | Custom domain for S3 public URLs (CDN) |
+| **API & Player Configuration** |                 |||
+| `SCORM_API_TIMEOUT` | `30000`         | ms | API request timeout in milliseconds |
+| `SCORM_DEBUG` | `false`         | - | Enable debug mode (verbose logging) |
+| `SCORM_AUTO_COMMIT_INTERVAL` | `30`            | sec | Auto-commit interval for CMI data |
+| **WebSocket Configuration** |                 |||
+| `SCORM_WS_NAME` | `socket-io`     | - | WebSocket server name identifier |
+| **Cache Configuration** |                 |||
+| `SCORM_CACHE_TTL` | `3600`          | sec | Cache time-to-live for SCORM data |
+| **Redis TTL Configuration** |                 |||
+| `SCORM_REDIS_TTL_JOB_STATUS` | `3600`          | sec | Job status cache TTL (1 hour) |
+| `SCORM_REDIS_TTL_JOB_RESULT` | `86400`         | sec | Job result cache TTL (24 hours) |
+| `SCORM_REDIS_TTL_WEBSOCKET` | `86400`         | sec | WebSocket connection data TTL (24 hours) |
 
 ## WebSocket Server Setup
 

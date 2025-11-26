@@ -11,13 +11,13 @@ use function Hyperf\Support\env;
 
 return [
     'storage' => [
-        'default' => env('SCORM_STORAGE_DRIVER', 's3'),
+        'default' => env('SCORM_STORAGE_DRIVER', 'scormS3'),
         'local' => [
             'domain' => env('DOMAIN_API'),
-            'public_path_prefix' => DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'uploads',
-            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'uploads',
+            'public_path_prefix' => DIRECTORY_SEPARATOR . 'scorm-packages',
+            'storage_path_prefix' => DIRECTORY_SEPARATOR . 'scorm-packages',
         ],
-        's3' => [
+        'scormS3' => [
             'domain' => env('SCORM_S3_DOMAIN'),
             'public_path_prefix' => DIRECTORY_SEPARATOR .  'scorm-packages',
             'storage_path_prefix' => DIRECTORY_SEPARATOR . 'scorm-packages',

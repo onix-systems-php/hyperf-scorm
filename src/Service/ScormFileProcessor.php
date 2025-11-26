@@ -62,7 +62,7 @@ class ScormFileProcessor
     {
         $storagePathConfig = $this->config->get("scorm.storage.{$storage}.storage_path_prefix", '');
         $storagePublicConfig = $this->config->get("scorm.storage.{$storage}.public_path_prefix", '');
-        $domain = $this->config->get("scorm.storage.{$storage}.domain", '');
+        $domain = $this->config->get("scorm.storage.{$storage}.domain");
 
         $path = $storagePathConfig . DIRECTORY_SEPARATOR . $extractDir;
         $publicPath = $storagePublicConfig . DIRECTORY_SEPARATOR . $extractDir;
