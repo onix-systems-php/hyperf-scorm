@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -27,6 +27,13 @@ class ResourceScormJobStatus extends AbstractResource
 {
     public function toArray(): array
     {
-        return $this->resource;
+        return [
+            'job_id' => $this->resource['job_id'],
+            'status' => $this->resource['status'],
+            'progress' => $this->resource['progress'],
+            'stage' => $this->resource['stage'],
+            'package_id' => $this->resource['package_id'] ?? null,
+            'error' => $this->resource['error'] ?? null,
+        ];
     }
 }

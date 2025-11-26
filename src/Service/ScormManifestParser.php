@@ -189,10 +189,10 @@ class ScormManifestParser
         if (isset($xml->organizations->organization->{'adlseq:sequencing'})) {
             $sequencing = $xml->organizations->organization->{'adlseq:sequencing'};
             $metadata['sequencing'] = [
-                'choice' => (string) $sequencing['choice'] === 'true',
-                'choiceExit' => (string) $sequencing['choiceExit'] === 'true',
-                'flow' => (string) $sequencing['flow'] === 'true',
-                'forwardOnly' => (string) $sequencing['forwardOnly'] === 'true',
+                'choice' => (string)$sequencing['choice'] === 'true',
+                'choiceExit' => (string)$sequencing['choiceExit'] === 'true',
+                'flow' => (string)$sequencing['flow'] === 'true',
+                'forwardOnly' => (string)$sequencing['forwardOnly'] === 'true',
             ];
         }
 
@@ -227,12 +227,12 @@ class ScormManifestParser
 
         if (isset($xml->resources->resource)) {
             foreach ($xml->resources->resource as $resource) {
-                $identifier = (string) $resource['identifier'];
+                $identifier = (string)$resource['identifier'];
                 $resourcesMap[$identifier] = [
-                    'href' => (string) $resource['href'],
-                    'type' => (string) $resource['type'],
-                    'scorm_type' => (string) ($resource['adlcp:scormtype'] ?? ''),
-                    'base' => (string) ($resource['xml:base'] ?? ''),
+                    'href' => (string)$resource['href'],
+                    'type' => (string)$resource['type'],
+                    'scorm_type' => (string)($resource['adlcp:scormtype'] ?? ''),
+                    'base' => (string)($resource['xml:base'] ?? ''),
                 ];
             }
         }
@@ -246,17 +246,17 @@ class ScormManifestParser
 
         if (isset($parent->item)) {
             foreach ($parent->item as $item) {
-                $identifierref = (string) ($item['identifierref'] ?? '');
+                $identifierref = (string)($item['identifierref'] ?? '');
 
                 if (! empty($identifierref) && isset($resourcesMap[$identifierref])) {
                     $resource = $resourcesMap[$identifierref];
 
                     $scos[] = ScoDTO::make([
                         'identifier' => $identifierref,
-                        'title' => (string) ($item->title ?? 'Untitled SCO'),
+                        'title' => (string)($item->title ?? 'Untitled SCO'),
                         'launcher_path' => $this->buildLauncherPath($resource, $item),
                         'mastery_score' => isset($item['adlcp:masteryscore'])
-                            ? (float) $item['adlcp:masteryscore']
+                            ? (float)$item['adlcp:masteryscore']
                             : null,
                     ]);
                 }
@@ -276,17 +276,14 @@ class ScormManifestParser
             return null;
         }
 
-        return (string) $xml->metadata->lom->general->description->string;
+        return (string)$xml->metadata->lom->general->description->string;
     }
 
-    /**
-     * Build complete launch URL from resource and item data.
-     */
     private function buildLauncherPath(array $resource, \SimpleXMLElement $item): string
     {
         $href = $resource['href'];
         $base = $resource['base'];
-        $parameters = (string) ($item['parameters'] ?? '');
+        $parameters = (string)($item['parameters'] ?? '');
 
         $launcherPath = $base ? rtrim($base, '/') . '/' . ltrim($href, '/') : $href;
 

@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -24,7 +25,6 @@ class DeleteScormPackageService
         private readonly ScormPackageRepository $scormPackageRepository,
         private EventDispatcherInterface $eventDispatcher,
     ) {
-
     }
 
     #[Transactional(attempts: 1)]

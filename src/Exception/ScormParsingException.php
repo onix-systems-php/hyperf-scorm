@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Exception;
 
-/**
- * Exception thrown when SCORM parsing fails.
- */
 class ScormParsingException extends \Exception
 {
     public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)

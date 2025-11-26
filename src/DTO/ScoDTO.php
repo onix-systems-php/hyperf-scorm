@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,10 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-/**
- * DTO for SCORM Sharable Content Object (SCO)
- * Represents a single content object with all necessary data for playback.
- */
 class ScoDTO extends AbstractDTO
 {
     public string $identifier;
@@ -43,7 +39,7 @@ class ScoDTO extends AbstractDTO
             return null;
         }
 
-        return (int) round($this->mastery_score * 100);
+        return (int)round($this->mastery_score * 100);
     }
 
     public function toArray(): array

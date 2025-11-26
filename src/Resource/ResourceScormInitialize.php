@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -20,50 +20,140 @@ use OpenApi\Attributes as OA;
         new OA\Property(
             property: 'student',
             properties: [
-                new OA\Property(property: 'id', type: 'integer', description: 'Student ID', example: 1),
-                new OA\Property(property: 'name', type: 'string', nullable: true, description: 'Student name', example: 'John Doe'),
+                new OA\Property(property: 'id', description: 'Student ID', type: 'integer', example: 1),
+                new OA\Property(
+                    property: 'name',
+                    description: 'Student name',
+                    type: 'string',
+                    example: 'John Doe',
+                    nullable: true
+                ),
             ],
             type: 'object'
         ),
         new OA\Property(
             property: 'score',
             properties: [
-                new OA\Property(property: 'raw', type: 'number', nullable: true, description: 'Raw score', example: 85.5),
-                new OA\Property(property: 'scaled', type: 'number', nullable: true, description: 'Scaled score (0-1)', example: 0.855),
+                new OA\Property(
+                    property: 'raw',
+                    description: 'Raw score',
+                    type: 'number',
+                    example: 85.5,
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'scaled',
+                    description: 'Scaled score (0-1)',
+                    type: 'number',
+                    example: 0.855,
+                    nullable: true
+                ),
             ],
             type: 'object'
         ),
         new OA\Property(
             property: 'session',
             properties: [
-                new OA\Property(property: 'id', type: 'integer', description: 'Session ID', example: 123),
-                new OA\Property(property: 'session_time', type: 'string', nullable: true, description: 'Current session time', example: 'PT5M'),
-                new OA\Property(property: 'total_time', type: 'string', nullable: true, description: 'Total learning time', example: 'PT15M30S'),
-                new OA\Property(property: 'suspend_data', type: 'array', nullable: true, description: 'Suspend data', example: ['bookmark' => 'page_5']),
-                new OA\Property(property: 'session_time_seconds', type: 'integer', nullable: true, description: 'Session time in seconds', example: 300),
+                new OA\Property(property: 'id', description: 'Session ID', type: 'integer', example: 123),
+                new OA\Property(
+                    property: 'session_time',
+                    description: 'Current session time',
+                    type: 'string',
+                    example: 'PT5M',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'total_time',
+                    description: 'Total learning time',
+                    type: 'string',
+                    example: 'PT15M30S',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'suspend_data',
+                    description: 'Suspend data',
+                    type: 'array',
+                    example: ['bookmark' => 'page_5'],
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'session_time_seconds',
+                    description: 'Session time in seconds',
+                    type: 'integer',
+                    example: 300,
+                    nullable: true
+                ),
             ],
             type: 'object'
         ),
         new OA\Property(
             property: 'lesson',
             properties: [
-                new OA\Property(property: 'status', type: 'string', nullable: true, description: 'Lesson status', enum: ['incomplete', 'completed', 'passed', 'failed', 'browsed', 'not_attempted'], example: 'incomplete'),
-                new OA\Property(property: 'location', type: 'string', nullable: true, description: 'Current position in lesson', example: 'slide_5'),
-                new OA\Property(property: 'exit', type: 'string', nullable: true, description: 'Exit mode', enum: ['suspend', 'logout', 'time-out'], example: 'suspend'),
-                new OA\Property(property: 'mode', type: 'string', nullable: true, description: 'Lesson mode', enum: ['normal', 'browse', 'review'], example: 'normal'),
-                new OA\Property(property: 'entry', type: 'string', nullable: true, description: 'Entry type', enum: ['ab-initio', 'resume'], example: 'ab-initio'),
-                new OA\Property(property: 'credit', type: 'string', nullable: true, description: 'Credit type', enum: ['credit', 'no-credit'], example: 'credit'),
+                new OA\Property(
+                    property: 'status',
+                    description: 'Lesson status',
+                    type: 'string',
+                    enum: ['incomplete', 'completed', 'passed', 'failed', 'browsed', 'not_attempted'],
+                    example: 'incomplete',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'location',
+                    description: 'Current position in lesson',
+                    type: 'string',
+                    example: 'slide_5',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'exit',
+                    description: 'Exit mode',
+                    type: 'string',
+                    enum: ['suspend', 'logout', 'time-out'],
+                    example: 'suspend',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'mode',
+                    description: 'Lesson mode',
+                    type: 'string',
+                    enum: ['normal', 'browse', 'review'],
+                    example: 'normal',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'entry',
+                    description: 'Entry type',
+                    type: 'string',
+                    enum: ['ab-initio', 'resume'],
+                    example: 'ab-initio',
+                    nullable: true
+                ),
+                new OA\Property(
+                    property: 'credit',
+                    description: 'Credit type',
+                    type: 'string',
+                    enum: ['credit', 'no-credit'],
+                    example: 'credit',
+                    nullable: true
+                ),
             ],
             type: 'object'
         ),
         new OA\Property(
             property: 'interactions',
-            type: 'array',
             description: 'Interactions (currently empty array)',
+            type: 'array',
             items: new OA\Items(type: 'object'),
             example: []
         ),
-        new OA\Property(property: 'completed_at', type: 'string', nullable: true, format: 'date-time', description: 'Lesson completion date', example: '2025-08-29T18:26:40.006Z'),
+        new OA\Property(
+            property: 'completed_at',
+            description: 'Lesson completion date',
+            type: 'string',
+            format: 'date-time',
+            example: '2025-08-29T18:26:40.006Z',
+            nullable: true
+        ),
     ]
 )]
 /**
@@ -84,7 +174,6 @@ class ResourceScormInitialize extends AbstractResource
                 'raw' => $this->resource->score_raw,
                 'scaled' => $this->resource->score_scaled,
             ],
-            //           'score_percentage' =>  $this->resource->score_percentage ?? 0, //todo calculate if null
             'session' => [
                 'id' => $this->resource->id,
                 'session_time' => $this->resource->session_time,
@@ -100,8 +189,6 @@ class ResourceScormInitialize extends AbstractResource
                 'entry' => $this->resource->lesson_entry,
                 'credit' => $this->resource->lesson_credit,
             ],
-            //            'interactions' =>  $this->resource->interactions ?? [],//todo need this data or not? check can you go back in scorm
-            'interactions' => [],
             'completed_at' => $this->resource->completed_at,
         ];
     }

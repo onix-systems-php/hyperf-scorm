@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace OnixSystemsPHP\HyperfScorm\Model;
 
 use Carbon\Carbon;
+use Hyperf\Collection\Collection;
 use Hyperf\Database\Model\Relations\HasMany;
 use Hyperf\Database\Model\SoftDeletes;
 use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
@@ -34,6 +35,8 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormManifestDTO;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property null|Carbon $deleted_at
+ *
+ * @property ?Collection $scos
  */
 class ScormPackage extends AbstractModel
 {

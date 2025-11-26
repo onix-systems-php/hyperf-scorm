@@ -13,7 +13,8 @@
  */
 
 class ScormUploadClient {
-    constructor(apiBaseUrl) {
+    constructor(apiBaseUrl)
+    {
         this.apiBaseUrl = apiBaseUrl;
         this.ws = null;
         this.pollingInterval = null;
@@ -26,7 +27,8 @@ class ScormUploadClient {
     /**
      * Start tracking a job with WebSocket (primary) or Polling (fallback)
      */
-    trackJob(jobId, callbacks) {
+    trackJob(jobId, callbacks)
+    {
         this.jobId = jobId;
         this.callbacks = callbacks;
 
@@ -37,7 +39,8 @@ class ScormUploadClient {
     /**
      * Connect to WebSocket server
      */
-    connectWebSocket(jobId) {
+    connectWebSocket(jobId)
+    {
         const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsHost = window.location.hostname;
         const wsUrl = `${wsProtocol}//${wsHost}:${this.wsPort}/scorm-progress?job_id=${jobId}`;
@@ -105,7 +108,6 @@ class ScormUploadClient {
                     this.startPolling(jobId);
                 }
             };
-
         } catch (error) {
             console.error('[SCORM WS] Failed to create WebSocket:', error);
             // Fallback to polling
@@ -116,7 +118,8 @@ class ScormUploadClient {
     /**
      * Start HTTP polling as fallback
      */
-    startPolling(jobId) {
+    startPolling(jobId)
+    {
         if (this.pollingInterval) {
             return; // Already polling
         }
@@ -124,7 +127,7 @@ class ScormUploadClient {
         console.log('[SCORM Poll] Starting polling for job:', jobId);
 
         // Poll every 2 seconds
-        this.pollingInterval = setInterval(async () => {
+        this.pollingInterval = setInterval(async() => {
             await this.checkJobStatus(jobId);
         }, 2000);
 
@@ -135,9 +138,10 @@ class ScormUploadClient {
     /**
      * Check job status via REST API
      */
-    async checkJobStatus(jobId) {
+    async checkJobStatus(jobId)
+    {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/v1/scorm/jobs/${jobId}/status`, {
+            const response = await fetch(`${this.apiBaseUrl} / v1 / scorm / jobs / ${jobId} / status`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -149,7 +153,6 @@ class ScormUploadClient {
 
             const result = await response.json();
             this.handleProgressUpdate(result.data);
-
         } catch (error) {
             console.error('[SCORM Poll] Status check failed:', error);
             // Don't stop polling on network errors
@@ -159,7 +162,8 @@ class ScormUploadClient {
     /**
      * Handle progress update (from WebSocket or Polling)
      */
-    handleProgressUpdate(data) {
+    handleProgressUpdate(data)
+    {
         // Call progress callback
         if (this.callbacks.onProgress) {
             this.callbacks.onProgress(data);
@@ -175,7 +179,6 @@ class ScormUploadClient {
 
             this.cleanup();
             this.callbacks.completed = true;
-
         } else if (data.status === 'failed') {
             console.error('[SCORM] Job failed:', data.error);
 
@@ -191,7 +194,8 @@ class ScormUploadClient {
     /**
      * Get stage label for display
      */
-    static getStageLabel(stage) {
+    static getStageLabel(stage)
+    {
         const labels = {
             queued: 'Queued...',
             validating: 'Validating file...',
@@ -210,7 +214,8 @@ class ScormUploadClient {
     /**
      * Cleanup connections
      */
-    cleanup() {
+    cleanup()
+    {
         // Close WebSocket
         if (this.ws) {
             this.ws.close();
@@ -235,7 +240,8 @@ class ScormUploadClient {
     /**
      * Cancel tracking (for user-initiated cancellation)
      */
-    cancel() {
+    cancel()
+    {
         console.log('[SCORM] Cancelling job tracking');
         this.cleanup();
     }

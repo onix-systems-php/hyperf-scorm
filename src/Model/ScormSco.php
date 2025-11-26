@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -26,12 +26,11 @@ use OnixSystemsPHP\HyperfCore\Model\AbstractModel;
  * @property null|string $timeLimitAction
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ *
+ * @property ScormPackage $package
  */
 class ScormSco extends AbstractModel
 {
-    /**
-     * The table associated with the model.
-     */
     protected ?string $table = 'scorm_scos';
 
     protected array $fillable = [

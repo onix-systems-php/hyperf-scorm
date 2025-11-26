@@ -11,9 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-/**
- * SCORM Player Data Transfer Object.
- */
 class ScormPlayerDTO extends AbstractDTO
 {
     public ScormPackageDTO $package;

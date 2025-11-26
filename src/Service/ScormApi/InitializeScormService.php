@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -14,7 +14,6 @@ use OnixSystemsPHP\HyperfScorm\Constants\SessionStatuses;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
-
 use function Hyperf\Support\now;
 
 #[Service]
@@ -26,8 +25,7 @@ class InitializeScormService
         public readonly ScormPackageRepository $scormPackageRepository,
         public readonly ScormUserSessionRepository $scormUserSessionRepository,
         public readonly ScormPlayerService $scormPlayerService,
-    ){
-
+    ) {
     }
 
     public function run(int $packageId, int $userId): ScormSession

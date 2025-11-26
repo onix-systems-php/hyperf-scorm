@@ -78,7 +78,7 @@ class ScormWebSocketNotificationService
                     'job_id' => $jobId,
                     'user_id' => $userId,
                 ]);
-                return; // No active connections
+                return;
             }
 
             $message = json_encode([

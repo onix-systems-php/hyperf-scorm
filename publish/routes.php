@@ -8,8 +8,8 @@ declare(strict_types=1);
  */
 use Hyperf\HttpServer\Router\Router;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormApiController;
-use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use OnixSystemsPHP\HyperfScorm\Controller\ScormProxyController;
+use OnixSystemsPHP\HyperfScorm\Controller\WebSocket\ScormProgressWebSocketController;
 use function Hyperf\Config\config;
 
 Router::addGroup('/v1/api/scorm', function () {

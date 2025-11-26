@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -11,9 +11,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-/**
- * DTO for creating SCORM package.
- */
 class CreateScormPackageDTO extends AbstractDTO
 {
     public string $title;

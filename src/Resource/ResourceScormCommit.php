@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -18,10 +18,10 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'session_id', type: 'integer', example: 123),
         new OA\Property(property: 'student_id', type: 'string', example: 'Guest'),
         new OA\Property(property: 'lesson_status', type: 'string', example: 'incomplete'),
-        new OA\Property(property: 'score', type: 'integer', nullable: true, example: 75),
-        new OA\Property(property: 'score_percentage', type: 'integer', nullable: true, example: 75),
+        new OA\Property(property: 'score', type: 'integer', example: 75, nullable: true),
+        new OA\Property(property: 'score_percentage', type: 'integer', example: 75, nullable: true),
         new OA\Property(property: 'interactions_count', type: 'integer', example: 3),
-        new OA\Property(property: 'session_time_seconds', type: 'integer', nullable: true, example: 300),
+        new OA\Property(property: 'session_time_seconds', type: 'integer', example: 300, nullable: true),
         new OA\Property(property: 'is_completed', type: 'boolean', example: false),
         new OA\Property(property: 'is_passed', type: 'boolean', example: false),
         new OA\Property(property: 'processed_at', type: 'string', format: 'date-time', example: '2025-08-29T18:26:40.006Z'),
@@ -87,7 +87,6 @@ class ResourceScormCommit extends AbstractResource
     {
         $sessionTime = $this->resource['session_time_seconds'] ?? 0;
         $interactionsCount = $this->resource['interactions_count'] ?? 0;
-        $scorePercentage = $this->resource['score_percentage'] ?? 0;
 
         return [
             'total_interactions' => $interactionsCount,
@@ -98,9 +97,6 @@ class ResourceScormCommit extends AbstractResource
         ];
     }
 
-    /**
-     * Estimate correct interactions based on score percentage.
-     */
     private function estimateCorrectInteractions(): int
     {
         $interactionsCount = $this->resource['interactions_count'] ?? 0;
@@ -110,12 +106,9 @@ class ResourceScormCommit extends AbstractResource
             return 0;
         }
 
-        return (int) round(($scorePercentage / 100) * $interactionsCount);
+        return (int)round($scorePercentage / 100 * $interactionsCount);
     }
 
-    /**
-     * Format session time in human-readable format.
-     */
     private function formatSessionTime(int $seconds): string
     {
         if ($seconds === 0) {
@@ -143,9 +136,6 @@ class ResourceScormCommit extends AbstractResource
         return implode(' ', $parts);
     }
 
-    /**
-     * Get completion percentage based on status and score.
-     */
     private function getCompletionPercentage(): int
     {
         $status = $this->resource['lesson_status'];

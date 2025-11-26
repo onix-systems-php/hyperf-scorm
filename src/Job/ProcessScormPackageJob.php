@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -18,18 +18,6 @@ use OnixSystemsPHP\HyperfScorm\Exception\ScormParsingException;
 use OnixSystemsPHP\HyperfScorm\Service\ScormPackageProcessor;
 use Psr\Log\LoggerInterface;
 
-/**
- * Asynchronous job for processing SCORM packages.
- *
- * Responsibilities:
- * - Create UploadedFile from temp path
- * - Create ProgressContext for tracking
- * - Delegate to ScormPackageProcessor
- * - Handle errors and cleanup
- *
- * Note: Progress tracking is now handled by ScormPackageProcessor
- * with ProgressTracker (clean separation of concerns)
- */
 class ProcessScormPackageJob extends Job
 {
     public function __construct(
@@ -39,7 +27,8 @@ class ProcessScormPackageJob extends Job
         private readonly int $fileSize,
         private readonly int $userId,
         private readonly array $metadata = []
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {

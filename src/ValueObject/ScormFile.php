@@ -73,7 +73,7 @@ final class ScormFile
     {
         return $this->extractDir;
     }
-    public function getExtractedBaseDir() :string
+    public function getExtractedBaseDir(): string
     {
         $parts = [
             $this->extractDir,
@@ -148,6 +148,6 @@ final class ScormFile
         $manifestIndex = $this->zip->locateName(self::MANIFEST_FILENAME, \ZipArchive::FL_NODIR);
         $dir = dirname($this->zip->getNameIndex($manifestIndex));
 
-        return ($dir !== '.' && $dir !== '') ? $dir : '';
+        return $dir !== '.' && $dir !== '' ? $dir : '';
     }
 }

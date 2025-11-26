@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -15,7 +15,6 @@ use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitDTO;
 use OnixSystemsPHP\HyperfScorm\DTO\ScormCommitInteractionDTO;
 use OnixSystemsPHP\HyperfScorm\Model\ScormSession;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormUserSessionRepository;
-
 use function Hyperf\Collection\collect;
 use function Hyperf\Support\now;
 
@@ -26,7 +25,8 @@ class ScormCommitService
 
     public function __construct(
         private readonly ScormUserSessionRepository $sessionRepository,
-    ) {}
+    ) {
+    }
 
     #[Transactional(attempts: 1)]
     public function run($packageId, ScormCommitDTO $scormCommitDTO): array

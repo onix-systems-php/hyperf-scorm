@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace OnixSystemsPHP\HyperfScorm\Enum;
 
-/**
- * SCORM Version Enum with version mapping.
- */
 enum ScormVersionEnum: string
 {
     case SCORM_12 = '1.2';

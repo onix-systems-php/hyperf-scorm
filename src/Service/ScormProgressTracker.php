@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -21,7 +21,8 @@ class ScormProgressTracker implements ProgressTrackerInterface
         private readonly ScormJobStatusService $jobStatusService,
         private readonly ScormWebSocketNotificationService $webSocketService,
         private readonly LoggerInterface $logger
-    ) {}
+    ) {
+    }
 
     public function track(ProgressContext $context, array $progressData): void
     {

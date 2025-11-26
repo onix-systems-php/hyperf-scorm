@@ -1,6 +1,6 @@
 <?php
-
 declare(strict_types=1);
+
 /**
  * This file is part of the extension library for Hyperf.
  *
@@ -12,9 +12,6 @@ namespace OnixSystemsPHP\HyperfScorm\DTO;
 use ClassTransformer\Attributes\ConvertArray;
 use OnixSystemsPHP\HyperfCore\DTO\AbstractDTO;
 
-/**
- * DTO for parsed SCORM manifest data.
- */
 class ScormManifestDTO extends AbstractDTO
 {
     public string $title;
