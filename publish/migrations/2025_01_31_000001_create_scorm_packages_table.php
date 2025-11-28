@@ -103,7 +103,7 @@ class CreateScormPackagesTable extends Migration
                 ->references('id')->on('scorm_sessions')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-            $table->bigInteger('interaction_id')->nullable();
+            $table->string('interaction_id')->nullable();
             $table->string('type', 50);
             $table->text('description');
             $table->jsonb('learner_response');

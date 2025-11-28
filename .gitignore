@@ -10,3 +10,4 @@ Dockerfile
 docker-compose.yml
 entrypoint.sh
 redis
+.DS_Store
