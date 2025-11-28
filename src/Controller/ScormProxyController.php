@@ -9,32 +9,30 @@ use OnixSystemsPHP\HyperfCore\Controller\AbstractController;
 use OnixSystemsPHP\HyperfScorm\Model\ScormPackage;
 use OnixSystemsPHP\HyperfScorm\Repository\ScormPackageRepository;
 use OnixSystemsPHP\HyperfScorm\Service\MemeTypeResolverService;
+use OnixSystemsPHP\HyperfScorm\Service\ScormProxyService;
 use Psr\Http\Message\ResponseInterface;
 
 class ScormProxyController extends AbstractController
 {
     public function __construct(
-        private readonly ScormPackageRepository $scormPackageRepository,
-        private readonly FilesystemFactory $filesystemFactory,
+        private readonly ScormProxyService $scormProxyService,
         private readonly MemeTypeResolverService $memeTypeResolverService,
     ) {
     }
     public function proxy(int $packageId, string $path): ResponseInterface
     {
-        $package = $this->scormPackageRepository->getById($packageId, false, true);
-        $fullPath = $this->buildFullPath($package, $path);
-        $filesystem = $this->filesystemFactory->get($package->storage);
+        [$package, $fullPath, $stream] = $this->scormProxyService->run($packageId, $path);
 
         try {
-            $stream = $filesystem->readStream($fullPath);
-
-            if ($stream === false) {
-                throw new \RuntimeException("Failed to read SCORM file: {$path}", 500);
-            }
+            $etag = sprintf('"%d-%s"',
+                $packageId,
+                $package->updated_at->timestamp
+            );
 
             return $this->response
                 ->withHeader('Content-Type', $this->memeTypeResolverService->getMimeTypeByPath($fullPath))
                 ->withHeader('Cache-Control', 'public, max-age=1200, immutable')
+                ->withHeader('ETag', $etag)
                 ->withHeader('Access-Control-Allow-Origin', '*')
                 ->withBody(new SwooleStream(stream_get_contents($stream)));
         } finally {
@@ -42,11 +40,4 @@ class ScormProxyController extends AbstractController
         }
     }
 
-    private function buildFullPath(ScormPackage $package, string $path): string
-    {
-        return ltrim(join(DIRECTORY_SEPARATOR, [
-            ltrim($package->content_path, '/'),
-            ltrim(urldecode($path), '/'),
-        ]), '/');
-    }
 }
