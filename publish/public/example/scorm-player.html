@@ -829,6 +829,26 @@
               </div>
             </div>
 
+            <!-- Role Selection -->
+            <div class="mb-3">
+              <label for="authRole" class="form-label fw-bold">
+                <i class="bi bi-person-badge"></i>
+                Role *
+              </label>
+              <select
+                id="authRole"
+                class="form-select form-select-lg"
+                v-model="authForm.role"
+                required
+                :disabled="authInProgress"
+              >
+                <option value="" disabled selected>Select your role...</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+
             <!-- Submit Button -->
             <div class="d-grid">
               <button
@@ -905,7 +925,8 @@
       const userEmail = ref(null);
       const authForm = ref({
         email: '',
-        password: ''
+        password: '',
+        role: ''
       });
       const authInProgress = ref(false);
       const authError = ref(null);
@@ -954,7 +975,7 @@
             body: JSON.stringify({
               login: authForm.value.email,
               password: authForm.value.password,
-              app: 'admin'
+              app: authForm.value.role
             })
           });
 
@@ -983,6 +1004,7 @@
             // Clear form
             authForm.value.email = '';
             authForm.value.password = '';
+            authForm.value.role = '';
 
             // Close modal
             closeAuthModal();
